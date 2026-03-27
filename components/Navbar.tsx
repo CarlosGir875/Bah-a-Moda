@@ -1,0 +1,108 @@
+"use client";
+
+import { useState, useRef, useEffect } from "react";
+import { Menu, ShoppingBag, Search, User, X } from "lucide-react";
+import { useStore } from "@/lib/store";
+import { useRouter, usePathname } from "next/navigation";
+import Link from "next/link";
+
+export function Navbar() {
+  const { setIsLeftSidebarOpen, setIsCartOpen, cart, searchQuery, setSearchQuery, setIsAuthModalOpen } = useStore();
+  const itemCount = cart.reduce((acc, item) => acc + item.quantity, 0);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const openSearch = () => {
+    setSearchOpen(true);
+    setTimeout(() => inputRef.current?.focus(), 50);
+    // Navigate to catalog if not already there
+    if (pathname !== "/catalogo") {
+      router.push("/catalogo");
+    }
+  };
+
+  const closeSearch = () => {
+    setSearchOpen(false);
+    setSearchQuery("");
+  };
+
+  // Close search on Escape key
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeSearch();
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <nav className="sticky top-0 z-40 bg-[#f1f2f3]/95 backdrop-blur border-b border-gray-200 h-16 flex items-center px-4 sm:px-8 transition-all">
+      {/* Menu Izquierdo */}
+      {!searchOpen && (
+        <div className="flex-none w-20 flex justify-start">
+          <button
+            onClick={() => setIsLeftSidebarOpen(true)}
+            className="p-2 -ml-2 text-black hover:bg-gray-200 rounded-md transition-colors flex items-center gap-2"
+            aria-label="Menú de categorías"
+          >
+            <Menu className="h-6 w-6" strokeWidth={1.5} />
+            <span className="hidden sm:inline font-bold text-xs tracking-wider">MENÚ</span>
+          </button>
+        </div>
+      )}
+
+      {/* Buscador expandible */}
+      {searchOpen ? (
+        <div className="flex-1 flex items-center gap-2 animate-in slide-in-from-top-1 fade-in duration-200">
+          <Search className="h-5 w-5 text-gray-400 flex-shrink-0" />
+          <input
+            ref={inputRef}
+            type="text"
+            placeholder="Buscar en el catálogo..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="flex-1 bg-transparent text-black placeholder-gray-400 text-sm font-medium focus:outline-none"
+          />
+          <button onClick={closeSearch} className="p-1.5 text-gray-400 hover:text-black transition-colors">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+      ) : (
+        <>
+          {/* Titulo Central */}
+          <div className="flex-1 flex justify-center">
+            <Link href="/" className="font-black text-xl sm:text-2xl tracking-[0.2em] uppercase text-black hover:opacity-70 transition-opacity">
+              Bahía Moda
+            </Link>
+          </div>
+
+          {/* Utilidades: Buscar, Cuenta, Bolsa */}
+          <div className="flex-none flex justify-end items-center gap-1 sm:gap-2">
+            <button onClick={openSearch} aria-label="Buscar" className="p-2 text-gray-500 hover:text-black hover:bg-gray-200 rounded-full transition-colors">
+              <Search className="h-5 w-5" strokeWidth={1.7} />
+            </button>
+            <button onClick={() => setIsAuthModalOpen(true)} aria-label="Mi Cuenta" className="p-2 text-gray-500 hover:text-black hover:bg-gray-200 rounded-full transition-colors">
+              <User className="h-5 w-5" strokeWidth={1.7} />
+            </button>
+            <div className="w-px h-5 bg-gray-300 mx-1 hidden sm:block"></div>
+            <button
+              onClick={() => setIsCartOpen(true)}
+              className="relative p-2 text-black hover:bg-gray-200 rounded-full transition-all hover:scale-105"
+              aria-label="Carrito de compras"
+            >
+              <ShoppingBag className="h-[22px] w-[22px]" strokeWidth={1.8} />
+              {itemCount > 0 && (
+                <span className="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold h-[18px] w-[18px] flex items-center justify-center rounded-full shadow-sm border-[1.5px] border-white">
+                  {itemCount}
+                </span>
+              )}
+            </button>
+          </div>
+        </>
+      )}
+    </nav>
+  );
+}
