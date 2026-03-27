@@ -6,6 +6,10 @@ export interface Product {
   image: string;
   sizes?: string[];
   isOffer?: boolean;
+  filterTag?: string;
+  supplier?: string;
+  delivery_date?: string;
+  description?: string;
 }
 
 export const MAIN_CATEGORIES = [
@@ -31,15 +35,20 @@ export const PRODUCTS: Product[] = [
     name: "Set Olla y Sartén Antiadherente",
     price: 350.00,
     category: "Hogar y Cocina",
-    image: "", 
-    isOffer: true
+    image: "",
+    filterTag: "🔥 Ofertas Estrella",
+    supplier: "Arabela",
+    delivery_date: "Entrega Inmediata"
   },
   {
     id: "2",
     name: "Loción Blue Intense Men",
     price: 250.00,
     category: "Perfumería y Lociones",
-    image: ""
+    image: "",
+    filterTag: "✨ Nuevos Ingresos",
+    supplier: "Scentia",
+    delivery_date: "Entrega Inmediata"
   },
   {
     id: "3",
@@ -47,6 +56,9 @@ export const PRODUCTS: Product[] = [
     price: 180.00,
     category: "Ropa, Calzado y Accesorios",
     image: "",
-    sizes: ["S", "M", "L", "XL"]
+    sizes: ["S", "M", "L", "XL"],
+    filterTag: "💎 Alta Gama (Premium)",
+    supplier: "Boutique Independiente",
+    delivery_date: "Viene el 15 de Mayo"
   }
 ];
