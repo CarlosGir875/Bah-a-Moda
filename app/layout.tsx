@@ -5,9 +5,10 @@ import { StoreProvider } from "@/lib/store";
 import { Navbar } from "@/components/Navbar";
 import { SidebarLeft } from "@/components/SidebarLeft";
 import { CartSidebar } from "@/components/CartSidebar";
-import { SplashScreen } from "@/components/SplashScreen";
+import { LoadingScreen } from "@/components/LoadingScreen";
 import { DisableInspect } from "@/components/DisableInspect";
 import { AuthModal } from "@/components/AuthModal";
+import { ProfileModal } from "@/components/ProfileModal";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -29,10 +30,11 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-white text-black selection:bg-gray-200">
         <StoreProvider>
           <DisableInspect />
-          <SplashScreen />
+          <LoadingScreen />
           <SidebarLeft />
           <CartSidebar />
           <AuthModal />
+          <ProfileModal />
           <Navbar />
           <main className="flex-1 flex flex-col">
             {children}

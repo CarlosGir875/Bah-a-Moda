@@ -56,20 +56,42 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
           <X className="w-5 h-5" />
         </button>
 
-        <div className="md:w-1/2 relative aspect-square md:aspect-auto md:h-auto min-h-[250px] bg-gray-200 flex items-center justify-center border-b md:border-b-0 md:border-r border-gray-300">
-          <span className="text-gray-500 font-bold text-sm uppercase tracking-widest px-4 text-center">Espacio para la<br/>Fotografía del Producto</span>
+        <div className="md:w-1/2 relative aspect-square md:aspect-auto md:h-auto min-h-[300px] bg-gray-50 flex items-center justify-center border-b md:border-b-0 md:border-r border-gray-100">
+          {/* Badge Foto Real */}
+          <div className="absolute top-6 left-6 z-10">
+            <span className="bg-white text-[10px] font-black uppercase tracking-widest text-black px-3 py-1.5 rounded-full border border-gray-100 shadow-xl flex items-center gap-2">
+              <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+              Foto 100% Real
+            </span>
+          </div>
+
+          <span className="text-gray-200 font-black text-xs uppercase tracking-[0.3em] px-8 text-center leading-relaxed">
+            Bahía Moda<br/>{product.category}
+          </span>
         </div>
 
-        <div className="md:w-1/2 p-6 md:p-10 flex flex-col overflow-y-auto">
-          <p className="text-xs text-gray-400 uppercase tracking-widest mb-4">{product.category}</p>
-          <div className="h-6 sm:h-8 w-3/4 bg-gray-100 rounded-md mb-2"></div>
-          <div className="h-6 sm:h-8 w-1/2 bg-gray-100 rounded-md mb-6"></div>
-          <div className="h-6 sm:h-8 w-1/4 bg-gray-200 rounded-md mb-8"></div>
+        <div className="md:w-1/2 p-8 md:p-12 flex flex-col overflow-y-auto">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.2em] bg-indigo-50 px-3 py-1 rounded-lg">
+              {product.category}
+            </span>
+          </div>
 
-          <div className="space-y-2 mb-8">
-            <div className="h-3 w-full bg-gray-50 rounded-sm"></div>
-            <div className="h-3 w-full bg-gray-50 rounded-sm"></div>
-            <div className="h-3 w-2/3 bg-gray-50 rounded-sm"></div>
+          <h2 className="text-3xl font-black text-black uppercase tracking-tight leading-[1.1] mb-4">
+            {product.name || "Producto Bahía Moda"}
+          </h2>
+
+          <div className="flex items-baseline gap-1 mb-8">
+            <span className="text-sm font-bold text-gray-400">Q</span>
+            <span className="text-4xl font-black text-black tracking-tighter">
+              {product.price.toFixed(2)}
+            </span>
+          </div>
+
+          <div className="prose prose-sm mb-10">
+            <p className="text-gray-500 font-medium leading-relaxed">
+              {product.description || "Este producto de alta calidad está disponible exclusivamente para nuestros clientes en el Puerto San José. Perfecto para complementar tu estilo con la elegancia de Bahía Moda."}
+            </p>
           </div>
 
           {product.sizes && product.sizes.length > 0 && (
@@ -109,18 +131,24 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
           </div>
 
           {/* Gatillos Psicológicos de Confianza (Ventas) */}
-          <div className="mt-8 pt-6 border-t border-gray-100 grid grid-cols-3 gap-4">
-            <div className="flex flex-col items-center justify-center text-center text-gray-500">
-               <Banknote className="w-5 h-5 mb-2 text-gray-400" />
-               <span className="text-[8px] font-bold uppercase tracking-widest leading-tight">Anticipo 50%<br/>Resto Al Entrega</span>
+          <div className="mt-8 pt-8 border-t border-gray-100 grid grid-cols-3 gap-6">
+            <div className="flex flex-col items-center justify-center text-center">
+               <div className="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center mb-3">
+                 <Banknote className="w-5 h-5 text-black" />
+               </div>
+               <span className="text-[9px] font-black uppercase tracking-widest text-black leading-tight">Reserva 50%<br/><span className="text-gray-400 font-bold">Seguridad</span></span>
             </div>
-            <div className="flex flex-col items-center justify-center text-center text-gray-500">
-               <Truck className="w-5 h-5 mb-2 text-gray-400" />
-               <span className="text-[9px] font-bold uppercase tracking-widest leading-tight">Entregas al<br/>Puerto</span>
+            <div className="flex flex-col items-center justify-center text-center">
+               <div className="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center mb-3">
+                 <Truck className="w-5 h-5 text-black" />
+               </div>
+               <span className="text-[9px] font-black uppercase tracking-widest text-black leading-tight">Solo Puerto<br/><span className="text-gray-400 font-bold">Escuintla</span></span>
             </div>
-            <div className="flex flex-col items-center justify-center text-center text-gray-500">
-               <ShieldCheck className="w-5 h-5 mb-2 text-gray-400" />
-               <span className="text-[9px] font-bold uppercase tracking-widest leading-tight">Calidad<br/>Garantizada</span>
+            <div className="flex flex-col items-center justify-center text-center">
+               <div className="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center mb-3">
+                 <ShieldCheck className="w-5 h-5 text-black" />
+               </div>
+               <span className="text-[9px] font-black uppercase tracking-widest text-black leading-tight">Garantía<br/><span className="text-gray-400 font-bold">Original</span></span>
             </div>
           </div>
         </div>

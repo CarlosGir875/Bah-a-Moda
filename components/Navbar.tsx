@@ -7,7 +7,18 @@ import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 
 export function Navbar() {
-  const { setIsLeftSidebarOpen, setIsCartOpen, cart, searchQuery, setSearchQuery, setIsAuthModalOpen } = useStore();
+  const { 
+    setIsLeftSidebarOpen, 
+    setIsCartOpen, 
+    cart, 
+    searchQuery, 
+    setSearchQuery, 
+    setIsAuthModalOpen,
+    setIsProfileModalOpen,
+    user,
+    profile,
+    isAdmin
+  } = useStore();
   const itemCount = cart.reduce((acc, item) => acc + item.quantity, 0);
   const [searchOpen, setSearchOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -39,7 +50,7 @@ export function Navbar() {
   }, []);
 
   return (
-    <nav className="sticky top-0 z-40 bg-[#f1f2f3]/95 backdrop-blur border-b border-gray-200 h-16 flex items-center px-4 sm:px-8 transition-all">
+    <nav className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-gray-200 h-16 flex items-center px-3 sm:px-8 transition-all">
       {/* Menu Izquierdo */}
       {!searchOpen && (
         <div className="flex-none w-20 flex justify-start">
@@ -80,13 +91,29 @@ export function Navbar() {
           </div>
 
           {/* Utilidades: Buscar, Cuenta, Bolsa */}
-          <div className="flex-none flex justify-end items-center gap-1 sm:gap-2">
+          <div className="flex-none flex justify-end items-center gap-0.5 sm:gap-2">
             <button onClick={openSearch} aria-label="Buscar" className="p-2 text-gray-500 hover:text-black hover:bg-gray-200 rounded-full transition-colors">
               <Search className="h-5 w-5" strokeWidth={1.7} />
             </button>
-            <button onClick={() => setIsAuthModalOpen(true)} aria-label="Mi Cuenta" className="p-2 text-gray-500 hover:text-black hover:bg-gray-200 rounded-full transition-colors">
-              <User className="h-5 w-5" strokeWidth={1.7} />
-            </button>
+            <div className="flex items-center gap-1 sm:gap-2">
+              {user ? (
+                <button 
+                  onClick={() => setIsProfileModalOpen(true)}
+                  className="p-2 text-black bg-gray-100 hover:bg-gray-200 rounded-full transition-all hover:scale-110 flex items-center justify-center border border-gray-200 shadow-sm"
+                  aria-label="Perfil"
+                >
+                  <User className="h-5 w-5" strokeWidth={2} />
+                </button>
+              ) : (
+                <button 
+                  onClick={() => setIsAuthModalOpen(true)} 
+                  aria-label="Mi Cuenta" 
+                  className="p-2 text-gray-500 hover:text-black hover:bg-gray-200 rounded-full transition-colors"
+                >
+                  <User className="h-5 w-5" strokeWidth={1.7} />
+                </button>
+              )}
+            </div>
             <div className="w-px h-5 bg-gray-300 mx-1 hidden sm:block"></div>
             <button
               onClick={() => setIsCartOpen(true)}

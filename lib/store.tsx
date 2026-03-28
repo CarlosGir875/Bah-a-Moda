@@ -1,12 +1,40 @@
 "use client";
 
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, ReactNode, useEffect, useCallback, useMemo } from "react";
 import { Product } from "./mockData";
+import { supabase } from "./supabase";
+import { User } from "@supabase/supabase-js";
 
 export interface CartItem {
   product: Product;
   size?: string;
   quantity: number;
+}
+
+interface Profile {
+  id: string;
+  rol: string | null;
+  nombre_completo: string | null;
+  avatar_url: string | null;
+  telefono: string | null;
+  direccion: string | null;
+  punto_encuentro: string | null;
+  dpi: string | null;
+}
+
+export interface Order {
+  id: string;
+  cliente_id: string;
+  nombre_cliente: string;
+  items: any[];
+  total: number;
+  anticipo: number;
+  inversion: number;
+  ganancia: number;
+  estado: 'pendiente' | 'pagado_parcial' | 'completado' | 'cancelado';
+  tipo_entrega: 'domicilio' | 'punto_encuentro';
+  ubicacion_entrega: string | null;
+  created_at: string;
 }
 
 type StoreContextType = {
@@ -17,6 +45,7 @@ type StoreContextType = {
   cart: CartItem[];
   addToCart: (product: Product, size?: string) => void;
   removeFromCart: (productId: string, size?: string) => void;
+  clearCart: () => void;
   selectedCategory: string;
   setSelectedCategory: (category: string) => void;
   selectedFilter: string;
@@ -25,6 +54,31 @@ type StoreContextType = {
   setSearchQuery: (q: string) => void;
   isAuthModalOpen: boolean;
   setIsAuthModalOpen: (val: boolean) => void;
+  isProfileModalOpen: boolean;
+  setIsProfileModalOpen: (val: boolean) => void;
+  products: Product[];
+  fetchProducts: () => Promise<void>;
+  addProduct: (product: Omit<Product, 'id'>) => Promise<void>;
+  user: User | null;
+  profile: Profile | null;
+  isAdmin: boolean;
+  authLoading: boolean;
+  signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string, fullName: string, metadata?: Partial<Profile>) => Promise<void>;
+  signOut: () => Promise<void>;
+  updateProfile: (updates: Partial<Omit<Profile, 'id' | 'rol'>>) => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
+  uploadAvatar: (file: File) => Promise<string>;
+  updateUserPassword: (password: string) => Promise<void>;
+  createOrder: (orderData: Omit<Order, 'id' | 'created_at' | 'ganancia'>) => Promise<void>;
+  userOrders: Order[];
+  adminOrders: Order[];
+  fetchUserOrders: () => Promise<void>;
+  fetchAllOrders: () => Promise<void>;
+  updateOrderStatus: (orderId: string, newStatus: string) => Promise<void>;
+  allUsers: Profile[];
+  fetchAllUsers: () => Promise<void>;
+  isInitialLoading: boolean;
 };
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
@@ -37,6 +91,196 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [selectedFilter, setSelectedFilter] = useState<string>("Todo");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+
+  // Auth State
+  const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
+
+  // Products State
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+
+  const fetchProducts = useCallback(async () => {
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.error('Error fetching products:', error);
+      return;
+    }
+    
+    if (data) {
+      // Mapping database naming (snake_case) to frontend naming (camelCase)
+      const mappedProducts = data.map((p: any) => ({
+        id: p.id,
+        name: p.name,
+        price: p.price,
+        image: p.image_url,
+        category: p.category,
+        filterTag: p.filter_tag,
+        supplier: p.supplier,
+        delivery_date: p.delivery_date,
+        description: p.description,
+        sizes: p.sizes || []
+      }));
+      setProducts(mappedProducts);
+    }
+  }, []);
+
+  const addProduct = useCallback(async (product: Omit<Product, 'id'>) => {
+    const { error } = await supabase
+      .from('products')
+      .insert([{
+        name: product.name,
+        price: product.price,
+        image_url: product.image,
+        category: product.category,
+        filter_tag: product.filterTag,
+        supplier: product.supplier,
+        delivery_date: product.delivery_date,
+        description: product.description,
+        sizes: product.sizes
+      }]);
+    
+    if (error) throw error;
+    await fetchProducts(); // Refresh list
+  }, [fetchProducts]);
+
+  useEffect(() => {
+    fetchProducts();
+    // Check active sessions and sets the user
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchProfile(session.user.id).finally(() => setAuthLoading(false));
+      } else {
+        setAuthLoading(false);
+      }
+    });
+
+    // Listen for changes on auth state
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        setAuthLoading(true);
+        fetchProfile(session.user.id).finally(() => setAuthLoading(false));
+      } else {
+        setProfile(null);
+        setIsAdmin(false);
+        setAuthLoading(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Final check for initial loading
+  useEffect(() => {
+    // We only wait for auth to finish. 
+    // If products are slow or empty, we still want to show the app.
+    if (!authLoading) {
+      const timer = setTimeout(() => setIsInitialLoading(false), 1500); 
+      return () => clearTimeout(timer);
+    }
+  }, [authLoading]);
+
+  const fetchProfile = useCallback(async (userId: string) => {
+    const { data, error } = await supabase
+      .from('cliente_perfiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+    
+    if (error) {
+      console.error('CRITICAL: Error fetching profile detail:', JSON.stringify(error, null, 2));
+      return;
+    }
+
+    if (data) {
+      setProfile(data as Profile);
+      setIsAdmin(data.rol === 'admin');
+    }
+  }, []);
+
+  const signIn = useCallback(async (email: string, password: string) => {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    if (data.user) await fetchProfile(data.user.id);
+  }, [fetchProfile]);
+
+  const signUp = useCallback(async (email: string, password: string, fullName: string, metadata?: Partial<Profile>) => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: fullName,
+          ...metadata
+        },
+      },
+    });
+    if (error) throw error;
+    if (data.user) {
+      await fetchProfile(data.user.id);
+    }
+  }, [fetchProfile]);
+
+  const signOut = useCallback(async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setProfile(null);
+    setIsAdmin(false);
+  }, []);
+
+  const updateProfile = useCallback(async (updates: Partial<Omit<Profile, 'id' | 'rol'>>) => {
+    if (!user) return;
+    
+    const { error } = await supabase
+      .from('cliente_perfiles')
+      .update(updates)
+      .eq('id', user.id);
+    
+    if (error) throw error;
+    await fetchProfile(user.id);
+  }, [user, fetchProfile]);
+
+  const resetPassword = useCallback(async (email: string) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/`,
+    });
+    if (error) throw error;
+  }, []);
+
+  const uploadAvatar = useCallback(async (file: File) => {
+    if (!user) throw new Error("No user logged in");
+
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${user.id}-${Math.random()}.${fileExt}`;
+    const filePath = `avatars/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(filePath, file);
+
+    if (uploadError) throw uploadError;
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('avatars')
+      .getPublicUrl(filePath);
+
+    await updateProfile({ avatar_url: publicUrl });
+    return publicUrl;
+  }, [user, updateProfile]);
+
+  const updateUserPassword = useCallback(async (password: string) => {
+    const { error } = await supabase.auth.updateUser({ password });
+    if (error) throw error;
+  }, []);
 
   const addToCart = (product: Product, size?: string) => {
     setCart((prev) => {
@@ -48,12 +292,86 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       }
       return [...prev, { product, size, quantity: 1 }];
     });
-    setIsCartOpen(true); // Open cart when adding an item
+    setIsCartOpen(true);
   };
 
   const removeFromCart = (productId: string, size?: string) => {
     setCart((prev) => prev.filter((item) => !(item.product.id === productId && item.size === size)));
   };
+
+  const clearCart = useCallback(() => {
+    setCart([]);
+  }, []);
+
+  const [userOrders, setUserOrders] = useState<Order[]>([]);
+  const [adminOrders, setAdminOrders] = useState<Order[]>([]);
+  const [allUsers, setAllUsers] = useState<Profile[]>([]);
+
+  const fetchAllUsers = useCallback(async () => {
+    const { data, error } = await supabase
+      .from('cliente_perfiles')
+      .select('*')
+      .order('nombre_completo', { ascending: true });
+    
+    if (error) {
+      console.error("Error fetching users:", error);
+      return;
+    }
+    setAllUsers(data || []);
+  }, []);
+
+  const fetchUserOrders = useCallback(async () => {
+    if (!user) return;
+    const { data, error } = await supabase
+      .from('pedidos')
+      .select('*')
+      .eq('cliente_id', user.id)
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.error(`ERROR (User:${user.id}): fetchUserOrders failed:`, JSON.stringify(error, null, 2));
+      return;
+    }
+    setUserOrders(data || []);
+  }, [user]);
+
+  const fetchAllOrders = useCallback(async () => {
+    const { data, error } = await supabase
+      .from('pedidos')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.error("Error fetching admin orders:", error);
+      return;
+    }
+    setAdminOrders(data || []);
+  }, []);
+
+  const createOrder = useCallback(async (orderData: Omit<Order, 'id' | 'created_at' | 'ganancia'>) => {
+    const { error } = await supabase
+      .from('pedidos')
+      .insert([orderData]);
+    
+    if (error) throw error;
+    await fetchUserOrders();
+  }, [fetchUserOrders]);
+
+  const updateOrderStatus = useCallback(async (orderId: string, newStatus: string) => {
+    const { error } = await supabase
+      .from('pedidos')
+      .update({ estado: newStatus })
+      .eq('id', orderId);
+    
+    if (error) throw error;
+    await fetchAllOrders();
+  }, [fetchAllOrders]);
+
+  useEffect(() => {
+    if (user) {
+      fetchUserOrders();
+    }
+  }, [user, fetchUserOrders]);
 
   return (
     <StoreContext.Provider
@@ -73,6 +391,32 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         setSearchQuery,
         isAuthModalOpen,
         setIsAuthModalOpen,
+        isProfileModalOpen,
+        setIsProfileModalOpen,
+        products,
+        fetchProducts,
+        addProduct,
+        user,
+        profile,
+        isAdmin,
+        authLoading,
+        signIn,
+        signUp,
+        signOut,
+        updateProfile,
+        resetPassword,
+        uploadAvatar,
+        updateUserPassword,
+        createOrder,
+        userOrders,
+        adminOrders,
+        fetchUserOrders,
+        fetchAllOrders,
+        updateOrderStatus,
+        allUsers,
+        fetchAllUsers,
+        clearCart,
+        isInitialLoading
       }}
     >
       {children}

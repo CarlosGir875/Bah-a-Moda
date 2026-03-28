@@ -3,14 +3,29 @@
 import { useState } from "react";
 import { ProductCard } from "./ProductCard";
 import { ProductModal } from "./ProductModal";
-import { PRODUCTS, Product, QUICK_FILTERS } from "@/lib/mockData";
+import { ProductSkeleton } from "./Skeleton";
+import { Product, QUICK_FILTERS } from "@/lib/mockData";
 import { useStore } from "@/lib/store";
+import { useEffect } from "react";
 
 export function ProductSection() {
-  const { selectedCategory, setSelectedCategory, selectedFilter, setSelectedFilter, searchQuery } = useStore();
+  const { products, selectedCategory, setSelectedCategory, selectedFilter, setSelectedFilter, searchQuery, fetchProducts } = useStore();
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const filteredProducts = PRODUCTS.filter(p => {
+  useEffect(() => {
+    let isMounted = true;
+    const loadData = async () => {
+      // Only show loading if we don't have products yet
+      if (products.length === 0) setLoading(true);
+      await fetchProducts();
+      if (isMounted) setLoading(false);
+    };
+    loadData();
+    return () => { isMounted = false; };
+  }, [fetchProducts, products.length]);
+
+  const filteredProducts = products.filter(p => {
     // Search query takes highest priority
     if (searchQuery && searchQuery.trim() !== "") {
       return p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -58,7 +73,13 @@ export function ProductSection() {
         </span>
       </div>
 
-      {filteredProducts.length > 0 ? (
+      {loading ? (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-8 lg:gap-10">
+          {[...Array(8)].map((_, i) => (
+            <ProductSkeleton key={i} />
+          ))}
+        </div>
+      ) : filteredProducts.length > 0 ? (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-8 lg:gap-10">
           {filteredProducts.map((product) => (
             <ProductCard 
@@ -68,12 +89,15 @@ export function ProductSection() {
             />
           ))}
         </div>
-      ) : (
-        <div className="py-20 text-center flex flex-col items-center">
-          <p className="text-gray-500 text-lg font-bold uppercase tracking-widest">Sección Vacía</p>
-          <p className="text-gray-400 text-sm mt-2">Aún no hay componentes asignados a este filtro.</p>
+      ) : !loading && filteredProducts.length === 0 ? (
+        <div className="py-20 text-center flex flex-col items-center animate-in fade-in duration-700">
+          <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-6">
+            <span className="text-3xl">🏜️</span>
+          </div>
+          <p className="text-gray-900 text-lg font-black uppercase tracking-[0.2em]">Sección Vacía</p>
+          <p className="text-gray-400 text-sm mt-3 font-bold">Aún no hay tesoros asignados a este filtro en el Puerto.</p>
         </div>
-      )}
+      ) : null}
 
       <ProductModal 
         product={selectedProduct} 

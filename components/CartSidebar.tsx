@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X, Trash2, ShoppingBag, ArrowLeft, Send } from "lucide-react";
 import { useStore } from "@/lib/store";
 
 export function CartSidebar() {
-  const { isCartOpen, setIsCartOpen, cart, removeFromCart } = useStore();
+  const { isCartOpen, setIsCartOpen, cart, removeFromCart, user, profile, createOrder, clearCart } = useStore();
   const [checkoutStep, setCheckoutStep] = useState<"cart" | "form">("cart");
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [deliveryType, setDeliveryType] = useState<"domicilio" | "punto">("domicilio");
   const [formData, setFormData] = useState({
     nombre: "",
     celular: "",
@@ -14,38 +16,81 @@ export function CartSidebar() {
     horario: ""
   });
 
+  // Auto-fill from profile
+  useEffect(() => {
+    if (user && profile && checkoutStep === "form") {
+      setFormData(prev => ({
+        ...prev,
+        nombre: prev.nombre || profile.nombre_completo || "",
+        celular: prev.celular || profile.telefono || "",
+        ubicacion: prev.ubicacion || profile.punto_encuentro || profile.direccion || ""
+      }));
+    }
+  }, [user, profile, checkoutStep]);
+
   const cartTotal = cart.reduce((acc, item) => acc + (item.product.price * item.quantity), 0);
   const depositAmount = cartTotal * 0.5;
   const pendingBalance = cartTotal - depositAmount;
 
-  const confirmAndSendWhatsApp = (e: React.FormEvent) => {
+  const confirmAndSendWhatsApp = async (e: React.FormEvent) => {
     e.preventDefault();
-    const phoneNumber = "50230000000"; // Reemplazar con el WhatsApp real sin '+'
-
-    const itemsText = cart.map((item) => {
-      const pName = item.product.name ? item.product.name : `Componente Estructural ${item.product.category}`;
-      return `- ${item.quantity}x ${pName} ${item.size ? `(Talla: ${item.size})` : ''}`;
-    }).join("%0A");
-
-    const totalMsg = 
-      `🌟 *SOLICITUD DE RESERVA - BAHÍA MODA*%0A` +
-      `------------------------%0A` +
-      `*👤 Cliente:* ${formData.nombre}%0A` +
-      `*📱 Celular:* ${formData.celular}%0A` +
-      `*📍 Dirección:* ${formData.ubicacion}%0A` +
-      `*⏰ Horario de entrega:* ${formData.horario}%0A` +
-      `------------------------%0A` +
-      `*🛒 Mi Compra:*%0A${itemsText}%0A` +
-      `------------------------%0A` +
-      `📦 Valor Total: Q${cartTotal.toFixed(2)}%0A` +
-      `💳 *Anticipo Seguridad (50%): Q${depositAmount.toFixed(2)}*%0A` +
-      `🚚 Saldo Contra Entrega: Q${pendingBalance.toFixed(2)}%0A%0A` +
-      `_Hola Bahía Moda, estoy listo(a) para coordinar mi reserva. ¿Me indican a qué cuenta o enlace realizo mi anticipo para asignar mis productos?_`;
-
-    window.open(`https://wa.me/${phoneNumber}?text=${totalMsg}`, '_blank');
+    setIsProcessing(true);
     
-    setIsCartOpen(false);
-    setTimeout(() => setCheckoutStep("cart"), 500);
+    try {
+      // 1. Guardar en Base de Datos (Si el usuario esta logueado o como invitado)
+      const orderItems = cart.map(item => ({
+        id: item.product.id,
+        name: item.product.name,
+        price: item.product.price,
+        quantity: item.quantity,
+        size: item.size
+      }));
+
+      await createOrder({
+        cliente_id: user?.id || null as any,
+        nombre_cliente: formData.nombre,
+        items: orderItems,
+        total: cartTotal,
+        anticipo: depositAmount,
+        inversion: 0, // El administrador lo llenará después
+        estado: 'pendiente',
+        tipo_entrega: deliveryType === 'domicilio' ? 'domicilio' : 'punto_encuentro',
+        ubicacion_entrega: formData.ubicacion
+      });
+
+      // 2. Preparar WhatsApp
+      const phoneNumber = "50230000000"; // Reemplazar con el WhatsApp real sin '+'
+      const itemsText = cart.map((item) => {
+        const pName = item.product.name ? item.product.name : `Producto Bahía ${item.product.category}`;
+        return `- ${item.quantity}x ${pName} ${item.size ? `(Talla: ${item.size})` : ''}`;
+      }).join("%0A");
+
+      const totalMsg = 
+        `🌟 *SOLICITUD DE RESERVA - BAHÍA MODA*%0A` +
+        `------------------------%0A` +
+        `*👤 Cliente:* ${formData.nombre}%0A` +
+        `*📱 Celular:* ${formData.celular}%0A` +
+        `*🚚 Entrega:* ${deliveryType === 'domicilio' ? 'A Domicilio' : '📍 Punto de Encuentro (Seguro)'}%0A` +
+        `*📍 Dirección/Punto:* ${formData.ubicacion}%0A` +
+        `*⏰ Horario:* ${formData.horario}%0A` +
+        `------------------------%0A` +
+        `*🛒 Mi Compra:*%0A${itemsText}%0A` +
+        `------------------------%0A` +
+        `📦 Valor Total: Q${cartTotal.toFixed(2)}%0A` +
+        `💳 *Anticipo Seguridad (50%): Q${depositAmount.toFixed(2)}*%0A` +
+        `🚚 Saldo Contra Entrega: Q${pendingBalance.toFixed(2)}%0A%0A` +
+        `_Hola Bahía Moda, quiero coordinar mi pedido en el Puerto. Ya tengo mis datos listos._`;
+
+      window.open(`https://wa.me/${phoneNumber}?text=${totalMsg}`, '_blank');
+      
+      clearCart();
+      setIsCartOpen(false);
+      setTimeout(() => setCheckoutStep("cart"), 500);
+    } catch (err: any) {
+      alert("Error al procesar pedido: " + err.message);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -151,27 +196,70 @@ export function CartSidebar() {
         ) : (
           <>
             <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-white">
-              <div className="mb-6">
-                 <h3 className="text-lg font-black uppercase tracking-tight text-gray-900">Datos de Entrega</h3>
-                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mt-1">Llena estos datos para coordinar tu envío gratis.</p>
+               <div className="mb-6">
+                 <div className="flex items-center justify-between mb-1">
+                   <h3 className="text-lg font-black uppercase tracking-tight text-gray-900">Datos de Entrega</h3>
+                   {!user && (
+                     <span className="bg-amber-100 text-amber-700 text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-lg border border-amber-200">
+                       Modo Invitado
+                     </span>
+                   )}
+                 </div>
+                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mt-1">
+                   {user ? "Tus datos se guardarán en tu perfil." : "Tus datos no se guardarán (Compra única)."}
+                 </p>
               </div>
 
               <form id="checkout-form" onSubmit={confirmAndSendWhatsApp} className="space-y-6">
                  <div>
-                   <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Nombre Completo</label>
-                   <input required type="text" placeholder="Ej. Ana Pérez" value={formData.nombre} onChange={e => setFormData({...formData, nombre: e.target.value})} className="w-full border border-gray-200 bg-gray-50 px-4 py-3 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black" />
+                   <label className="block text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-3">Modo de Entrega</label>
+                   <div className="grid grid-cols-2 gap-2">
+                     <button 
+                        type="button"
+                        onClick={() => setDeliveryType("domicilio")}
+                        className={`py-3 px-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${
+                          deliveryType === 'domicilio' ? 'bg-black text-white border-black shadow-lg' : 'bg-white text-gray-400 border-gray-100'
+                        }`}
+                     >
+                       A Domicilio
+                     </button>
+                     <button 
+                        type="button"
+                        onClick={() => setDeliveryType("punto")}
+                        className={`py-3 px-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${
+                          deliveryType === 'punto' ? 'bg-black text-white border-black shadow-lg' : 'bg-white text-gray-400 border-gray-100'
+                        }`}
+                     >
+                       📍 Punto Seguro
+                     </button>
+                   </div>
+                   {deliveryType === 'punto' && (
+                     <p className="mt-3 text-[9px] font-bold text-indigo-600 bg-indigo-50 p-3 rounded-lg leading-relaxed border border-indigo-100">
+                       💡 RECOMENDACIÓN: Si vives en una zona de difícil acceso, elige un punto público (Parque, Super 24, Muelle) por seguridad de todos.
+                     </p>
+                   )}
                  </div>
+
                  <div>
-                   <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Celular de Contacto</label>
-                   <input required type="tel" placeholder="Ej. 4567 8910" value={formData.celular} onChange={e => setFormData({...formData, celular: e.target.value})} className="w-full border border-gray-200 bg-gray-50 px-4 py-3 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black" />
+                   <label className="block text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Nombre Completo</label>
+                   <input required type="text" placeholder="Ej. Ana Pérez" value={formData.nombre} onChange={e => setFormData({...formData, nombre: e.target.value})} className="w-full border border-gray-100 bg-gray-50 px-5 py-4 rounded-2xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-black transition-all" />
                  </div>
+                 
                  <div>
-                   <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Dirección de Entrega</label>
-                   <textarea required placeholder="Municipio, Colonia, Aldea, Número de casa y referencias..." rows={3} value={formData.ubicacion} onChange={e => setFormData({...formData, ubicacion: e.target.value})} className="w-full border border-gray-200 bg-gray-50 px-4 py-3 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black resize-none" />
+                   <label className="block text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-2">
+                     {deliveryType === 'domicilio' ? 'Barrio / Colonia en el Puerto' : 'Punto de Encuentro Acordado'}
+                   </label>
+                   <textarea required placeholder={deliveryType === 'domicilio' ? "Ej. Barrio El Centro, cerca de la iglesia..." : "Ej. Parque Central, frente al Super 24"} rows={2} value={formData.ubicacion} onChange={e => setFormData({...formData, ubicacion: e.target.value})} className="w-full border border-gray-100 bg-gray-50 px-5 py-4 rounded-2xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-black resize-none transition-all" />
                  </div>
+
                  <div>
-                   <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Horario Ideal para Entregar</label>
-                   <input required type="text" placeholder="Ej. Por la mañana de 9am a 12pm" value={formData.horario} onChange={e => setFormData({...formData, horario: e.target.value})} className="w-full border border-gray-200 bg-gray-50 px-4 py-3 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black" />
+                   <label className="block text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Celular de Contacto</label>
+                   <input required type="tel" placeholder="Ej. 4567 8910" value={formData.celular} onChange={e => setFormData({...formData, celular: e.target.value})} className="w-full border border-gray-100 bg-gray-50 px-5 py-4 rounded-2xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-black transition-all" />
+                 </div>
+                 
+                 <div>
+                   <label className="block text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Horario de Entrega</label>
+                   <input required type="text" placeholder="Ej. Mañana de 9am a 12pm" value={formData.horario} onChange={e => setFormData({...formData, horario: e.target.value})} className="w-full border border-gray-100 bg-gray-50 px-5 py-4 rounded-2xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-black transition-all" />
                  </div>
               </form>
             </div>
@@ -181,9 +269,15 @@ export function CartSidebar() {
               <button
                 type="submit"
                 form="checkout-form"
-                className="w-full bg-[#25D366] text-white font-bold tracking-widest uppercase text-xs py-4 rounded-xl flex items-center justify-center gap-2 hover:bg-[#128C7E] shadow-xl shadow-[#25D366]/20 transition-all transform hover:-translate-y-0.5"
+                disabled={isProcessing}
+                className={`w-full bg-[#25D366] text-white font-bold tracking-widest uppercase text-xs py-4 rounded-xl flex items-center justify-center gap-2 hover:bg-[#128C7E] shadow-xl shadow-[#25D366]/20 transition-all transform hover:-translate-y-0.5 ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
-                <Send className="w-5 h-5" /> Coordinar Reserva por WhatsApp
+                {isProcessing ? (
+                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-white/20 border-t-white" />
+                ) : (
+                  <Send className="w-5 h-5" />
+                )}
+                {isProcessing ? "Procesando Pedido..." : "Coordinar Reserva por WhatsApp"}
               </button>
             </div>
           </>
