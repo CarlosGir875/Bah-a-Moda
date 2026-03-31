@@ -136,8 +136,18 @@ export function CartSidebar() {
                 <ul className="space-y-4">
                   {cart.map((item) => (
                     <li key={`${item.product.id}-${item.size}`} className="flex gap-4 border-b border-gray-50 pb-4">
-                      <div className="relative w-20 h-24 flex-shrink-0 bg-gray-200 rounded-lg flex flex-col items-center justify-center border border-gray-300">
-                        <span className="text-gray-400 font-bold text-[8px] uppercase tracking-widest text-center px-1 leading-tight">Espacio<br/>Imagen</span>
+                      <div className="relative w-20 h-24 flex-shrink-0 bg-gray-100 rounded-2xl overflow-hidden flex items-center justify-center border border-gray-100 shadow-sm">
+                        {item.product.images && item.product.images.length > 0 ? (
+                          <img 
+                            src={item.product.images[0]} 
+                            alt={item.product.name} 
+                            className="absolute inset-0 w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-gray-300 font-bold text-[8px] uppercase tracking-widest text-center px-1 leading-tight italic">
+                            Bahía<br/>Moda
+                          </span>
+                        )}
                       </div>
                       <div className="flex-1 flex flex-col justify-between">
                         <div>

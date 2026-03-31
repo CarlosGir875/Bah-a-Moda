@@ -3,14 +3,16 @@
 import { useStore } from "@/lib/store";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Upload, Plus, DollarSign, Package, CheckSquare, Square } from "lucide-react";
+import { Upload, Plus, DollarSign, Package, CheckSquare, Square, Trash2, ImagePlus, X } from "lucide-react";
 
 export default function AdminDashboard() {
-  const { user, isAdmin, authLoading, addProduct } = useStore();
+  const { user, isAdmin, authLoading, addProduct, uploadProductImages } = useStore();
   const router = useRouter();
   
   const [loading, setLoading] = useState(false);
   const [hasSizes, setHasSizes] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [previews, setPreviews] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     name: "",
     price: "",
@@ -53,6 +55,21 @@ export default function AdminDashboard() {
     );
   }
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+      setSelectedFiles(prev => [...prev, ...files]);
+      
+      const newPreviews = files.map(file => URL.createObjectURL(file));
+      setPreviews(prev => [...prev, ...newPreviews]);
+    }
+  };
+
+  const removeFile = (index: number) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+    setPreviews(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handlePublish = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.price || !formData.category) {
@@ -60,12 +77,21 @@ export default function AdminDashboard() {
       return;
     }
 
+    if (selectedFiles.length === 0) {
+      alert("Por favor sube al menos una fotografía del producto");
+      return;
+    }
+
     setLoading(true);
     try {
+      // 1. Upload images to Cloud
+      const imageUrls = await uploadProductImages(selectedFiles);
+
+      // 2. Save product to DB
       await addProduct({
         name: formData.name,
         price: parseFloat(formData.price),
-        image: "", // Placeholder for now, later Cloudinary
+        images: imageUrls,
         category: formData.category,
         filterTag: formData.filterTag === "Ninguno (Predeterminado)" ? undefined : formData.filterTag,
         supplier: formData.supplier,
@@ -86,6 +112,8 @@ export default function AdminDashboard() {
         sizes: ""
       });
       setHasSizes(false);
+      setSelectedFiles([]);
+      setPreviews([]);
     } catch (error: any) {
       alert("Error al publicar: " + error.message);
     } finally {
@@ -112,12 +140,40 @@ export default function AdminDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-6">
               <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Fotografía del Producto</label>
-                <div className="border-2 border-dashed border-gray-300 bg-gray-50 rounded-2xl w-full aspect-[4/5] flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 hover:border-gray-400 transition-colors">
-                   <Upload className="w-10 h-10 text-gray-400 mb-4" />
-                   <span className="text-sm font-semibold text-gray-600">Tocar para Explorar Nube</span>
-                   <span className="text-xs text-gray-400 mt-1">Soporta JPG, PNG, WEBP</span>
-                </div>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Galería de Fotos (Múltiple)</label>
+                
+                {previews.length === 0 ? (
+                  <label className="border-2 border-dashed border-gray-300 bg-gray-50 rounded-3xl w-full aspect-[4/5] flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 hover:border-gray-400 transition-all group relative overflow-hidden">
+                    <input type="file" multiple onChange={handleFileChange} className="absolute inset-0 opacity-0 cursor-pointer" />
+                    <div className="p-4 bg-white rounded-2xl shadow-sm mb-4 group-hover:scale-110 transition-transform">
+                      <ImagePlus className="w-8 h-8 text-indigo-500" />
+                    </div>
+                    <span className="text-sm font-black text-gray-900 uppercase tracking-tight">Cargar Imágenes</span>
+                    <span className="text-[10px] text-gray-400 mt-2 font-bold uppercase tracking-widest">JPG, PNG, WEBP (Min. 1)</span>
+                  </label>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-3">
+                      {previews.map((preview, idx) => (
+                        <div key={idx} className="relative aspect-square rounded-2xl overflow-hidden border border-gray-100 shadow-sm group">
+                          <img src={preview} alt="" className="w-full h-full object-cover" />
+                          <button 
+                            type="button"
+                            onClick={() => removeFile(idx)}
+                            className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity transform hover:scale-110"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ))}
+                      <label className="aspect-square border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors">
+                        <input type="file" multiple onChange={handleFileChange} className="absolute inset-0 opacity-0 cursor-pointer" />
+                        <Plus className="w-6 h-6 text-gray-400" />
+                        <span className="text-[9px] font-black text-gray-400 uppercase mt-1">Añadir más</span>
+                      </label>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 

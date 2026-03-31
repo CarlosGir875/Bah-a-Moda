@@ -59,6 +59,7 @@ type StoreContextType = {
   products: Product[];
   fetchProducts: () => Promise<void>;
   addProduct: (product: Omit<Product, 'id'>) => Promise<void>;
+  uploadProductImages: (files: File[]) => Promise<string[]>;
   user: User | null;
   profile: Profile | null;
   isAdmin: boolean;
@@ -120,7 +121,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         id: p.id,
         name: p.name,
         price: p.price,
-        image: p.image_url,
+        images: p.image_urls || [],
         category: p.category,
         filterTag: p.filter_tag,
         supplier: p.supplier,
@@ -138,7 +139,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       .insert([{
         name: product.name,
         price: product.price,
-        image_url: product.image,
+        image_urls: product.images,
         category: product.category,
         filter_tag: product.filterTag,
         supplier: product.supplier,
@@ -277,6 +278,35 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return publicUrl;
   }, [user, updateProfile]);
 
+  const uploadProductImages = useCallback(async (files: File[]) => {
+    if (!user) throw new Error("No user logged in");
+
+    const urls: string[] = [];
+
+    for (const file of files) {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('products')
+        .upload(filePath, file);
+
+      if (uploadError) {
+        console.error("Upload error for file:", file.name, uploadError);
+        continue;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('products')
+        .getPublicUrl(filePath);
+      
+      urls.push(publicUrl);
+    }
+
+    return urls;
+  }, [user]);
+
   const updateUserPassword = useCallback(async (password: string) => {
     const { error } = await supabase.auth.updateUser({ password });
     if (error) throw error;
@@ -396,6 +426,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         products,
         fetchProducts,
         addProduct,
+        uploadProductImages,
         user,
         profile,
         isAdmin,

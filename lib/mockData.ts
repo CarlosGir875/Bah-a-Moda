@@ -3,7 +3,7 @@ export interface Product {
   name: string;
   price: number;
   category: string;
-  image: string;
+  images: string[];
   sizes?: string[];
   isOffer?: boolean;
   filterTag?: string;
@@ -35,7 +35,7 @@ export const PRODUCTS: Product[] = [
     name: "Set Olla y Sartén Antiadherente",
     price: 350.00,
     category: "Hogar y Cocina",
-    image: "",
+    images: [],
     filterTag: "🔥 Ofertas Estrella",
     supplier: "Arabela",
     delivery_date: "Entrega Inmediata"
@@ -45,7 +45,7 @@ export const PRODUCTS: Product[] = [
     name: "Loción Blue Intense Men",
     price: 250.00,
     category: "Perfumería y Lociones",
-    image: "",
+    images: [],
     filterTag: "✨ Nuevos Ingresos",
     supplier: "Scentia",
     delivery_date: "Entrega Inmediata"
@@ -55,7 +55,7 @@ export const PRODUCTS: Product[] = [
     name: "Pantalón Casual de Tela",
     price: 180.00,
     category: "Ropa, Calzado y Accesorios",
-    image: "",
+    images: [],
     sizes: ["S", "M", "L", "XL"],
     filterTag: "💎 Alta Gama (Premium)",
     supplier: "Boutique Independiente",

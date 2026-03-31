@@ -15,12 +15,14 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
   const { addToCart } = useStore();
   const [selectedSize, setSelectedSize] = useState<string>("");
   const [sizeError, setSizeError] = useState<boolean>(false);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
 
   // Reset selected size and error state when modal is closed or opened for a new product
   useEffect(() => {
     if (product) {
       setSelectedSize("");
       setSizeError(false);
+      setActiveImageIndex(0);
     }
   }, [product?.id]);
 
@@ -42,32 +44,63 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
     handleClose();
   };
 
+  const currentImage = product.images?.[activeImageIndex] || null;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 transition-opacity">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-6 bg-black/80 backdrop-blur-sm transition-opacity">
       <div 
         className="fixed inset-0"
         onClick={handleClose}
       />
-      <div className="bg-white w-full max-w-4xl flex flex-col md:flex-row shadow-2xl overflow-hidden rounded-xl relative animate-in fade-in zoom-in-95 duration-200 z-10 max-h-[90vh]">
+      <div className="bg-white w-full max-w-5xl flex flex-col md:flex-row shadow-2xl overflow-hidden rounded-[2.5rem] relative animate-in fade-in zoom-in-95 duration-300 z-10 max-h-[95vh] md:h-[800px]">
         <button
           onClick={handleClose}
-          className="absolute top-4 right-4 z-20 p-2 bg-white/70 backdrop-blur-sm shadow-sm rounded-full text-black hover:bg-gray-100 transition-colors"
+          className="absolute top-6 right-6 z-30 p-2 bg-white/90 backdrop-blur shadow-xl rounded-full text-black hover:bg-black hover:text-white transition-all duration-300"
         >
           <X className="w-5 h-5" />
         </button>
 
-        <div className="md:w-1/2 relative aspect-square md:aspect-auto md:h-auto min-h-[300px] bg-gray-50 flex items-center justify-center border-b md:border-b-0 md:border-r border-gray-100">
-          {/* Badge Foto Real */}
-          <div className="absolute top-6 left-6 z-10">
-            <span className="bg-white text-[10px] font-black uppercase tracking-widest text-black px-3 py-1.5 rounded-full border border-gray-100 shadow-xl flex items-center gap-2">
-              <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
-              Foto 100% Real
-            </span>
+        {/* Media Section (Left) */}
+        <div className="md:w-[55%] relative h-[400px] md:h-auto bg-[#f8f8f8] flex flex-col items-center justify-between p-6">
+          <div className="relative w-full h-full flex flex-col items-center justify-center">
+            {/* Badge Foto Real */}
+            <div className="absolute top-2 left-2 z-10">
+              <span className="bg-white/95 backdrop-blur-sm text-[9px] font-black uppercase tracking-widest text-black px-3 py-1.5 rounded-full border border-gray-100 shadow-lg flex items-center gap-2">
+                <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+                Detalle Real
+              </span>
+            </div>
+
+            {currentImage ? (
+              <img 
+                key={activeImageIndex}
+                src={currentImage} 
+                alt={product.name} 
+                className="w-full h-full object-cover rounded-2xl md:rounded-[2rem] shadow-sm animate-in fade-in duration-500"
+              />
+            ) : (
+              <span className="text-gray-300 font-black text-xs uppercase tracking-[0.4em] px-8 text-center leading-relaxed">
+                Bahía Moda<br/>{product.category}
+              </span>
+            )}
           </div>
 
-          <span className="text-gray-200 font-black text-xs uppercase tracking-[0.3em] px-8 text-center leading-relaxed">
-            Bahía Moda<br/>{product.category}
-          </span>
+          {/* Thumbnails Row */}
+          {product.images && product.images.length > 1 && (
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-3 px-4 py-3 bg-white/30 backdrop-blur-md rounded-2xl border border-white/40 shadow-xl overflow-x-auto max-w-[90%] hide-scrollbar">
+              {product.images.map((img, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setActiveImageIndex(idx)}
+                  className={`relative w-14 h-14 md:w-16 md:h-16 rounded-xl overflow-hidden border-2 transition-all flex-shrink-0 ${
+                    activeImageIndex === idx ? 'border-black ring-2 ring-black/20 scale-110 shadow-lg' : 'border-transparent opacity-60 hover:opacity-100'
+                  }`}
+                >
+                  <img src={img} alt="" className="w-full h-full object-cover" />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="md:w-1/2 p-8 md:p-12 flex flex-col overflow-y-auto">

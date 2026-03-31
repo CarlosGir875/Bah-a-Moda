@@ -16,6 +16,19 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
       onClick={() => onClick(product)}
     >
       <div className="relative aspect-[3/4] w-full overflow-hidden bg-gray-100 rounded-3xl mb-4 shadow-sm flex flex-col items-center justify-center border border-gray-100 group-hover:shadow-xl transition-all duration-500">
+        {/* Real Image Rendering */}
+        {product.images && product.images.length > 0 ? (
+          <img 
+            src={product.images[0]} 
+            alt={product.name} 
+            className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+          />
+        ) : (
+          <span className="text-gray-300 font-black text-[10px] uppercase tracking-[0.2em] text-center px-6 leading-relaxed">
+            Bahía Moda<br/>{product.category}
+          </span>
+        )}
+        
         {/* Badge Foto Real */}
         <div className="absolute top-3 left-3 z-10">
           <span className="bg-white/90 backdrop-blur-sm text-[8px] font-black uppercase tracking-widest text-black px-2 py-1 rounded-full border border-gray-100 shadow-sm flex items-center gap-1">
@@ -24,10 +37,6 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
           </span>
         </div>
 
-        <span className="text-gray-300 font-black text-[10px] uppercase tracking-[0.2em] text-center px-6 leading-relaxed">
-          Bahía Moda<br/>{product.category}
-        </span>
-        
         <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors duration-500" />
 
         <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-500 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
