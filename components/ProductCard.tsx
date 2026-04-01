@@ -11,15 +11,15 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
       className="group flex flex-col cursor-pointer"
       onClick={() => onClick(product)}
     >
-      {/* Image container — off-white card to match studio photos */}
-      <div className="relative aspect-[3/4] w-full overflow-hidden bg-[#FAFAFA] rounded-2xl mb-3 shadow-[0_2px_12px_rgba(0,0,0,0.08)] flex items-center justify-center group-hover:shadow-[0_8px_30px_rgba(0,0,0,0.14)] group-hover:-translate-y-1 transition-all duration-400">
+      {/* Image container — white card, minimalist style to blend with white page */}
+      <div className="relative aspect-[3/4] w-full overflow-hidden bg-white rounded-2xl mb-3 flex items-center justify-center group-hover:-translate-y-1 transition-all duration-400">
         {product.images && product.images.length > 0 ? (
           <>
-            {/* Imagen principal — siempre completa, nunca recortada */}
+            {/* Imagen principal — sin padding extra para que el "marco" sea parte de la foto */}
             <img 
               src={product.images[0]} 
               alt={product.name} 
-              className="w-full h-full object-contain p-3 group-hover:scale-105 transition-transform duration-500 mix-blend-multiply"
+              className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500 mix-blend-multiply"
             />
           </>
         ) : (
