@@ -87,23 +87,13 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
                  transition={{ duration: 0.4, ease: "easeOut" }}
                  className="w-full h-full flex items-center justify-center overflow-hidden cursor-zoom-in relative"
                  onMouseMove={(e) => {
-                   if (!isZoomed) return;
-                   const target = e.currentTarget;
-                   const rect = target.getBoundingClientRect();
-                   const x = ((e.clientX - rect.left) / rect.width) * 100;
-                   const y = ((e.clientY - rect.top) / rect.height) * 100;
-                   target.style.perspectiveOrigin = `${x}% ${y}%`;
-                   // We use the direct child img for transform origin
-                   const img = target.querySelector('img');
-                   if (img) img.style.transformOrigin = `${x}% ${y}%`;
-                 }}
-                 onMouseEnter={() => setIsZoomed(true)}
-                 onMouseLeave={(e) => {
-                   setIsZoomed(false);
-                   const target = e.currentTarget;
-                   const img = target.querySelector('img');
-                   if (img) img.style.transformOrigin = 'center center';
-                 }}
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const x = ((e.clientX - rect.left) / rect.width) * 100;
+                  const y = ((e.clientY - rect.top) / rect.height) * 100;
+                  setMousePos({ x, y });
+                }}
+                onMouseEnter={() => setIsZoomed(true)}
+                onMouseLeave={() => setIsZoomed(false)}
                >
                  {currentImage ? (
                    <>
@@ -115,7 +105,11 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
                      <motion.img 
                        src={currentImage} 
                        alt={product.name} 
-                       animate={{ scale: isZoomed ? 2.5 : 1 }}
+                       animate={{ 
+                         scale: isZoomed ? 2.5 : 1,
+                         originX: `${mousePos.x}%`,
+                         originY: `${mousePos.y}%`
+                       }}
                        transition={{ duration: 0.3, ease: "easeOut" }}
                        className="relative w-full h-full object-contain p-4 md:p-8 rounded-3xl drop-shadow-[0_20px_50px_rgba(0,0,0,0.3)] z-10"
                      />
@@ -197,7 +191,7 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
           </h2>
 
           <div className="flex items-baseline gap-1.5 mb-8">
-            <span className="text-xl font-black text-black">Q</span>
+            <span className="text-3xl font-black text-black">Q</span>
             <span className="text-5xl font-black text-black tracking-tighter">
               {product.price.toFixed(2)}
             </span>

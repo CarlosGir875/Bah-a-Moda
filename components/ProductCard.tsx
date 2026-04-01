@@ -51,7 +51,7 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
           {product.name || "Producto sin Nombre"}
         </h3>
         <div className="mt-auto flex items-baseline gap-1.5">
-          <span className="text-sm font-black text-black">Q</span>
+          <span className="text-xl font-black text-black">Q</span>
           <span className="text-lg font-black text-black tracking-tighter">
             {product.price.toFixed(2)}
           </span>
