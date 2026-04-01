@@ -15,7 +15,8 @@ export function Navbar() {
     setSearchQuery, 
     setIsAuthModalOpen,
     setIsProfileModalOpen,
-    user
+    user,
+    profile
   } = useStore();
   const itemCount = cart.reduce((acc, item) => acc + item.quantity, 0);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -97,10 +98,15 @@ export function Navbar() {
               {user ? (
                 <button 
                   onClick={() => setIsProfileModalOpen(true)}
-                  className="p-2 text-black bg-gray-100 hover:bg-gray-200 rounded-full transition-all hover:scale-110 flex items-center justify-center border border-gray-200 shadow-sm"
+                  className="flex items-center gap-2 pl-2 pr-2.5 py-1.5 text-black bg-gray-50 hover:bg-gray-100 rounded-full transition-all hover:scale-[1.02] border border-gray-200 shadow-sm active:scale-95"
                   aria-label="Perfil"
                 >
-                  <User className="h-5 w-5" strokeWidth={2} />
+                  <div className="w-7 h-7 bg-black text-white rounded-full flex items-center justify-center shadow-inner">
+                    <User className="h-4 w-4" strokeWidth={2.5} />
+                  </div>
+                  <span className="hidden sm:inline-block text-[11px] font-black uppercase tracking-widest text-gray-800">
+                    {profile?.nombre_completo?.split(' ')[0] || user.email?.split('@')[0] || "Mi Cuenta"}
+                  </span>
                 </button>
               ) : (
                 <button 
