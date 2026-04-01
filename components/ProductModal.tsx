@@ -17,6 +17,7 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
   const [sizeError, setSizeError] = useState<boolean>(false);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
+  const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
 
   const handleClose = () => {
     setSelectedSize("");
@@ -195,9 +196,9 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
             {product.name || "Producto Bahía Moda"}
           </h2>
 
-          <div className="flex items-baseline gap-1 mb-8">
-            <span className="text-sm font-bold text-gray-400">Q</span>
-            <span className="text-4xl font-black text-black tracking-tighter">
+          <div className="flex items-baseline gap-1.5 mb-8">
+            <span className="text-xl font-black text-black">Q</span>
+            <span className="text-5xl font-black text-black tracking-tighter">
               {product.price.toFixed(2)}
             </span>
           </div>

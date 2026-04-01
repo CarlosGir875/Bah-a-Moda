@@ -50,8 +50,8 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
         <h3 className="text-sm font-black text-black uppercase tracking-tight leading-tight line-clamp-2 mb-2">
           {product.name || "Producto sin Nombre"}
         </h3>
-        <div className="mt-auto flex items-baseline gap-1">
-          <span className="text-[10px] font-bold text-gray-400">Q</span>
+        <div className="mt-auto flex items-baseline gap-1.5">
+          <span className="text-sm font-black text-black">Q</span>
           <span className="text-lg font-black text-black tracking-tighter">
             {product.price.toFixed(2)}
           </span>
