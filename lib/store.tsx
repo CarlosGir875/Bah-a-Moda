@@ -114,6 +114,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const { data, error } = await supabase
       .from('products')
       .select('*')
+      .order('category', { ascending: true })
+      .order('sub_category', { ascending: true })
       .order('created_at', { ascending: false });
     
     if (error) {
