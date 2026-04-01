@@ -158,7 +158,7 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
                   style={{ transformOrigin: `${mousePos.x}% ${mousePos.y}%` }}
                   animate={{ scale: isZoomed ? 2 : 1 }}
                   transition={{ duration: 0.3, ease: "easeOut" }}
-                  className="w-full h-auto object-contain block"
+                  className="w-full h-auto object-contain block mix-blend-multiply"
                 />
               ) : (
                 <div className="aspect-video flex items-center justify-center">
@@ -209,11 +209,11 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
               <button
                 key={idx}
                 onClick={() => setActiveImageIndex(idx)}
-                className={`relative flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-all duration-300 ${
+                className={`relative flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-all duration-300 bg-white ${
                   activeImageIndex === idx ? "border-black scale-105 shadow-md" : "border-transparent opacity-50 hover:opacity-80"
                 }`}
               >
-                <img src={img} alt="" className="w-full h-full object-cover" />
+                <img src={img} alt="" className="w-full h-full object-cover mix-blend-multiply" />
               </button>
             ))}
           </div>

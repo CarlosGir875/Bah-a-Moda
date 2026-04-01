@@ -475,7 +475,7 @@ export default function AdminDashboard() {
                     <div key={product.id} className="flex gap-4 p-4 border border-gray-100 rounded-2xl hover:shadow-lg transition-all bg-white relative group">
                        <div className="w-20 h-24 rounded-xl overflow-hidden bg-gray-50 flex-shrink-0 relative">
                           {hasImage ? (
-                             <img src={product.images![0]} className="w-full h-full object-cover" alt="" />
+                             <img src={product.images![0]} className="w-full h-full object-cover mix-blend-multiply" alt="" />
                           ) : (
                              <div className="w-full h-full flex items-center justify-center bg-gray-100"><Package className="w-6 h-6 text-gray-300"/></div>
                           )}
