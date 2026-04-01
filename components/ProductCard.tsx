@@ -11,7 +11,7 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
       className="group flex flex-col cursor-pointer"
       onClick={() => onClick(product)}
     >
-      <div className="relative w-full overflow-hidden bg-white rounded-[2.5rem] mb-4 shadow-sm flex flex-col items-center justify-center border border-gray-100 group-hover:shadow-2xl group-hover:-translate-y-1 transition-all duration-500">
+      <div className="relative aspect-[3/4] w-full overflow-hidden bg-white rounded-3xl mb-3 shadow-sm flex items-center justify-center border border-gray-100 group-hover:shadow-2xl group-hover:-translate-y-1 transition-all duration-500">
         {/* Real Image Rendering */}
         {product.images && product.images.length > 0 ? (
           <>
@@ -25,15 +25,13 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
             <img 
               src={product.images[0]} 
               alt={product.name} 
-              className="relative w-full h-auto object-contain z-10 group-hover:scale-105 transition-transform duration-700 drop-shadow-xl"
+              className="relative w-full h-full object-contain z-10 group-hover:scale-105 transition-transform duration-700 drop-shadow-xl p-2"
             />
           </>
         ) : (
-          <div className="aspect-square flex items-center justify-center">
-            <span className="text-gray-300 font-black text-[10px] uppercase tracking-[0.2em] text-center px-6 leading-relaxed">
-              Bahía Moda<br/>{product.category}
-            </span>
-          </div>
+          <span className="text-gray-300 font-black text-[10px] uppercase tracking-[0.2em] text-center px-4 leading-relaxed z-10">
+            Bahía Moda<br/>{product.category}
+          </span>
         )}
         
         <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors duration-500" />

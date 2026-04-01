@@ -74,22 +74,19 @@ export function ProductSection() {
       </div>
 
       {loading ? (
-        <div className="columns-2 md:columns-3 lg:columns-4 gap-6 space-y-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
           {[...Array(8)].map((_, i) => (
-            <div key={i} className="break-inside-avoid">
-              <ProductSkeleton />
-            </div>
+            <ProductSkeleton key={i} />
           ))}
         </div>
       ) : filteredProducts.length > 0 ? (
-        <div className="columns-2 md:columns-3 lg:columns-4 gap-6 space-y-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
           {filteredProducts.map((product) => (
-            <div key={product.id} className="break-inside-avoid mb-6">
-              <ProductCard 
-                product={product} 
-                onClick={(p) => setSelectedProduct(p)} 
-              />
-            </div>
+            <ProductCard 
+              key={product.id} 
+              product={product} 
+              onClick={(p) => setSelectedProduct(p)} 
+            />
           ))}
         </div>
       ) : !loading && filteredProducts.length === 0 ? (
