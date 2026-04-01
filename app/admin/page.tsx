@@ -254,50 +254,42 @@ export default function AdminDashboard() {
                </div>
                <div>
                   <div className="flex items-center justify-between mb-2">
-                    <label className="text-xs font-black text-indigo-600 uppercase tracking-widest flex items-center gap-1">Fecha de Ingreso / Entrega</label>
+                    <label className="text-xs font-black text-indigo-600 uppercase tracking-widest flex items-center gap-1">
+                      <Calendar className="w-3.5 h-3.5" /> Fecha de Cierre de Colección
+                    </label>
                     <div className="flex gap-2">
                       <button 
                         type="button"
-                        onClick={() => setFormData({...formData, delivery_date: "Entrega Inmediata"})}
-                        className="text-[9px] font-black uppercase px-2 py-1 bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors"
+                        onClick={() => {
+                          const d = new Date();
+                          d.setDate(d.getDate() + 7);
+                          setFormData({...formData, delivery_date: d.toISOString().split('T')[0]});
+                        }}
+                        className="text-[9px] font-black uppercase px-2 py-1 bg-orange-100 text-orange-700 rounded-md hover:bg-orange-200 transition-colors"
                       >
-                        🚀 Inmediata
+                        +7 días
                       </button>
                       <button 
                         type="button"
-                        onClick={() => setFormData({...formData, delivery_date: "Siguiente Lote"})}
-                        className="text-[9px] font-black uppercase px-2 py-1 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors"
+                        onClick={() => {
+                          const d = new Date();
+                          d.setDate(d.getDate() + 15);
+                          setFormData({...formData, delivery_date: d.toISOString().split('T')[0]});
+                        }}
+                        className="text-[9px] font-black uppercase px-2 py-1 bg-indigo-100 text-indigo-700 rounded-md hover:bg-indigo-200 transition-colors"
                       >
-                        📦 Lote
+                        +15 días
                       </button>
                     </div>
                   </div>
-                  <div className="relative group/delivery">
-                    <input 
-                      type="text" 
-                      value={formData.delivery_date}
-                      onChange={(e) => setFormData({...formData, delivery_date: e.target.value})}
-                      placeholder="Ej. Entrega Inmediata  o  Viene el 15 de Mayo" 
-                      className="w-full border-2 border-indigo-200 bg-white px-4 py-3.5 rounded-xl text-sm font-bold focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-shadow shadow-sm text-indigo-900 pr-12" 
-                    />
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                      <input 
-                        type="date" 
-                        onChange={(e) => {
-                          const date = new Date(e.target.value);
-                          if (!isNaN(date.getTime())) {
-                            // Format: "Viene el 15 de Mayo"
-                            const day = date.getDate() + 1; // Correction for timezone
-                            const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-                            const month = monthNames[date.getMonth()];
-                            setFormData({...formData, delivery_date: `Viene el ${day} de ${month}`});
-                          }
-                        }}
-                        className="absolute inset-0 opacity-0 cursor-pointer z-10 w-8"
-                      />
-                      <Calendar className="w-5 h-5 text-indigo-400 group-hover/delivery:text-indigo-600 transition-colors" />
-                    </div>
-                  </div>
+                  <input 
+                    type="date" 
+                    value={formData.delivery_date}
+                    onChange={(e) => setFormData({...formData, delivery_date: e.target.value})}
+                    className="w-full border-2 border-indigo-200 bg-white px-4 py-3.5 rounded-xl text-sm font-bold focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-shadow shadow-sm text-indigo-900" 
+                  />
+                  <p className="text-[10px] text-gray-400 mt-1.5 font-medium">⚡ Esta fecha controla la presión de urgencia en la tienda.
+                  </p>
                </div>
             </div>
           </div>
