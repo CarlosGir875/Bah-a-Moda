@@ -43,7 +43,8 @@ export function ProductSection() {
   });
 
   return (
-    <section id="catalog" className="max-w-7xl mx-auto px-4 sm:px-8 py-6 w-full">
+    <section id="catalog" className="w-full bg-[#F3F4F6] min-h-screen">
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 py-6 w-full">
       {/* Botones Rápidos (Quick Filters) */}
       <div className="flex overflow-x-auto hide-scrollbar gap-2 sm:gap-3 mb-6 pb-2">
         {QUICK_FILTERS.map(f => (
@@ -104,6 +105,7 @@ export function ProductSection() {
         product={selectedProduct} 
         onClose={() => setSelectedProduct(null)} 
       />
+      </div>
     </section>
   );
 }
