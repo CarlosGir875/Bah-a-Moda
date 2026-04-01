@@ -4,7 +4,7 @@ import { useStore } from "@/lib/store";
 import { CATEGORY_MAPPING } from "@/lib/mockData";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Plus, DollarSign, Package, CheckSquare, Square, Trash2, ImagePlus, Calendar } from "lucide-react";
+import { Plus, Package, CheckSquare, Square, Trash2, ImagePlus, Calendar } from "lucide-react";
 
 export default function AdminDashboard() {
   const { user, isAdmin, authLoading, addProduct, uploadProductImages } = useStore();
@@ -198,7 +198,7 @@ export default function AdminDashboard() {
                <div>
                   <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 flex items-center gap-1">Precio de Venta (Quetzales)</label>
                   <div className="relative">
-                    <DollarSign className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <span className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold flex items-center justify-center text-xs">Q</span>
                     <input 
                       type="number" 
                       value={formData.price}

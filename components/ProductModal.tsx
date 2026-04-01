@@ -77,33 +77,49 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
           
           {/* Main Image Container */}
           <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeImageIndex}
-                initial={{ opacity: 0, x: 20, scale: 0.95 }}
-                animate={{ opacity: 1, x: 0, scale: 1 }}
-                exit={{ opacity: 0, x: -20, scale: 0.95 }}
-                transition={{ duration: 0.4, ease: "easeOut" }}
-                className="w-full h-full flex items-center justify-center"
-                onMouseEnter={() => setIsZoomed(true)}
-                onMouseLeave={() => setIsZoomed(false)}
-              >
-                {currentImage ? (
-                  <motion.img 
-                    src={currentImage} 
-                    alt={product.name} 
-                    animate={{ scale: isZoomed ? 1.15 : 1 }}
-                    transition={{ duration: 0.6, ease: "easeOut" }}
-                    className="relative w-full h-full object-contain p-4 md:p-8 rounded-3xl drop-shadow-2xl mix-blend-multiply"
-                  />
-                ) : (
-                  <div className="flex flex-col items-center gap-4">
-                    <span className="text-gray-200 font-black text-6xl opacity-10 select-none">BAHÍA</span>
-                    <span className="text-gray-400 font-bold text-xs uppercase tracking-[0.5em]">{product.category}</span>
-                  </div>
-                )}
-              </motion.div>
-            </AnimatePresence>
+             <AnimatePresence mode="wait">
+               <motion.div
+                 key={activeImageIndex}
+                 initial={{ opacity: 0, x: 20, scale: 0.95 }}
+                 animate={{ opacity: 1, x: 0, scale: 1 }}
+                 exit={{ opacity: 0, x: -20, scale: 0.95 }}
+                 transition={{ duration: 0.4, ease: "easeOut" }}
+                 className="w-full h-full flex items-center justify-center overflow-hidden cursor-zoom-in relative"
+                 onMouseMove={(e) => {
+                   if (!isZoomed) return;
+                   const target = e.currentTarget;
+                   const rect = target.getBoundingClientRect();
+                   const x = ((e.clientX - rect.left) / rect.width) * 100;
+                   const y = ((e.clientY - rect.top) / rect.height) * 100;
+                   target.style.perspectiveOrigin = `${x}% ${y}%`;
+                   // We use the direct child img for transform origin
+                   const img = target.querySelector('img');
+                   if (img) img.style.transformOrigin = `${x}% ${y}%`;
+                 }}
+                 onMouseEnter={() => setIsZoomed(true)}
+                 onMouseLeave={(e) => {
+                   setIsZoomed(false);
+                   const target = e.currentTarget;
+                   const img = target.querySelector('img');
+                   if (img) img.style.transformOrigin = 'center center';
+                 }}
+               >
+                 {currentImage ? (
+                   <motion.img 
+                     src={currentImage} 
+                     alt={product.name} 
+                     animate={{ scale: isZoomed ? 2.5 : 1 }}
+                     transition={{ duration: 0.3, ease: "easeOut" }}
+                     className="relative w-full h-full object-contain p-4 md:p-8 rounded-3xl drop-shadow-2xl mix-blend-multiply"
+                   />
+                 ) : (
+                   <div className="flex flex-col items-center gap-4">
+                     <span className="text-gray-200 font-black text-6xl opacity-10 select-none">BAHÍA</span>
+                     <span className="text-gray-400 font-bold text-xs uppercase tracking-[0.5em]">{product.category}</span>
+                   </div>
+                 )}
+               </motion.div>
+             </AnimatePresence>
 
             {/* Navigation Arrows (Desktop Only) */}
             {product.images && product.images.length > 1 && (
