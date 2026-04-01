@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { X, Check, Truck, ShieldCheck, Banknote } from "lucide-react";
+import { X, Check, Truck, ShieldCheck, Banknote, ChevronLeft, ChevronRight } from "lucide-react";
 import { Product } from "@/lib/mockData";
 import { useStore } from "@/lib/store";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface ProductModalProps {
   product: Product | null;
@@ -15,8 +16,7 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
   const [selectedSize, setSelectedSize] = useState<string>("");
   const [sizeError, setSizeError] = useState<boolean>(false);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
-
-  // No useEffect needed anymore as 'key' prop in parent handles state reset
+  const [isZoomed, setIsZoomed] = useState(false);
 
   const handleClose = () => {
     setSelectedSize("");
@@ -25,6 +25,18 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
   };
 
   if (!product) return null;
+
+  const nextImage = () => {
+    if (product.images && product.images.length > 0) {
+      setActiveImageIndex((prev) => (prev + 1) % product.images!.length);
+    }
+  };
+
+  const prevImage = () => {
+    if (product.images && product.images.length > 0) {
+      setActiveImageIndex((prev) => (prev - 1 + product.images!.length) % product.images!.length);
+    }
+  };
 
   const handleAdd = () => {
     if (product.sizes && product.sizes.length > 0 && !selectedSize) {
@@ -39,56 +51,110 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
   const currentImage = product.images?.[activeImageIndex] || null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-6 bg-black/80 backdrop-blur-sm transition-opacity">
-      <div 
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-6 bg-black/90 backdrop-blur-md transition-all duration-500">
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
         className="fixed inset-0"
         onClick={handleClose}
       />
-      <div className="bg-white w-full max-w-5xl flex flex-col md:flex-row shadow-2xl overflow-hidden rounded-[2.5rem] relative animate-in fade-in zoom-in-95 duration-300 z-10 max-h-[95vh] md:h-[800px]">
+      <motion.div 
+        initial={{ scale: 0.9, opacity: 0, y: 20 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        className="bg-white w-full max-w-6xl flex flex-col md:flex-row shadow-[0_30px_100px_-20px_rgba(0,0,0,0.5)] overflow-hidden rounded-[2.5rem] relative z-10 max-h-[95vh] md:h-[800px]"
+      >
+        {/* Close Button */}
         <button
           onClick={handleClose}
-          className="absolute top-6 right-6 z-30 p-2 bg-white/90 backdrop-blur shadow-xl rounded-full text-black hover:bg-black hover:text-white transition-all duration-300"
+          className="absolute top-6 right-6 z-50 p-3 bg-white/90 backdrop-blur shadow-2xl rounded-full text-black hover:bg-black hover:text-white transition-all duration-500 hover:rotate-90 active:scale-90"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Media Section (Left) */}
-        <div className="md:w-[55%] relative h-[400px] md:h-auto bg-[#f8f8f8] flex flex-col items-center justify-between p-6">
-          <div className="relative w-full h-full flex flex-col items-center justify-center">
-            {/* Badge Foto Real */}
-            <div className="absolute top-2 left-2 z-10">
-              <span className="bg-white/95 backdrop-blur-sm text-[9px] font-black uppercase tracking-widest text-black px-3 py-1.5 rounded-full border border-gray-100 shadow-lg flex items-center gap-2">
-                <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
-                Detalle Real
-              </span>
-            </div>
-
-            {currentImage ? (
-              <img 
+        <div className="md:w-[60%] relative h-[450px] md:h-auto bg-[#fdfdfd] flex flex-col items-center justify-center p-4 md:p-10 group/modal overflow-hidden">
+          
+          {/* Main Image Container */}
+          <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
+            <AnimatePresence mode="wait">
+              <motion.div
                 key={activeImageIndex}
-                src={currentImage} 
-                alt={product.name} 
-                className="w-full h-full object-cover rounded-2xl md:rounded-[2rem] shadow-sm animate-in fade-in duration-500"
-              />
-            ) : (
-              <span className="text-gray-300 font-black text-xs uppercase tracking-[0.4em] px-8 text-center leading-relaxed">
-                Bahía Moda<br/>{product.category}
-              </span>
+                initial={{ opacity: 0, x: 20, scale: 0.95 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                exit={{ opacity: 0, x: -20, scale: 0.95 }}
+                transition={{ duration: 0.4, ease: "easeOut" }}
+                className="w-full h-full flex items-center justify-center"
+                onMouseEnter={() => setIsZoomed(true)}
+                onMouseLeave={() => setIsZoomed(false)}
+              >
+                {currentImage ? (
+                  <motion.img 
+                    src={currentImage} 
+                    alt={product.name} 
+                    animate={{ scale: isZoomed ? 1.15 : 1 }}
+                    transition={{ duration: 0.6, ease: "easeOut" }}
+                    className="w-full h-full object-contain md:object-cover rounded-3xl shadow-2xl"
+                  />
+                ) : (
+                  <div className="flex flex-col items-center gap-4">
+                    <span className="text-gray-200 font-black text-6xl opacity-10 select-none">BAHÍA</span>
+                    <span className="text-gray-400 font-bold text-xs uppercase tracking-[0.5em]">{product.category}</span>
+                  </div>
+                )}
+              </motion.div>
+            </AnimatePresence>
+
+            {/* Navigation Arrows (Desktop Only) */}
+            {product.images && product.images.length > 1 && (
+              <>
+                <button 
+                  onClick={(e) => { e.stopPropagation(); prevImage(); }}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 p-4 bg-white/80 backdrop-blur rounded-full shadow-xl text-black opacity-0 group-hover/modal:opacity-100 hover:bg-black hover:text-white transition-all duration-300 -translate-x-4 group-hover/modal:translate-x-0 hidden md:flex"
+                >
+                  <ChevronLeft className="w-6 h-6" />
+                </button>
+                <button 
+                  onClick={(e) => { e.stopPropagation(); nextImage(); }}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 p-4 bg-white/80 backdrop-blur rounded-full shadow-xl text-black opacity-0 group-hover/modal:opacity-100 hover:bg-black hover:text-white transition-all duration-300 translate-x-4 group-hover/modal:translate-x-0 hidden md:flex"
+                >
+                  <ChevronRight className="w-6 h-6" />
+                </button>
+              </>
             )}
+
+            {/* Badge Premium */}
+            <div className="absolute top-0 left-0">
+               <motion.span 
+                 initial={{ x: -20, opacity: 0 }}
+                 animate={{ x: 0, opacity: 1 }}
+                 className="bg-black text-[#FFD700] text-[9px] font-black uppercase tracking-[0.2em] px-5 py-2 rounded-br-2xl shadow-lg border-r border-b border-[#FFD700]/30"
+               >
+                 ✨ Selección Premium
+               </motion.span>
+            </div>
           </div>
 
-          {/* Thumbnails Row */}
+          {/* Thumbnails Row (Enhanced) */}
           {product.images && product.images.length > 1 && (
-            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-3 px-4 py-3 bg-white/30 backdrop-blur-md rounded-2xl border border-white/40 shadow-xl overflow-x-auto max-w-[90%] hide-scrollbar">
+            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-3 px-6 py-4 bg-white/20 backdrop-blur-xl rounded-[2rem] border border-white/40 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.1)] overflow-x-auto max-w-[90%] hide-scrollbar no-select">
               {product.images.map((img, idx) => (
                 <button
                   key={idx}
                   onClick={() => setActiveImageIndex(idx)}
-                  className={`relative w-14 h-14 md:w-16 md:h-16 rounded-xl overflow-hidden border-2 transition-all flex-shrink-0 ${
-                    activeImageIndex === idx ? 'border-black ring-2 ring-black/20 scale-110 shadow-lg' : 'border-transparent opacity-60 hover:opacity-100'
+                  className={`relative w-14 h-14 md:w-20 md:h-20 rounded-2xl overflow-hidden border-2 transition-all duration-300 flex-shrink-0 ${
+                    activeImageIndex === idx 
+                      ? 'border-black ring-4 ring-black/10 scale-105 shadow-xl' 
+                      : 'border-transparent opacity-50 grayscale hover:grayscale-0 hover:opacity-100 scale-95 hover:scale-100'
                   }`}
                 >
                   <img src={img} alt="" className="w-full h-full object-cover" />
+                  {activeImageIndex === idx && (
+                    <motion.div 
+                      layoutId="activeThumb"
+                      className="absolute inset-0 bg-black/5"
+                    />
+                  )}
                 </button>
               ))}
             </div>
@@ -177,7 +243,7 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
