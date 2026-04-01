@@ -1,6 +1,7 @@
 "use client";
 
 import { useStore } from "@/lib/store";
+import { CATEGORY_MAPPING } from "@/lib/mockData";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Plus, DollarSign, Package, CheckSquare, Square, Trash2, ImagePlus, Calendar } from "lucide-react";
@@ -278,44 +279,48 @@ export default function AdminDashboard() {
                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">1. Categoría Principal</label>
                <select 
                  value={formData.category}
-                 onChange={(e) => setFormData({...formData, category: e.target.value})}
+                 onChange={(e) => setFormData({...formData, category: e.target.value, subCategory: ""})}
                  className="w-full border border-gray-300 bg-white px-4 py-3.5 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-black appearance-none shadow-sm cursor-pointer"
                >
                  <option value="">Seleccionar...</option>
-                 <option value="Perfumería y Lociones">Perfumería y Lociones</option>
-                 <option value="Maquillaje y Rostro">Maquillaje y Rostro</option>
-                 <option value="Cuidado Personal">Cuidado Personal</option>
-                 <option value="Hogar y Cocina">Hogar y Cocina</option>
-                 <option value="Ropa, Calzado y Accesorios">Ropa, Calzado y Accesorios</option>
-                 <option value="Salud y Suplementos">Salud y Suplementos</option>
+                 {Object.keys(CATEGORY_MAPPING).map(cat => (
+                   <option key={cat} value={cat}>{cat}</option>
+                 ))}
                </select>
              </div>
              <div>
                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">2. Sub-Categoría (Línea Específica)</label>
                <select 
                  value={formData.subCategory}
-                 onChange={(e) => setFormData({...formData, subCategory: e.target.value})}
+                 onChange={(e) => {
+                   const newSub = e.target.value;
+                   let parentCat = formData.category;
+                   if (newSub) {
+                     for (const [cat, subs] of Object.entries(CATEGORY_MAPPING)) {
+                       if (subs.includes(newSub)) {
+                         parentCat = cat;
+                         break;
+                       }
+                     }
+                   }
+                   setFormData({...formData, subCategory: newSub, category: parentCat});
+                 }}
                  className="w-full border border-gray-300 bg-white px-4 py-3.5 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-black appearance-none shadow-sm cursor-pointer"
                >
-                 <option value="">-- Perfumería y Colonias --</option>
-                 <option value="Lociones de Hombre">Lociones de Hombre</option>
-                 <option value="Perfumes de Mujer">Perfumes de Mujer</option>
-                 <option value="Colonias Refrescantes">Colonias Refrescantes</option>
-                 <option value="">-- Maquillaje y Facial --</option>
-                 <option value="Labiales y Polvos">Labiales y Polvos</option>
-                 <option value="Cremas Faciales y Sueros">Cremas Faciales y Sueros</option>
-                 <option value="">-- Cuidado Personal --</option>
-                 <option value="Cremas Corporales y Talcos">Cremas Corporales y Talcos</option>
-                 <option value="Shampoo y Tratamiento Capilar">Shampoo y Tratamiento Capilar</option>
-                 <option value="">-- Hogar y Bienestar --</option>
-                 <option value="Cocina Pro (Utensilios, Sartenes)">Cocina Pro (Utensilios, Sartenes)</option>
-                 <option value="Suplementos (Omega, Colágeno)">Suplementos (Omega, Colágeno)</option>
-                 <option value="">-- Ropa y Vestimenta --</option>
-                 <option value="Ropa Interior, Boxers y Fajas">Ropa Interior, Boxers y Fajas</option>
-                 <option value="Camisas, Playeras y Sudaderos">Camisas, Playeras y Sudaderos</option>
-                 <option value="Ropa y Artículos de Bebé">Ropa y Artículos de Bebé</option>
-                 <option value="Zapatos y Calzado">Zapatos y Calzado</option>
-                 <option value="Relojes y Joyería">Relojes y Joyería</option>
+                 <option value="">Seleccionar Sub-Categoría...</option>
+                 {formData.category ? (
+                    CATEGORY_MAPPING[formData.category]?.map(sub => (
+                      <option key={sub} value={sub}>{sub}</option>
+                    ))
+                 ) : (
+                    Object.entries(CATEGORY_MAPPING).map(([cat, subs]) => (
+                      <optgroup key={cat} label={`-- ${cat} --`}>
+                        {subs.map(sub => (
+                          <option key={sub} value={sub}>{sub}</option>
+                        ))}
+                      </optgroup>
+                    ))
+                 )}
                </select>
              </div>
           </div>

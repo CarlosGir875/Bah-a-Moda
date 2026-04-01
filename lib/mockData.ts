@@ -22,6 +22,21 @@ export const MAIN_CATEGORIES = [
   "Salud y Suplementos"
 ];
 
+export const CATEGORY_MAPPING: Record<string, string[]> = {
+  "Perfumería y Lociones": ["Lociones de Hombre", "Perfumes de Mujer", "Colonias Refrescantes"],
+  "Maquillaje y Rostro": ["Labiales y Polvos", "Cremas Faciales y Sueros"],
+  "Cuidado Personal": ["Cremas Corporales y Talcos", "Shampoo y Tratamiento Capilar"],
+  "Hogar y Cocina": ["Cocina Pro (Utensilios, Sartenes)"],
+  "Salud y Suplementos": ["Suplementos (Omega, Colágeno)"],
+  "Ropa, Calzado y Accesorios": [
+    "Ropa Interior, Boxers y Fajas", 
+    "Camisas, Playeras y Sudaderos", 
+    "Ropa y Artículos de Bebé", 
+    "Zapatos y Calzado", 
+    "Relojes y Joyería"
+  ]
+};
+
 export const QUICK_FILTERS = [
   "Todo",
   "🔥 Ofertas Estrella",
