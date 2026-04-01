@@ -121,7 +121,7 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
         </button>
 
         {/* ═══ IMAGE GALLERY ═══ */}
-        <div className="relative w-full bg-gray-50 group/modal">
+        <div className="relative w-full bg-[#FAFAFA] group/modal">
 
           {/* Badge Premium */}
           <motion.span
@@ -209,7 +209,7 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
               <button
                 key={idx}
                 onClick={() => setActiveImageIndex(idx)}
-                className={`relative flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-all duration-300 bg-white ${
+                className={`relative flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-all duration-300 bg-[#FAFAFA] ${
                   activeImageIndex === idx ? "border-black scale-105 shadow-md" : "border-transparent opacity-50 hover:opacity-80"
                 }`}
               >

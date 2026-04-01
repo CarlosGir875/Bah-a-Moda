@@ -11,8 +11,8 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
       className="group flex flex-col cursor-pointer"
       onClick={() => onClick(product)}
     >
-      {/* Image container — white card, Pinterest style */}
-      <div className="relative aspect-[3/4] w-full overflow-hidden bg-white rounded-2xl mb-3 shadow-[0_2px_12px_rgba(0,0,0,0.08)] flex items-center justify-center group-hover:shadow-[0_8px_30px_rgba(0,0,0,0.14)] group-hover:-translate-y-1 transition-all duration-400">
+      {/* Image container — off-white card to match studio photos */}
+      <div className="relative aspect-[3/4] w-full overflow-hidden bg-[#FAFAFA] rounded-2xl mb-3 shadow-[0_2px_12px_rgba(0,0,0,0.08)] flex items-center justify-center group-hover:shadow-[0_8px_30px_rgba(0,0,0,0.14)] group-hover:-translate-y-1 transition-all duration-400">
         {product.images && product.images.length > 0 ? (
           <>
             {/* Imagen principal — siempre completa, nunca recortada */}
