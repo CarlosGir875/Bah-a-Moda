@@ -74,7 +74,7 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
         </button>
 
         {/* Media Section (Left) */}
-        <div className="md:w-[60%] relative h-[450px] md:h-auto bg-[#fdfdfd] flex flex-col items-center justify-center p-4 md:p-10 group/modal overflow-hidden">
+        <div className="md:w-[60%] relative h-[450px] md:h-auto bg-gray-900 flex flex-col items-center justify-center p-4 md:p-10 group/modal overflow-hidden">
           
           {/* Main Image Container */}
           <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
@@ -97,21 +97,22 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
                >
                  {currentImage ? (
                    <>
+                     {/* Dynamic Aura Background - extracts colors FROM the image */}
                      <motion.img 
                        src={currentImage} 
                        alt="" 
-                       className="absolute inset-0 w-full h-full object-cover blur-[50px] opacity-30 scale-150 saturate-150 brightness-110 select-none pointer-events-none"
+                       className="absolute inset-0 w-full h-full object-cover blur-[80px] opacity-70 scale-125 saturate-200 brightness-75 select-none pointer-events-none"
                      />
+                     {/* Subtle dark overlay for contrast */}
+                     <div className="absolute inset-0 bg-black/30 z-0" />
+                     {/* Main Product Image (with zoom) */}
                      <motion.img 
                        src={currentImage} 
                        alt={product.name} 
-                       animate={{ 
-                         scale: isZoomed ? 2.5 : 1,
-                         originX: `${mousePos.x}%`,
-                         originY: `${mousePos.y}%`
-                       }}
+                       style={{ transformOrigin: `${mousePos.x}% ${mousePos.y}%` }}
+                       animate={{ scale: isZoomed ? 2.5 : 1 }}
                        transition={{ duration: 0.3, ease: "easeOut" }}
-                       className="relative w-full h-full object-contain p-4 md:p-8 rounded-3xl drop-shadow-[0_20px_50px_rgba(0,0,0,0.3)] z-10"
+                       className="relative w-full h-auto object-contain max-h-full rounded-2xl z-10 drop-shadow-[0_30px_60px_rgba(0,0,0,0.5)]"
                      />
                    </>
                  ) : (
