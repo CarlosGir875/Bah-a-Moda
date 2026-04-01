@@ -207,13 +207,13 @@ export default function AdminDashboard() {
                   </div>
                </div>
                <div>
-                  <label className="block text-xs font-black text-indigo-600 uppercase tracking-widest mb-2 flex items-center gap-1">Revista / Proveedor de Origen</label>
+                  <label className="block text-xs font-black text-indigo-600 uppercase tracking-widest mb-2 flex items-center gap-1">Marca / Colección</label>
                   <select 
                     value={formData.supplier}
                     onChange={(e) => setFormData({...formData, supplier: e.target.value})}
                     className="w-full border-2 border-indigo-200 bg-indigo-50/50 px-4 py-3.5 rounded-xl text-sm font-black focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 shadow-sm cursor-pointer text-indigo-900 appearance-none"
                   >
-                    <option value="">Seleccionar Catálogo...</option>
+                    <option value="">Seleccionar Colección...</option>
                     <option value="Scentia">Scentia</option>
                     <option value="L&apos;Bel / &Eacute;sika / Cyzone">L&apos;Bel / &Eacute;sika / Cyzone</option>
                     <option value="Arabela">Arabela</option>
@@ -235,10 +235,10 @@ export default function AdminDashboard() {
                       </button>
                       <button 
                         type="button"
-                        onClick={() => setFormData({...formData, delivery_date: "Próximo Pedido (Quincena)"})}
+                        onClick={() => setFormData({...formData, delivery_date: "Siguiente Lote"})}
                         className="text-[9px] font-black uppercase px-2 py-1 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors"
                       >
-                        📦 Próximo
+                        📦 Lote
                       </button>
                     </div>
                   </div>

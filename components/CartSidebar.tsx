@@ -53,7 +53,7 @@ export function CartSidebar() {
         total: cartTotal,
         anticipo: depositAmount,
         inversion: 0, // El administrador lo llenará después
-        estado: 'pendiente',
+        estado: 'recibido',
         tipo_entrega: deliveryType === 'domicilio' ? 'domicilio' : 'punto_encuentro',
         ubicacion_entrega: formData.ubicacion
       });

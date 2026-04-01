@@ -15,10 +15,10 @@ export default function AdminOrdersPage() {
   }, [fetchAllOrders]);
 
   const stats = {
-    totalRevenue: adminOrders.reduce((acc, curr) => acc + (curr.estado === 'completado' ? Number(curr.total) : 0), 0),
+    totalRevenue: adminOrders.reduce((acc, curr) => acc + (curr.estado === 'listo_entrega' ? Number(curr.total) : 0), 0),
     totalInvestment: adminOrders.reduce((acc, curr) => acc + Number(curr.inversion), 0),
-    totalProfit: adminOrders.reduce((acc, curr) => acc + (curr.estado === 'completado' ? Number(curr.ganancia) : 0), 0),
-    pendingOrders: adminOrders.filter(o => o.estado === 'pendiente').length
+    totalProfit: adminOrders.reduce((acc, curr) => acc + (curr.estado === 'listo_entrega' ? Number(curr.ganancia) : 0), 0),
+    pendingOrders: adminOrders.filter(o => o.estado === 'recibido').length
   };
 
   const filteredOrders = filter === "todos" 
@@ -27,9 +27,10 @@ export default function AdminOrdersPage() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'pendiente': return <span className="px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-[10px] font-black uppercase tracking-widest border border-amber-200">Pendiente</span>;
-      case 'pagado_parcial': return <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-[10px] font-black uppercase tracking-widest border border-blue-200">Anticipo</span>;
-      case 'completado': return <span className="px-3 py-1 rounded-full bg-green-100 text-green-700 text-[10px] font-black uppercase tracking-widest border border-green-200">Completado</span>;
+      case 'recibido': return <span className="px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-[10px] font-black uppercase tracking-widest border border-amber-200">Recibido</span>;
+      case 'preparacion': return <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-[10px] font-black uppercase tracking-widest border border-blue-200">En Preparación</span>;
+      case 'en_transito': return <span className="px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 text-[10px] font-black uppercase tracking-widest border border-indigo-200">En Tránsito</span>;
+      case 'listo_entrega': return <span className="px-3 py-1 rounded-full bg-green-100 text-green-700 text-[10px] font-black uppercase tracking-widest border border-green-200">Listo (Entregado)</span>;
       case 'cancelado': return <span className="px-3 py-1 rounded-full bg-red-100 text-red-700 text-[10px] font-black uppercase tracking-widest border border-red-200">Cancelado</span>;
       default: return null;
     }
@@ -49,7 +50,7 @@ export default function AdminOrdersPage() {
           </div>
 
           <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0">
-            {["todos", "pendiente", "completado", "cancelado"].map(f => (
+            {["todos", "recibido", "preparacion", "en_transito", "listo_entrega", "cancelado"].map(f => (
               <button
                 key={f}
                 onClick={() => setFilter(f)}
@@ -89,8 +90,8 @@ export default function AdminOrdersPage() {
            <div className="space-y-4">
               {Array.from(new Set(adminOrders.map(o => new Date(o.created_at).toLocaleString('es-GT', { month: 'long', year: 'numeric' })))).map(month => {
                 const monthOrders = adminOrders.filter(o => new Date(o.created_at).toLocaleString('es-GT', { month: 'long', year: 'numeric' }) === month);
-                const monthRevenue = monthOrders.reduce((acc, curr) => acc + (curr.estado === 'completado' ? Number(curr.total) : 0), 0);
-                const monthProfit = monthOrders.reduce((acc, curr) => acc + (curr.estado === 'completado' ? Number(curr.ganancia) : 0), 0);
+                const monthRevenue = monthOrders.reduce((acc, curr) => acc + (curr.estado === 'listo_entrega' ? Number(curr.total) : 0), 0);
+                const monthProfit = monthOrders.reduce((acc, curr) => acc + (curr.estado === 'listo_entrega' ? Number(curr.ganancia) : 0), 0);
                 
                 return (
                   <div key={month} className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-colors">
@@ -189,21 +190,39 @@ export default function AdminOrdersPage() {
                     </div>
                   </div>
 
-                  <div className="flex gap-3">
-                    {order.estado !== 'completado' && (
-                      <button 
-                        onClick={() => updateOrderStatus(order.id, 'completado')}
-                        className="flex-1 bg-green-500 hover:bg-green-600 text-white py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-green-200 flex items-center justify-center gap-2"
-                      >
-                        <CheckCircle className="w-4 h-4" /> Finalizar Venta
-                      </button>
-                    )}
-                    {order.estado !== 'cancelado' && order.estado !== 'completado' && (
+                  <div className="flex flex-col gap-2">
+                    <div className="flex gap-2">
+                      {order.estado === 'recibido' && (
+                        <button 
+                          onClick={() => updateOrderStatus(order.id, 'preparacion')}
+                          className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all shadow-md flex items-center justify-center gap-2"
+                        >
+                          <Package className="w-3.5 h-3.5" /> Preparar
+                        </button>
+                      )}
+                      {order.estado === 'preparacion' && (
+                        <button 
+                          onClick={() => updateOrderStatus(order.id, 'en_transito')}
+                          className="flex-1 bg-indigo-500 hover:bg-indigo-600 text-white py-3 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all shadow-md flex items-center justify-center gap-2"
+                        >
+                          <ArrowLeft className="w-3.5 h-3.5 rotate-180" /> Despachar (Tránsito)
+                        </button>
+                      )}
+                      {order.estado === 'en_transito' && (
+                        <button 
+                          onClick={() => updateOrderStatus(order.id, 'listo_entrega')}
+                          className="flex-1 bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all shadow-md flex items-center justify-center gap-2"
+                        >
+                          <CheckCircle className="w-3.5 h-3.5" /> Entregado / Finalizado
+                        </button>
+                      )}
+                    </div>
+                    {order.estado !== 'cancelado' && order.estado !== 'listo_entrega' && (
                       <button 
                         onClick={() => updateOrderStatus(order.id, 'cancelado')}
-                        className="flex-1 bg-gray-50 hover:bg-red-50 text-gray-400 hover:text-red-500 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border border-gray-100 hover:border-red-100 flex items-center justify-center gap-2"
+                        className="w-full bg-gray-50 hover:bg-red-50 text-gray-400 hover:text-red-500 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all border border-gray-100 hover:border-red-100 flex items-center justify-center gap-2"
                       >
-                        <XCircle className="w-4 h-4" /> Cancelar
+                        <XCircle className="w-3.5 h-3.5" /> Cancelar Pedido
                       </button>
                     )}
                   </div>

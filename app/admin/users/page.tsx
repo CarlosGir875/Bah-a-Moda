@@ -22,8 +22,8 @@ export default function AdminUsersPage() {
 
   const getUserOrderStats = (userId: string) => {
     const userOrders = adminOrders.filter(o => o.cliente_id === userId);
-    const completed = userOrders.filter(o => o.estado === 'completado').length;
-    const totalSpent = userOrders.reduce((acc, curr) => acc + (curr.estado === 'completado' ? Number(curr.total) : 0), 0);
+    const completed = userOrders.filter(o => o.estado === 'listo_entrega').length;
+    const totalSpent = userOrders.reduce((acc, curr) => acc + (curr.estado === 'listo_entrega' ? Number(curr.total) : 0), 0);
     return { count: userOrders.length, completed, totalSpent };
   };
 

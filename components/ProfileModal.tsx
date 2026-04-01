@@ -56,12 +56,60 @@ export function ProfileModal() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pendiente': return 'bg-amber-100/50 text-amber-900 border-amber-200';
-      case 'pagado_parcial': return 'bg-blue-100/50 text-blue-900 border-blue-200';
-      case 'completado': return 'bg-emerald-100/50 text-emerald-900 border-emerald-200';
+      case 'recibido': return 'bg-amber-100/50 text-amber-900 border-amber-200';
+      case 'preparacion': return 'bg-blue-100/50 text-blue-900 border-blue-200';
+      case 'en_transito': return 'bg-indigo-100/50 text-indigo-900 border-indigo-200';
+      case 'listo_entrega': return 'bg-emerald-100/50 text-emerald-900 border-emerald-200';
       case 'cancelado': return 'bg-rose-100/50 text-rose-900 border-rose-200';
       default: return 'bg-zinc-100/50 text-zinc-900 border-zinc-200';
     }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'recibido': return 'Recibido';
+      case 'preparacion': return 'En Preparación';
+      case 'en_transito': return 'En Tránsito';
+      case 'listo_entrega': return 'Listo / Entregado';
+      case 'cancelado': return 'Cancelado';
+      default: return status;
+    }
+  };
+
+  const renderTracker = (status: string) => {
+    if (status === 'cancelado') return (
+      <div className="bg-rose-50 border border-rose-100 rounded-2xl p-6 text-center mt-6 mb-8">
+        <p className="text-xs font-black uppercase tracking-widest text-rose-600">Este pedido ha sido cancelado.</p>
+      </div>
+    );
+    
+    const steps = ['recibido', 'preparacion', 'en_transito', 'listo_entrega'];
+    const labels = ['Recibida', 'Preparación', 'En Tránsito', 'Lista / Entregada'];
+    const currentIndex = steps.indexOf(status);
+    
+    return (
+      <div className="flex items-center justify-between mt-6 mb-16 relative px-4 md:px-8">
+         <div className="absolute left-4 right-4 md:left-8 md:right-8 top-1/2 -translate-y-1/2 h-1 bg-zinc-100 rounded-full" />
+         <div 
+           className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 h-1 bg-green-500 rounded-full transition-all duration-1000 ease-out"
+           style={{ width: `calc(${(currentIndex / (steps.length - 1)) * 100}% - 2rem)` }}
+         />
+         {steps.map((step, idx) => {
+           const isCompleted = idx <= currentIndex;
+           const isCurrent = idx === currentIndex;
+           return (
+             <div key={step} className="relative z-10 flex flex-col items-center group">
+               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs text-white shadow-sm transition-all duration-500 ring-4 ring-white ${isCompleted ? 'bg-green-500 font-bold scale-110' : 'bg-zinc-200 font-medium'}`}>
+                 {isCompleted ? <Check className="w-4 h-4" /> : idx + 1}
+               </div>
+               <span className={`absolute top-12 w-24 text-center text-[9px] uppercase tracking-widest font-black transition-colors ${isCurrent ? 'text-green-600' : isCompleted ? 'text-zinc-500' : 'text-zinc-300'}`}>
+                 {labels[idx]}
+               </span>
+             </div>
+           );
+         })}
+      </div>
+    );
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -211,7 +259,7 @@ export function ProfileModal() {
                              </div>
                            </div>
                            <div className="flex flex-col items-end gap-2">
-                             <span className={`text-[9px] font-black uppercase px-3 py-1 rounded-full border ${getStatusColor(o.estado)}`}>{o.estado}</span>
+                             <span className={`text-[9px] font-black uppercase px-3 py-1 rounded-full border ${getStatusColor(o.estado)}`}>{getStatusLabel(o.estado)}</span>
                              <ArrowRight className="w-4 h-4 text-zinc-200 group-hover:text-zinc-900 transition-all" />
                            </div>
                         </div>
@@ -245,8 +293,10 @@ export function ProfileModal() {
                              <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">ID PEDIDO: {o.id.slice(0, 12).toUpperCase()}</p>
                              <p className="text-xl font-black text-zinc-900">{new Date(o.created_at).toLocaleDateString('es-GT', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
                            </div>
-                           <span className={`text-[12px] font-black uppercase px-6 py-2 rounded-full border shadow-sm ${getStatusColor(o.estado)}`}>{o.estado}</span>
+                           <span className={`text-[12px] font-black uppercase px-6 py-2 rounded-full border shadow-sm ${getStatusColor(o.estado)}`}>{getStatusLabel(o.estado)}</span>
                         </div>
+                        
+                        {renderTracker(o.estado)}
                         <div className="space-y-4 mb-8 bg-zinc-50/50 p-8 rounded-3xl border border-zinc-100">
                            {o.items.map((item: any, i: number) => (
                              <div key={i} className="flex justify-between text-sm font-bold text-zinc-700">

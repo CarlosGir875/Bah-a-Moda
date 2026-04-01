@@ -37,7 +37,7 @@ export interface Order {
   anticipo: number;
   inversion: number;
   ganancia: number;
-  estado: 'pendiente' | 'pagado_parcial' | 'completado' | 'cancelado';
+  estado: 'recibido' | 'preparacion' | 'en_transito' | 'listo_entrega' | 'cancelado';
   tipo_entrega: 'domicilio' | 'punto_encuentro';
   ubicacion_entrega: string | null;
   created_at: string;
@@ -189,12 +189,20 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     });
 
     // Listen for changes on auth state
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        setAuthLoading(true);
-        fetchProfile(session.user.id).finally(() => setAuthLoading(false));
-      } else {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      // Avoid re-triggering loading states on TOKEN_REFRESHED (which happens on window focus)
+      if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+        setUser(session?.user ?? null);
+        if (session?.user) {
+          setAuthLoading(true);
+          fetchProfile(session.user.id).finally(() => setAuthLoading(false));
+        } else {
+          setProfile(null);
+          setIsAdmin(false);
+          setAuthLoading(false);
+        }
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
         setProfile(null);
         setIsAdmin(false);
         setAuthLoading(false);
