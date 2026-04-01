@@ -93,6 +93,7 @@ export default function AdminDashboard() {
         price: parseFloat(formData.price),
         images: imageUrls,
         category: formData.category,
+        subCategory: formData.subCategory,
         filterTag: formData.filterTag === "Ninguno (Predeterminado)" ? undefined : formData.filterTag,
         supplier: formData.supplier,
         delivery_date: formData.delivery_date,
