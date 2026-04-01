@@ -105,13 +105,20 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
                  }}
                >
                  {currentImage ? (
-                   <motion.img 
-                     src={currentImage} 
-                     alt={product.name} 
-                     animate={{ scale: isZoomed ? 2.5 : 1 }}
-                     transition={{ duration: 0.3, ease: "easeOut" }}
-                     className="relative w-full h-full object-contain p-4 md:p-8 rounded-3xl drop-shadow-2xl mix-blend-multiply"
-                   />
+                   <>
+                     <motion.img 
+                       src={currentImage} 
+                       alt="" 
+                       className="absolute inset-0 w-full h-full object-cover blur-[50px] opacity-30 scale-150 saturate-150 brightness-110 select-none pointer-events-none"
+                     />
+                     <motion.img 
+                       src={currentImage} 
+                       alt={product.name} 
+                       animate={{ scale: isZoomed ? 2.5 : 1 }}
+                       transition={{ duration: 0.3, ease: "easeOut" }}
+                       className="relative w-full h-full object-contain p-4 md:p-8 rounded-3xl drop-shadow-[0_20px_50px_rgba(0,0,0,0.3)] z-10"
+                     />
+                   </>
                  ) : (
                    <div className="flex flex-col items-center gap-4">
                      <span className="text-gray-200 font-black text-6xl opacity-10 select-none">BAHÍA</span>

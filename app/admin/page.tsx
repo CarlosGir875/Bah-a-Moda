@@ -4,7 +4,8 @@ import { useStore } from "@/lib/store";
 import { CATEGORY_MAPPING } from "@/lib/mockData";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Plus, Package, CheckSquare, Square, Trash2, ImagePlus, Calendar } from "lucide-react";
+import { Plus, Package, CheckSquare, Square, Trash2, ImagePlus, Calendar, Eye } from "lucide-react";
+import { ProductCard } from "@/components/ProductCard";
 
 export default function AdminDashboard() {
   const { user, isAdmin, authLoading, addProduct, uploadProductImages } = useStore();
@@ -181,6 +182,33 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                 )}
+
+                {/* VISTA PREVIA INTELIGENTE (SIMULADOR) */}
+                <div className="pt-6 border-t border-gray-100">
+                  <label className="block text-[10px] font-black text-indigo-600 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+                    <Eye className="w-3.5 h-3.5" /> Simulador de Catálogo
+                  </label>
+                  
+                  <div className="max-w-[280px] mx-auto scale-90 sm:scale-100 origin-top">
+                    {/* Mock product for simulator */}
+                    <ProductCard 
+                      product={{
+                        id: 'preview',
+                        name: formData.name || 'Nombre del Producto',
+                        price: parseFloat(formData.price) || 0,
+                        category: formData.category || 'Categoría',
+                        subCategory: formData.subCategory || '',
+                        images: previews.length > 0 ? previews : [],
+                        supplier: formData.supplier || '',
+                        description: formData.description || ''
+                      }}
+                      onClick={() => {}}
+                    />
+                    <p className="text-[10px] text-gray-400 text-center mt-4 font-bold italic">
+                      Asi es como tus clientes lo verán en la tienda.
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
 
