@@ -89,13 +89,20 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
                 onMouseLeave={() => setIsZoomed(false)}
               >
                 {currentImage ? (
-                  <motion.img 
-                    src={currentImage} 
-                    alt={product.name} 
-                    animate={{ scale: isZoomed ? 1.15 : 1 }}
-                    transition={{ duration: 0.6, ease: "easeOut" }}
-                    className="w-full h-full object-contain md:object-cover rounded-3xl shadow-2xl"
-                  />
+                  <>
+                    <motion.img 
+                      src={currentImage} 
+                      alt=""
+                      className="absolute inset-0 w-full h-full object-cover blur-3xl opacity-30 scale-125 saturate-200"
+                    />
+                    <motion.img 
+                      src={currentImage} 
+                      alt={product.name} 
+                      animate={{ scale: isZoomed ? 1.15 : 1 }}
+                      transition={{ duration: 0.6, ease: "easeOut" }}
+                      className="relative w-full h-full object-contain p-4 md:p-8 rounded-3xl shadow-2xl z-10 drop-shadow-2xl"
+                    />
+                  </>
                 ) : (
                   <div className="flex flex-col items-center gap-4">
                     <span className="text-gray-200 font-black text-6xl opacity-10 select-none">BAHÍA</span>

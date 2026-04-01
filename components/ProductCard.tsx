@@ -18,11 +18,18 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
       <div className="relative aspect-[3/4] w-full overflow-hidden bg-gray-100 rounded-3xl mb-4 shadow-sm flex flex-col items-center justify-center border border-gray-100 group-hover:shadow-xl transition-all duration-500">
         {/* Real Image Rendering */}
         {product.images && product.images.length > 0 ? (
-          <img 
-            src={product.images[0]} 
-            alt={product.name} 
-            className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-          />
+          <>
+            <img 
+              src={product.images[0]} 
+              alt="" 
+              className="absolute inset-0 w-full h-full object-cover blur-2xl opacity-40 scale-125 saturate-200"
+            />
+            <img 
+              src={product.images[0]} 
+              alt={product.name} 
+              className="absolute inset-0 w-full h-full object-contain p-2 group-hover:scale-110 transition-transform duration-700 z-0"
+            />
+          </>
         ) : (
           <span className="text-gray-300 font-black text-[10px] uppercase tracking-[0.2em] text-center px-6 leading-relaxed">
             Bahía Moda<br/>{product.category}
