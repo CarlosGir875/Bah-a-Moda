@@ -1,14 +1,15 @@
 "use client";
 
 import { useStore } from "@/lib/store";
-import { CATEGORY_MAPPING } from "@/lib/mockData";
+import { CATEGORY_MAPPING, Product } from "@/lib/mockData";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Plus, Package, CheckSquare, Square, Trash2, ImagePlus, Calendar, Eye } from "lucide-react";
+import { Plus, Package, CheckSquare, Square, Trash2, ImagePlus, Calendar, Eye, Search, Pencil, ArrowUpRight } from "lucide-react";
 import { ProductCard } from "@/components/ProductCard";
+import { EditProductModal } from "@/components/admin/EditProductModal";
 
 export default function AdminDashboard() {
-  const { user, isAdmin, authLoading, addProduct, uploadProductImages } = useStore();
+  const { user, isAdmin, authLoading, addProduct, uploadProductImages, products, deleteProduct } = useStore();
   const router = useRouter();
   
   const [loading, setLoading] = useState(false);
@@ -26,6 +27,11 @@ export default function AdminDashboard() {
     description: "",
     sizes: ""
   });
+
+  // NEW INVENTORY STATE
+  const [activeTab, setActiveTab] = useState<'upload' | 'inventory'>('upload');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
   // 1. loading state while Supabase checks the session
   if (authLoading) {
@@ -127,18 +133,30 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-[calc(100vh-64px)] w-full bg-white p-3 sm:p-8">
       <div className="max-w-4xl mx-auto bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
-        <div className="p-5 sm:p-10 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
+        <div className="p-5 sm:p-10 border-b border-gray-200 bg-gray-50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-black flex items-center gap-3">
               <Package className="w-5 h-5 sm:w-6 h-6"/> Admin Panel
             </h1>
             <p className="text-[10px] sm:text-sm text-gray-500 mt-1 sm:mt-2 font-medium">Gestor de Contenidos Sincronizado</p>
           </div>
-          <div className="hidden sm:block">
-            <span className="px-4 py-2 bg-green-100 text-green-700 text-xs font-bold uppercase tracking-widest rounded-full">Sincronizado con Supabase</span>
+          <div className="flex bg-gray-200/50 p-1 rounded-xl w-full sm:w-auto">
+             <button
+                onClick={() => setActiveTab('upload')}
+                className={`flex-1 sm:px-6 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'upload' ? 'bg-white shadow-sm text-black' : 'text-gray-500 hover:text-black'}`}
+             >
+                Subir Producto
+             </button>
+             <button
+                onClick={() => setActiveTab('inventory')}
+                className={`flex-1 sm:px-6 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'inventory' ? 'bg-white shadow-sm text-black' : 'text-gray-500 hover:text-black'}`}
+             >
+                Mi Inventario
+             </button>
           </div>
         </div>
         
+        {activeTab === 'upload' && (
         <form className="p-6 sm:p-10 space-y-8" onSubmit={handlePublish}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-6">
@@ -427,7 +445,88 @@ export default function AdminDashboard() {
             </button>
           </div>
         </form>
+        )}
+
+        {/* ── MI INVENTARIO TAB ── */}
+        {activeTab === 'inventory' && (
+          <div className="p-6 sm:p-10 space-y-6">
+            <div className="flex items-center justify-between bg-gray-50 p-4 rounded-2xl border border-gray-100">
+              <span className="text-sm font-black text-black">
+                {products.length} PRODUCTOS
+              </span>
+              <div className="relative w-64">
+                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input 
+                  type="text" 
+                  placeholder="Buscar..."
+                  value={searchTerm}
+                  onChange={e => setSearchTerm(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-black bg-white"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {products
+                .filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()) || p.category.toLowerCase().includes(searchTerm.toLowerCase()))
+                .map(product => {
+                  const hasImage = product.images && product.images.length > 0;
+                  return (
+                    <div key={product.id} className="flex gap-4 p-4 border border-gray-100 rounded-2xl hover:shadow-lg transition-all bg-white relative group">
+                       <div className="w-20 h-24 rounded-xl overflow-hidden bg-gray-50 flex-shrink-0 relative">
+                          {hasImage ? (
+                             <img src={product.images![0]} className="w-full h-full object-cover" alt="" />
+                          ) : (
+                             <div className="w-full h-full flex items-center justify-center bg-gray-100"><Package className="w-6 h-6 text-gray-300"/></div>
+                          )}
+                       </div>
+                       <div className="flex-1 flex flex-col justify-center min-w-0 pr-16">
+                          <h3 className="text-sm font-bold text-gray-900 truncate leading-tight">{product.name}</h3>
+                          <span className="text-[10px] font-black uppercase text-indigo-500 tracking-widest mt-1 mb-2 block truncate">{product.category} {product.supplier ? `· ${product.supplier}` : ''}</span>
+                          <span className="text-lg font-black text-black tracking-tighter">Q {product.price.toFixed(2)}</span>
+                       </div>
+                       
+                       <div className="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                         <button 
+                            onClick={() => setEditingProduct(product)}
+                            className="p-2.5 bg-gray-50 hover:bg-black hover:text-white text-gray-600 rounded-xl transition-colors shadow-sm"
+                            title="Editar Publicación"
+                         >
+                            <Pencil className="w-4 h-4" />
+                         </button>
+                         <button 
+                            onClick={() => {
+                               if (window.confirm(`¿Seguro que quieres eliminar "${product.name}"? Esta acción borrará el producto de la tienda y no se puede deshacer.`)) {
+                                 deleteProduct(product.id);
+                               }
+                            }}
+                            className="p-2.5 bg-red-50 hover:bg-red-500 hover:text-white text-red-500 rounded-xl transition-colors shadow-sm"
+                            title="Eliminar Publicación"
+                         >
+                            <Trash2 className="w-4 h-4" />
+                         </button>
+                       </div>
+                    </div>
+                  );
+              })}
+              {products.length === 0 && (
+                 <div className="col-span-full py-20 flex flex-col items-center justify-center text-gray-400">
+                    <Package className="w-12 h-12 mb-4 opacity-50" />
+                    <p className="font-medium text-sm">No tienes productos en el inventario.</p>
+                 </div>
+              )}
+            </div>
+          </div>
+        )}
+
       </div>
+      
+      {editingProduct && (
+         <EditProductModal 
+           product={editingProduct} 
+           onClose={() => setEditingProduct(null)} 
+         />
+      )}
     </div>
   );
 }

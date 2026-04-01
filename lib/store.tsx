@@ -65,6 +65,8 @@ type StoreContextType = {
   products: Product[];
   fetchProducts: () => Promise<void>;
   addProduct: (product: Omit<Product, 'id'>) => Promise<void>;
+  updateProduct: (id: string, updates: Partial<Product>) => Promise<void>;
+  deleteProduct: (id: string) => Promise<void>;
   uploadProductImages: (files: File[]) => Promise<string[]>;
   user: User | null;
   profile: Profile | null;
@@ -160,6 +162,39 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     
     if (error) throw error;
     await fetchProducts(); // Refresh list
+  }, [fetchProducts]);
+
+  const updateProduct = useCallback(async (id: string, updates: Partial<Product>) => {
+    // Map frontend fields to DB snake_case fields
+    const dbUpdates: any = {};
+    if (updates.name !== undefined) dbUpdates.name = updates.name;
+    if (updates.price !== undefined) dbUpdates.price = updates.price;
+    if (updates.images !== undefined) dbUpdates.image_urls = updates.images;
+    if (updates.category !== undefined) dbUpdates.category = updates.category;
+    if (updates.subCategory !== undefined) dbUpdates.sub_category = updates.subCategory;
+    if (updates.filterTag !== undefined) dbUpdates.filter_tag = updates.filterTag;
+    if (updates.supplier !== undefined) dbUpdates.supplier = updates.supplier;
+    if (updates.delivery_date !== undefined) dbUpdates.delivery_date = updates.delivery_date;
+    if (updates.description !== undefined) dbUpdates.description = updates.description;
+    if (updates.sizes !== undefined) dbUpdates.sizes = updates.sizes;
+
+    const { error } = await supabase
+      .from('products')
+      .update(dbUpdates)
+      .eq('id', id);
+
+    if (error) throw error;
+    await fetchProducts();
+  }, [fetchProducts]);
+
+  const deleteProduct = useCallback(async (id: string) => {
+    const { error } = await supabase
+      .from('products')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+    await fetchProducts();
   }, [fetchProducts]);
 
   const fetchProfile = useCallback(async (userId: string) => {
@@ -445,6 +480,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         products,
         fetchProducts,
         addProduct,
+        updateProduct,
+        deleteProduct,
         uploadProductImages,
         user,
         profile,
