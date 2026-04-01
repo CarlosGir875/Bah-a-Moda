@@ -74,7 +74,7 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
         </button>
 
         {/* Media Section (Left) */}
-        <div className="md:w-[60%] relative h-[450px] md:h-auto bg-gray-900 flex flex-col items-center justify-center p-4 md:p-10 group/modal overflow-hidden">
+        <div className="md:w-[60%] relative h-[450px] md:h-auto bg-black flex flex-col items-center justify-center p-4 md:p-10 group/modal overflow-hidden">
           
           {/* Main Image Container */}
           <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
@@ -97,14 +97,14 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
                >
                  {currentImage ? (
                    <>
-                     {/* Dynamic Aura Background - extracts colors FROM the image */}
+                     {/* ✨ Fondo Cinematográfico Universal - funciona con CUALQUIER foto */}
                      <motion.img 
                        src={currentImage} 
                        alt="" 
-                       className="absolute inset-0 w-full h-full object-cover blur-[80px] opacity-70 scale-125 saturate-200 brightness-75 select-none pointer-events-none"
+                       className="absolute inset-0 w-full h-full object-cover blur-[120px] opacity-40 scale-150 saturate-[0.3] brightness-[0.25] select-none pointer-events-none"
                      />
-                     {/* Subtle dark overlay for contrast */}
-                     <div className="absolute inset-0 bg-black/30 z-0" />
+                     {/* Overlay oscuro para garantizar el contraste */}
+                     <div className="absolute inset-0 bg-black/60 z-0" />
                      {/* Main Product Image (with zoom) */}
                      <motion.img 
                        src={currentImage} 
