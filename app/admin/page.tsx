@@ -166,7 +166,7 @@ export default function AdminDashboard() {
                           </button>
                         </div>
                       ))}
-                      <label className="aspect-square border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors">
+                      <label className="relative aspect-square border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors">
                         <input type="file" multiple onChange={handleFileChange} className="absolute inset-0 opacity-0 cursor-pointer" />
                         <Plus className="w-6 h-6 text-gray-400" />
                         <span className="text-[9px] font-black text-gray-400 uppercase mt-1">Añadir más</span>
