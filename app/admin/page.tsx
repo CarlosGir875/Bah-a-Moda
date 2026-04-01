@@ -3,7 +3,7 @@
 import { useStore } from "@/lib/store";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Plus, DollarSign, Package, CheckSquare, Square, Trash2, ImagePlus } from "lucide-react";
+import { Plus, DollarSign, Package, CheckSquare, Square, Trash2, ImagePlus, Calendar } from "lucide-react";
 
 export default function AdminDashboard() {
   const { user, isAdmin, authLoading, addProduct, uploadProductImages } = useStore();
@@ -223,14 +223,51 @@ export default function AdminDashboard() {
                   </select>
                </div>
                <div>
-                  <label className="block text-xs font-black text-indigo-600 uppercase tracking-widest mb-2 flex items-center gap-1">Fecha de Ingreso / Entrega</label>
-                  <input 
-                    type="text" 
-                    value={formData.delivery_date}
-                    onChange={(e) => setFormData({...formData, delivery_date: e.target.value})}
-                    placeholder="Ej. Entrega Inmediata  o  Viene el 15 de Mayo" 
-                    className="w-full border-2 border-indigo-200 bg-white px-4 py-3.5 rounded-xl text-sm font-bold focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-shadow shadow-sm text-indigo-900" 
-                  />
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-xs font-black text-indigo-600 uppercase tracking-widest flex items-center gap-1">Fecha de Ingreso / Entrega</label>
+                    <div className="flex gap-2">
+                      <button 
+                        type="button"
+                        onClick={() => setFormData({...formData, delivery_date: "Entrega Inmediata"})}
+                        className="text-[9px] font-black uppercase px-2 py-1 bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors"
+                      >
+                        🚀 Inmediata
+                      </button>
+                      <button 
+                        type="button"
+                        onClick={() => setFormData({...formData, delivery_date: "Próximo Pedido (Quincena)"})}
+                        className="text-[9px] font-black uppercase px-2 py-1 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors"
+                      >
+                        📦 Próximo
+                      </button>
+                    </div>
+                  </div>
+                  <div className="relative group/delivery">
+                    <input 
+                      type="text" 
+                      value={formData.delivery_date}
+                      onChange={(e) => setFormData({...formData, delivery_date: e.target.value})}
+                      placeholder="Ej. Entrega Inmediata  o  Viene el 15 de Mayo" 
+                      className="w-full border-2 border-indigo-200 bg-white px-4 py-3.5 rounded-xl text-sm font-bold focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-shadow shadow-sm text-indigo-900 pr-12" 
+                    />
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                      <input 
+                        type="date" 
+                        onChange={(e) => {
+                          const date = new Date(e.target.value);
+                          if (!isNaN(date.getTime())) {
+                            // Format: "Viene el 15 de Mayo"
+                            const day = date.getDate() + 1; // Correction for timezone
+                            const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+                            const month = monthNames[date.getMonth()];
+                            setFormData({...formData, delivery_date: `Viene el ${day} de ${month}`});
+                          }
+                        }}
+                        className="absolute inset-0 opacity-0 cursor-pointer z-10 w-8"
+                      />
+                      <Calendar className="w-5 h-5 text-indigo-400 group-hover/delivery:text-indigo-600 transition-colors" />
+                    </div>
+                  </div>
                </div>
             </div>
           </div>
