@@ -15,9 +15,7 @@ export function Navbar() {
     setSearchQuery, 
     setIsAuthModalOpen,
     setIsProfileModalOpen,
-    user,
-    profile,
-    isAdmin
+    user
   } = useStore();
   const itemCount = cart.reduce((acc, item) => acc + item.quantity, 0);
   const [searchOpen, setSearchOpen] = useState(false);

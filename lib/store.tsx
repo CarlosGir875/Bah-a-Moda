@@ -24,9 +24,15 @@ interface Profile {
 
 export interface Order {
   id: string;
-  cliente_id: string;
+  cliente_id: string | null;
   nombre_cliente: string;
-  items: any[];
+  items: { 
+    id: string; 
+    name: string; 
+    price: number; 
+    quantity: number; 
+    size?: string 
+  }[];
   total: number;
   anticipo: number;
   inversion: number;
@@ -152,6 +158,24 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     await fetchProducts(); // Refresh list
   }, [fetchProducts]);
 
+  const fetchProfile = useCallback(async (userId: string) => {
+    const { data, error } = await supabase
+      .from('cliente_perfiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+    
+    if (error) {
+      console.error('CRITICAL: Error fetching profile detail:', JSON.stringify(error, null, 2));
+      return;
+    }
+
+    if (data) {
+      setProfile(data as Profile);
+      setIsAdmin(data.rol === 'admin');
+    }
+  }, []);
+
   useEffect(() => {
     fetchProducts();
     // Check active sessions and sets the user
@@ -178,7 +202,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [fetchProducts, fetchProfile]);
 
   // Final check for initial loading
   useEffect(() => {
@@ -190,23 +214,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   }, [authLoading]);
 
-  const fetchProfile = useCallback(async (userId: string) => {
-    const { data, error } = await supabase
-      .from('cliente_perfiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
-    
-    if (error) {
-      console.error('CRITICAL: Error fetching profile detail:', JSON.stringify(error, null, 2));
-      return;
-    }
-
-    if (data) {
-      setProfile(data as Profile);
-      setIsAdmin(data.rol === 'admin');
-    }
-  }, []);
 
   const signIn = useCallback(async (email: string, password: string) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });

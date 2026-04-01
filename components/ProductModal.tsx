@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Image from "next/image";
+import { useState } from "react";
 import { X, Check, Truck, ShieldCheck, Banknote } from "lucide-react";
 import { Product } from "@/lib/mockData";
 import { useStore } from "@/lib/store";
@@ -17,14 +16,7 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
   const [sizeError, setSizeError] = useState<boolean>(false);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
 
-  // Reset selected size and error state when modal is closed or opened for a new product
-  useEffect(() => {
-    if (product) {
-      setSelectedSize("");
-      setSizeError(false);
-      setActiveImageIndex(0);
-    }
-  }, [product?.id]);
+  // No useEffect needed anymore as 'key' prop in parent handles state reset
 
   const handleClose = () => {
     setSelectedSize("");

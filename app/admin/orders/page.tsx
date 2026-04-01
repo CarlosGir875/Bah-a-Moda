@@ -150,7 +150,7 @@ export default function AdminOrdersPage() {
                    <div className="border-t border-gray-100 pt-4 mt-4">
                       <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-3">Productos pidiendo</p>
                       <div className="space-y-2">
-                        {order.items.map((item: any, idx: number) => (
+                        {order.items.map((item: { name: string; quantity: number; price: number; size?: string }, idx: number) => (
                           <div key={idx} className="flex justify-between text-xs font-bold text-black">
                             <span>{item.quantity}x {item.name} {item.size && `(${item.size})`}</span>
                             <span className="text-gray-400 font-black">Q{item.price * item.quantity}</span>

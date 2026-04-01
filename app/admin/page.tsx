@@ -3,7 +3,7 @@
 import { useStore } from "@/lib/store";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Upload, Plus, DollarSign, Package, CheckSquare, Square, Trash2, ImagePlus, X } from "lucide-react";
+import { Plus, DollarSign, Package, CheckSquare, Square, Trash2, ImagePlus } from "lucide-react";
 
 export default function AdminDashboard() {
   const { user, isAdmin, authLoading, addProduct, uploadProductImages } = useStore();
@@ -114,8 +114,8 @@ export default function AdminDashboard() {
       setHasSizes(false);
       setSelectedFiles([]);
       setPreviews([]);
-    } catch (error: any) {
-      alert("Error al publicar: " + error.message);
+    } catch (error: Error | any) {
+      alert("Error al publicar: " + (error.message || "Error desconocido"));
     } finally {
       setLoading(false);
     }
@@ -210,7 +210,7 @@ export default function AdminDashboard() {
                   >
                     <option value="">Seleccionar Catálogo...</option>
                     <option value="Scentia">Scentia</option>
-                    <option value="L'Bel / Ésika / Cyzone">L'Bel / Ésika / Cyzone</option>
+                    <option value="L&apos;Bel / &Eacute;sika / Cyzone">L&apos;Bel / &Eacute;sika / Cyzone</option>
                     <option value="Arabela">Arabela</option>
                     <option value="Avon">Avon</option>
                     <option value="Cklass">Cklass</option>

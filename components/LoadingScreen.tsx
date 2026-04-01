@@ -9,10 +9,15 @@ export function LoadingScreen() {
   const [fade, setFade] = useState(false);
 
   useEffect(() => {
+    let timer: NodeJS.Timeout;
     if (!isInitialLoading) {
-      setFade(true);
-      const timer = setTimeout(() => setShouldRender(false), 800);
-      return () => clearTimeout(timer);
+      // Small delay to ensure the exit animation starts smoothly
+      const fadeTimer = setTimeout(() => setFade(true), 10);
+      timer = setTimeout(() => setShouldRender(false), 800);
+      return () => {
+        clearTimeout(fadeTimer);
+        clearTimeout(timer);
+      };
     }
   }, [isInitialLoading]);
 

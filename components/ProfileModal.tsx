@@ -70,8 +70,8 @@ export function ProfileModal() {
     setIsUploading(true);
     try {
       await uploadAvatar(file);
-    } catch (err: any) {
-      alert("Error al subir imagen: " + err.message);
+    } catch (err: unknown) {
+      alert("Error al subir imagen: " + (err instanceof Error ? err.message : "Error desconocido"));
     } finally {
       setIsUploading(false);
     }

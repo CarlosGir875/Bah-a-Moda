@@ -100,6 +100,7 @@ export function ProductSection() {
       ) : null}
 
       <ProductModal 
+        key={selectedProduct?.id || 'none'}
         product={selectedProduct} 
         onClose={() => setSelectedProduct(null)} 
       />

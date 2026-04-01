@@ -47,7 +47,7 @@ export function CartSidebar() {
       }));
 
       await createOrder({
-        cliente_id: user?.id || null as any,
+        cliente_id: user?.id || null,
         nombre_cliente: formData.nombre,
         items: orderItems,
         total: cartTotal,
@@ -86,8 +86,8 @@ export function CartSidebar() {
       clearCart();
       setIsCartOpen(false);
       setTimeout(() => setCheckoutStep("cart"), 500);
-    } catch (err: any) {
-      alert("Error al procesar pedido: " + err.message);
+    } catch (err: unknown) {
+      alert("Error al procesar pedido: " + (err instanceof Error ? err.message : "Error desconocido"));
     } finally {
       setIsProcessing(false);
     }
