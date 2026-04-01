@@ -121,7 +121,7 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
         </button>
 
         {/* ═══ IMAGE GALLERY ═══ */}
-        <div className="relative w-full bg-[#FAFAFA] group/modal">
+        <div className="relative w-full bg-[#F3F4F4] group/modal">
 
           {/* Badge Premium */}
           <motion.span
@@ -158,7 +158,7 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
                   style={{ transformOrigin: `${mousePos.x}% ${mousePos.y}%` }}
                   animate={{ scale: isZoomed ? 2 : 1 }}
                   transition={{ duration: 0.3, ease: "easeOut" }}
-                  className="w-full h-auto object-contain block mix-blend-multiply"
+                  className="w-full h-auto object-contain block"
                 />
               ) : (
                 <div className="aspect-video flex items-center justify-center">
@@ -209,11 +209,11 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
               <button
                 key={idx}
                 onClick={() => setActiveImageIndex(idx)}
-                className={`relative flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-all duration-300 bg-[#FAFAFA] ${
+                className={`relative flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-all duration-300 bg-[#F3F4F4] ${
                   activeImageIndex === idx ? "border-black scale-105 shadow-md" : "border-transparent opacity-50 hover:opacity-80"
                 }`}
               >
-                <img src={img} alt="" className="w-full h-full object-cover mix-blend-multiply" />
+                <img src={img} alt="" className="w-full h-full object-cover" />
               </button>
             ))}
           </div>

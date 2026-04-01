@@ -11,15 +11,15 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
       className="group flex flex-col cursor-pointer"
       onClick={() => onClick(product)}
     >
-      {/* Image container — white card, minimalist style to blend with white page */}
-      <div className="relative aspect-[3/4] w-full overflow-hidden bg-white rounded-2xl mb-3 flex items-center justify-center group-hover:-translate-y-1 transition-all duration-400">
+      {/* Image container — colored to exactly match the Scentia/catalog image backgrounds */}
+      <div className="relative aspect-[3/4] w-full overflow-hidden bg-[#F3F4F4] rounded-2xl mb-3 flex items-center justify-center group-hover:-translate-y-1 transition-all duration-400">
         {product.images && product.images.length > 0 ? (
           <>
-            {/* Imagen principal — sin padding extra para que el "marco" sea parte de la foto */}
+            {/* Imagen principal — sin mix-blend-multiply para que se funda de forma nativa con el fondo del marco */}
             <img 
               src={product.images[0]} 
               alt={product.name} 
-              className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500 mix-blend-multiply"
+              className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-500"
             />
           </>
         ) : (
