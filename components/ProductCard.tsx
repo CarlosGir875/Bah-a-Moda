@@ -11,14 +11,23 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
       className="group flex flex-col cursor-pointer"
       onClick={() => onClick(product)}
     >
-      <div className="relative w-full overflow-hidden bg-white rounded-[2.5rem] mb-4 shadow-sm flex flex-col items-center justify-center border border-gray-100 group-hover:shadow-xl transition-all duration-500">
+      <div className="relative w-full overflow-hidden bg-white rounded-[2.5rem] mb-4 shadow-sm flex flex-col items-center justify-center border border-gray-100 group-hover:shadow-2xl group-hover:-translate-y-1 transition-all duration-500">
         {/* Real Image Rendering */}
         {product.images && product.images.length > 0 ? (
-          <img 
-            src={product.images[0]} 
-            alt={product.name} 
-            className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-700"
-          />
+          <>
+            {/* Aura sutil — colores del producto como fondo vivo */}
+            <img
+              src={product.images[0]}
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover blur-[60px] opacity-50 scale-150 saturate-150 select-none pointer-events-none"
+            />
+            {/* Imagen principal — siempre completa, nunca recortada */}
+            <img 
+              src={product.images[0]} 
+              alt={product.name} 
+              className="relative w-full h-auto object-contain z-10 group-hover:scale-105 transition-transform duration-700 drop-shadow-xl"
+            />
+          </>
         ) : (
           <div className="aspect-square flex items-center justify-center">
             <span className="text-gray-300 font-black text-[10px] uppercase tracking-[0.2em] text-center px-6 leading-relaxed">
