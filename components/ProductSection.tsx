@@ -44,9 +44,9 @@ export function ProductSection() {
 
   return (
     <section id="catalog" className="w-full bg-white min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 sm:px-8 py-6 w-full">
+      <div className="max-w-7xl mx-auto px-2 sm:px-8 py-3 sm:py-6 w-full">
       {/* Botones Rápidos (Quick Filters) */}
-      <div className="flex overflow-x-auto hide-scrollbar gap-2 sm:gap-3 mb-6 pb-2">
+      <div className="flex overflow-x-auto hide-scrollbar gap-2 sm:gap-3 mb-4 sm:mb-6 pb-1 sm:pb-2">
         {QUICK_FILTERS.map(f => (
           <button 
             key={f} 
@@ -65,8 +65,8 @@ export function ProductSection() {
         ))}
       </div>
 
-      <div className="flex flex-col sm:flex-row items-baseline justify-between mb-8 pb-4 border-b border-gray-200">
-        <h2 className="text-xl sm:text-2xl font-bold tracking-wide uppercase text-black">
+      <div className="flex flex-col sm:flex-row items-baseline justify-between mb-4 sm:mb-8 pb-3 sm:pb-4 border-b border-gray-200">
+        <h2 className="text-lg sm:text-2xl font-bold tracking-wide uppercase text-black">
           {selectedCategory || selectedFilter || "Todo"}
         </h2>
         <span className="text-xs sm:text-sm text-gray-500 font-medium mt-2 sm:mt-0">
@@ -75,13 +75,13 @@ export function ProductSection() {
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4 lg:gap-5">
           {[...Array(8)].map((_, i) => (
             <ProductSkeleton key={i} />
           ))}
         </div>
       ) : filteredProducts.length > 0 ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4 lg:gap-5">
           {filteredProducts.map((product) => (
             <ProductCard 
               key={product.id} 
