@@ -280,6 +280,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       },
     });
     if (error) throw error;
+    
+    // If session is null after signUp, it means Supabase requires email confirmation
+    if (!data.session) {
+      throw new Error('EMAIL_CONFIRMATION_REQUIRED');
+    }
+    
     if (data.user) {
       await fetchProfile(data.user.id);
     }

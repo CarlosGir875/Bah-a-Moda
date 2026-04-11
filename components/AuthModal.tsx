@@ -18,6 +18,7 @@ export function AuthModal() {
   });
   const [loading, setLoading] = useState(false);
   const [resetSent, setResetSent] = useState(false);
+  const [emailConfirmSent, setEmailConfirmSent] = useState(false);
 
   // Detect recovery flow
   useEffect(() => {
@@ -58,6 +59,11 @@ export function AuthModal() {
         setMode("login");
       }
     } catch (error: any) {
+      // Special case: email confirmation required — show success screen instead of error
+      if (error.message === 'EMAIL_CONFIRMATION_REQUIRED') {
+        setEmailConfirmSent(true);
+        return;
+      }
       alert(error.message || "Ocurrió un error");
     } finally {
       setLoading(false);
@@ -91,7 +97,24 @@ export function AuthModal() {
           </div>
 
           {/* Body */}
-          {mode === "reset" && resetSent ? (
+          {emailConfirmSent ? (
+            <div className="p-8 text-center space-y-4 animate-in fade-in duration-500">
+              <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-3xl">📧</span>
+              </div>
+              <h3 className="text-lg font-black uppercase tracking-tighter text-black">¡Cuenta creada!</h3>
+              <p className="text-xs text-gray-500 leading-relaxed">
+                Enviamos un correo de confirmación a <strong>{formData.email}</strong>.<br/>
+                Revisa tu bandeja de entrada (y el spam) y haz clic en el enlace para activar tu cuenta.
+              </p>
+              <button 
+                onClick={() => setIsAuthModalOpen(false)}
+                className="w-full bg-black text-white font-black text-[10px] uppercase tracking-widest py-4 rounded-xl hover:bg-gray-900 transition-all"
+              >
+                Entendido, revisar correo
+              </button>
+            </div>
+          ) : mode === "reset" && resetSent ? (
             <div className="p-8 text-center space-y-4 animate-in fade-in duration-500">
                <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4">
                   <span className="text-2xl">📧</span>
