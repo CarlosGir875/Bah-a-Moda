@@ -280,19 +280,39 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       },
     });
     if (error) throw error;
-    
+
+    // Helper to create/update profile in cliente_perfiles
+    const upsertProfile = async (userId: string) => {
+      const { error: profileError } = await supabase
+        .from('cliente_perfiles')
+        .upsert({
+          id: userId,
+          nombre_completo: fullName,
+          telefono: metadata?.telefono ?? null,
+          direccion: metadata?.direccion ?? null,
+          punto_encuentro: metadata?.punto_encuentro ?? null,
+          rol: 'cliente',
+        }, { onConflict: 'id' });
+
+      if (profileError) {
+        console.error('Error creating profile:', profileError);
+      }
+    };
+
     // If session is null, try auto-sign-in (happens when email confirm is disabled but Supabase still delays session)
     if (!data.session) {
       const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
       if (!signInError && signInData.user) {
+        await upsertProfile(signInData.user.id);
         await fetchProfile(signInData.user.id);
         return;
       }
       // Last resort: show confirmation screen
       throw new Error('EMAIL_CONFIRMATION_REQUIRED');
     }
-    
+
     if (data.user) {
+      await upsertProfile(data.user.id);
       await fetchProfile(data.user.id);
     }
   }, [fetchProfile]);
