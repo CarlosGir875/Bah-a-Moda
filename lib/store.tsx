@@ -16,7 +16,7 @@ interface Profile {
   rol: string | null;
   nombre_completo: string | null;
   avatar_url: string | null;
-  telefono: string | null;
+  celular: string | null;
   direccion: string | null;
   punto_encuentro: string | null;
   dpi: string | null;
@@ -288,14 +288,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         .upsert({
           id: userId,
           nombre_completo: fullName,
-          telefono: metadata?.telefono ?? null,
+          celular: metadata?.celular ?? (metadata as any)?.telefono ?? null,
           direccion: metadata?.direccion ?? null,
           punto_encuentro: metadata?.punto_encuentro ?? null,
           rol: 'cliente',
         }, { onConflict: 'id' });
 
       if (profileError) {
-        console.error('Error creating profile:', profileError);
+        console.error('Error creating profile:', JSON.stringify(profileError, null, 2));
       }
     };
 
