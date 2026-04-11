@@ -100,18 +100,18 @@ export function AuthModal() {
           {emailConfirmSent ? (
             <div className="p-8 text-center space-y-4 animate-in fade-in duration-500">
               <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-3xl">📧</span>
+                <span className="text-3xl">✅</span>
               </div>
-              <h3 className="text-lg font-black uppercase tracking-tighter text-black">¡Cuenta creada!</h3>
+              <h3 className="text-lg font-black uppercase tracking-tighter text-black">¡Cuenta Lista!</h3>
               <p className="text-xs text-gray-500 leading-relaxed">
-                Enviamos un correo de confirmación a <strong>{formData.email}</strong>.<br/>
-                Revisa tu bandeja de entrada (y el spam) y haz clic en el enlace para activar tu cuenta.
+                Tu cuenta fue creada exitosamente.<br/>
+                Ya puedes iniciar sesión con tu correo y contraseña.
               </p>
               <button 
-                onClick={() => setIsAuthModalOpen(false)}
+                onClick={() => { setEmailConfirmSent(false); setMode("login"); }}
                 className="w-full bg-black text-white font-black text-[10px] uppercase tracking-widest py-4 rounded-xl hover:bg-gray-900 transition-all"
               >
-                Entendido, revisar correo
+                Iniciar Sesión Ahora
               </button>
             </div>
           ) : mode === "reset" && resetSent ? (

@@ -281,8 +281,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     });
     if (error) throw error;
     
-    // If session is null after signUp, it means Supabase requires email confirmation
+    // If session is null, try auto-sign-in (happens when email confirm is disabled but Supabase still delays session)
     if (!data.session) {
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      if (!signInError && signInData.user) {
+        await fetchProfile(signInData.user.id);
+        return;
+      }
+      // Last resort: show confirmation screen
       throw new Error('EMAIL_CONFIRMATION_REQUIRED');
     }
     
