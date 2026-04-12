@@ -61,10 +61,26 @@ export function CartSidebar() {
       clearCart();
       setCheckoutStep("success");
       
-      // Enviar a WhatsApp opcionalmente para avisar
+      // Construir recibo detallado para WhatsApp
       const phoneNumber = "50242721798";
-      const totalMsg = `🌟 *SOLICITUD ENVIADA - BAHÍA MODA*%0A_Hola, acabo de enviar mi solicitud desde la web. Quedo a la espera de confirmación._`;
-      window.open(`https://wa.me/${phoneNumber}?text=${totalMsg}`, '_blank');
+      const itemsList = cart.map(item => 
+        `▪ ${item.quantity}x ${item.product.name} ${item.size ? `(Talla: ${item.size})` : ''} - Q${(item.product.price * item.quantity).toFixed(2)}`
+      ).join('\n');
+
+      const rawMessage = `🌟 *NUEVO PEDIDO - BAHÍA MODA* 🌟\n\n` +
+        `👤 *Cliente:* ${formData.nombre}\n` +
+        `📱 *Celular:* ${formData.celular}\n` +
+        `📍 *Modalidad:* ${deliveryType === 'domicilio' ? 'Envío a Domicilio' : 'Punto de Encuentro'}\n` +
+        `🗺️ *Ubicación:* ${formData.ubicacion}\n` +
+        `⏰ *Horario:* ${formData.horario}\n\n` +
+        `🛍️ *RESUMEN DE COMPRA:*\n${itemsList}\n\n` +
+        `💰 *Total:* Q${cartTotal.toFixed(2)}\n` +
+        `💳 *Anticipo Depositado (50%):* Q${depositAmount.toFixed(2)}\n` +
+        `💵 *Saldo Pago Contra Entrega:* Q${pendingBalance.toFixed(2)}\n\n` +
+        `_Nota de cliente: Ya ingresé mi solicitud a través del carrito en la página web. ¡Quedo a la espera de que la confirmen en la base de datos!_`;
+
+      const encodedMessage = encodeURIComponent(rawMessage);
+      window.open(`https://wa.me/${phoneNumber}?text=${encodedMessage}`, '_blank');
 
     } catch (err: unknown) {
       addToast("Error al enviar solicitud: " + (err instanceof Error ? err.message : "Error desconocido"), "error");
