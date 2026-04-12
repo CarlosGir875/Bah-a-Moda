@@ -19,7 +19,8 @@ export const MAIN_CATEGORIES = [
   "Cuidado Personal",
   "Hogar y Cocina",
   "Ropa, Calzado y Accesorios",
-  "Salud y Suplementos"
+  "Salud y Suplementos",
+  "🥘 Comida y Antojos"
 ];
 
 export const CATEGORY_MAPPING: Record<string, string[]> = {

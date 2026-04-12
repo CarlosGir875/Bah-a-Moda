@@ -144,15 +144,27 @@ export default function AdminRequestsPage() {
                 {/* CONTENT */}
                 <div className="p-6">
                   <div className="space-y-3">
-                    {req.items.map((item: any, idx: number) => (
-                      <div key={idx} className="flex items-center justify-between text-sm py-2 border-b border-gray-50 last:border-0">
-                        <div className="flex items-center gap-2">
-                          <span className="w-6 h-6 flex items-center justify-center bg-gray-100 rounded-lg text-[10px] font-bold">x{item.quantity}</span>
-                          <span className="font-bold text-gray-900">{item.name} {item.size ? `(${item.size})` : ''}</span>
+                    {req.items.map((item: any, idx: number) => {
+                      const idFood = item.supplier === '🥘 Venta de Comida';
+                      return (
+                        <div key={idx} className="flex flex-col sm:flex-row sm:items-center justify-between text-sm py-3 border-b border-gray-50 last:border-0 gap-1">
+                          <div className="flex items-center gap-2">
+                            <span className="w-6 h-6 flex items-center justify-center bg-gray-100 rounded-lg text-[10px] font-bold">x{item.quantity}</span>
+                            <div className="flex flex-col">
+                              {item.supplier && (
+                                <span className={`text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded w-max mb-1 ${
+                                  idFood ? 'bg-orange-100 text-orange-700' : 'bg-indigo-100 text-indigo-700'
+                                }`}>
+                                  {idFood ? '🍳 Comida' : `📖 Revista: ${item.supplier}`}
+                                </span>
+                              )}
+                              <span className="font-bold text-gray-900">{item.name} {item.size ? `(${item.size})` : ''}</span>
+                            </div>
+                          </div>
+                          <span className="font-black text-right">Q{(item.price * item.quantity).toFixed(2)}</span>
                         </div>
-                        <span className="font-black">Q{(item.price * item.quantity).toFixed(2)}</span>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
 
                   <div className="mt-6 pt-6 border-t border-dashed border-gray-200 grid grid-cols-2 gap-4">

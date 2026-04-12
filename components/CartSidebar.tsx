@@ -20,7 +20,8 @@ export function CartSidebar() {
         name: item.product.name,
         price: item.product.price,
         quantity: item.quantity,
-        size: item.size
+        size: item.size,
+        supplier: item.product.supplier // Añadido para distinguir comida/revista
       }));
 
       await createOrderRequest({

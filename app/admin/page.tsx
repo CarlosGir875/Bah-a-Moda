@@ -166,8 +166,9 @@ export default function AdminDashboard() {
              >
                 Mi Inventario
              </button>
-          </div>
+           </div>
         </div>
+      </div>
         
         {activeTab === 'upload' && (
         <form className="p-6 sm:p-10 space-y-8" onSubmit={handlePublish}>
@@ -280,6 +281,7 @@ export default function AdminDashboard() {
                     <option value="Arabela">Arabela</option>
                     <option value="Avon">Avon</option>
                     <option value="Cklass">Cklass</option>
+                    <option value="🥘 Venta de Comida">🥘 Venta de Comida</option>
                     <option value="Boutique Independiente">Boutique Independiente</option>
                   </select>
                </div>
