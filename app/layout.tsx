@@ -9,6 +9,7 @@ import { LoadingScreen } from "@/components/LoadingScreen";
 import { DisableInspect } from "@/components/DisableInspect";
 import { AuthModal } from "@/components/AuthModal";
 import { ProfileModal } from "@/components/ProfileModal";
+import { FloatingStatus } from "@/components/FloatingStatus";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -36,6 +37,7 @@ export default function RootLayout({
           <AuthModal />
           <ProfileModal />
           <Navbar />
+          <FloatingStatus />
           <main className="flex-1 flex flex-col">
             {children}
           </main>

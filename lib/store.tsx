@@ -522,12 +522,32 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [fetchAllOrders]);
 
   useEffect(() => {
-    if (user) {
-      fetchUserOrders();
+    if (isAdmin) {
+      fetchOrderRequests();
+    } else if (user) {
+      // Clientes solo cargan sus propias solicitudes (RLS filtra)
+      fetchOrderRequests();
     }
-  }, [user, fetchUserOrders]);
+    
+    // SUSCRIPCIÓN REALTIME
+    const channel = supabase
+      .channel('solicitudes_pedidos_changes')
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'solicitudes_pedidos' 
+      }, () => {
+        fetchOrderRequests();
+        if (user) fetchUserOrders();
+      })
+      .subscribe();
 
-  const [orderRequests, setOrderRequests] = useState<OrderRequest[]>([]);
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [isAdmin, user, fetchOrderRequests, fetchUserOrders]);
+
+  const [loading, setLoading] = useState(true);
 
   const fetchOrderRequests = useCallback(async () => {
     const { data, error } = await supabase
