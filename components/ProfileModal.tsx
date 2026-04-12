@@ -134,49 +134,50 @@ export function ProfileModal() {
       <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => setIsProfileModalOpen(false)} />
 
       <div 
-        className={`relative w-full max-w-[95%] md:max-w-5xl max-h-[92vh] bg-[#fdfdfd] rounded-[3rem] md:rounded-[4rem] shadow-[0_50px_150px_rgba(0,0,0,0.8)] overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] transform flex flex-col ${
+        className={`relative w-full max-w-[95%] md:max-w-3xl max-h-[92vh] bg-slate-50 rounded-[3rem] md:rounded-[4rem] shadow-[0_50px_150px_rgba(0,0,0,0.8)] overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] transform flex flex-col ${
           isProfileModalOpen ? "translate-y-0 scale-100 opacity-100" : "translate-y-20 scale-95 opacity-0"
         }`}
       >
         <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
 
-        <div className="h-44 md:h-48 bg-gray-950 flex-shrink-0 relative">
-          <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
-          <button 
-            onClick={() => setIsProfileModalOpen(false)}
-            className="absolute top-6 right-6 p-3 bg-white/5 hover:bg-white/10 rounded-full text-white/40 hover:text-white transition-all border border-white/5 z-40"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        <div className="absolute left-1/2 -ml-20 md:-ml-24 top-[100px] md:top-[112px] z-50">
-          <div className="inline-flex items-center justify-center w-40 h-40 md:w-48 md:h-48 bg-[#fdfdfd] rounded-full border-[10px] border-[#fdfdfd] shadow-2xl overflow-hidden group relative">
-            <div className="w-full h-full bg-zinc-100 flex items-center justify-center text-black">
-              {isUploading && (
-                <div className="absolute inset-0 bg-white/60 backdrop-blur-sm flex items-center justify-center z-20">
-                  <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
-                </div>
-              )}
-              {avatarUrl ? (
-                <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover transition-transform group-hover:scale-110" />
-              ) : (
-                <div className="w-full h-full bg-zinc-200 flex items-center justify-center">
-                  <span className="text-6xl font-black text-zinc-900 uppercase tracking-tighter">{displayName?.charAt(0)}</span>
-                </div>
-              )}
-            </div>
+        <div className="flex-1 overflow-y-auto custom-scrollbar relative">
+          {/* Header move inside scroll */}
+          <div className="h-36 md:h-40 bg-slate-900 flex-shrink-0 relative">
+            <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
             <button 
-              onClick={() => fileInputRef.current?.click()}
-              className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10 cursor-pointer"
+              onClick={() => setIsProfileModalOpen(false)}
+              className="absolute top-6 right-6 p-3 bg-white/5 hover:bg-white/10 rounded-full text-white/40 hover:text-white transition-all border border-white/5 z-40"
             >
-              <span className="text-xs font-black uppercase tracking-widest text-white">Editar Foto</span>
+              <X className="w-5 h-5" />
             </button>
           </div>
-        </div>
 
-        <div className="flex-1 overflow-y-auto custom-scrollbar relative">
-          <div className="px-6 md:px-20 pb-16 pt-24 md:pt-32 text-center">
+          {/* Avatar move inside scroll */}
+          <div className="relative -mt-20 md:-mt-24 mb-10 flex justify-center z-10">
+            <div className="inline-flex items-center justify-center w-40 h-40 md:w-48 md:h-48 bg-slate-50 rounded-full border-[10px] border-slate-50 shadow-2xl overflow-hidden group relative">
+              <div className="w-full h-full bg-slate-100 flex items-center justify-center text-black">
+                {isUploading && (
+                  <div className="absolute inset-0 bg-white/60 backdrop-blur-sm flex items-center justify-center z-20">
+                    <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+                  </div>
+                )}
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover transition-transform group-hover:scale-110" />
+                ) : (
+                  <div className="w-full h-full bg-slate-200 flex items-center justify-center">
+                    <span className="text-6xl font-black text-slate-900 uppercase tracking-tighter">{displayName?.charAt(0)}</span>
+                  </div>
+                )}
+              </div>
+              <button 
+                onClick={() => fileInputRef.current?.click()}
+                className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10 cursor-pointer"
+              >
+                <span className="text-xs font-black uppercase tracking-widest text-white">Editar Foto</span>
+              </button>
+            </div>
+          </div>
+          <div className="px-6 md:px-20 pb-16 pt-6 text-center">
             
             {view === "overview" ? (
               <div className="animate-in fade-in slide-in-from-bottom-6 duration-700 max-w-5xl mx-auto">
@@ -202,7 +203,7 @@ export function ProfileModal() {
 
                 {isAdmin && (
                   <div className="flex justify-center mb-16">
-                    <span className="flex items-center gap-4 px-10 py-4 bg-zinc-900 text-white rounded-full text-[12px] font-black uppercase tracking-[0.4em] shadow-2xl border-t border-white/10 group cursor-pointer hover:bg-emerald-600 transition-colors" onClick={() => window.location.href='/admin'}>
+                    <span className="flex items-center gap-4 px-10 py-4 bg-slate-900 text-white rounded-full text-[12px] font-black uppercase tracking-[0.4em] shadow-2xl border-t border-white/10 group cursor-pointer hover:bg-emerald-600 transition-colors" onClick={() => window.location.href='/admin'}>
                       <ShieldCheck className="w-5 h-5 text-emerald-400 group-hover:text-white" /> ADMINISTRADOR JEFE
                     </span>
                   </div>
@@ -214,41 +215,41 @@ export function ProfileModal() {
                     { label: "Dirección de Entrega", icon: MapPin, value: profile?.direccion, edit: () => setIsEditingAddress(true), cancel: () => setIsEditingAddress(false), isEditing: isEditingAddress, val: newAddress, setVal: setNewAddress, save: async () => { await updateProfile({ direccion: newAddress }); setIsEditingAddress(false); } },
                     { label: "Punto de Referencia", icon: Map, value: profile?.punto_encuentro, edit: () => setIsEditingMeetingPoint(true), cancel: () => setIsEditingMeetingPoint(false), isEditing: isEditingMeetingPoint, val: newMeetingPoint, setVal: setNewMeetingPoint, save: async () => { await updateProfile({ punto_encuentro: newMeetingPoint }); setIsEditingMeetingPoint(false); } }
                   ].map((item, i) => (
-                    <div key={i} className="bg-white p-8 rounded-[3rem] border border-zinc-100 shadow-sm hover:shadow-xl transition-all group overflow-hidden">
-                      <div className="flex items-center gap-3 mb-6 text-zinc-900">
+                    <div key={i} className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all group overflow-hidden">
+                      <div className="flex items-center gap-3 mb-6 text-slate-900">
                          <item.icon className="w-5 h-5 opacity-40 text-indigo-600" />
-                         <span className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-500">{item.label}</span>
+                         <span className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">{item.label}</span>
                       </div>
                       {item.isEditing ? (
                         <div className="flex gap-2">
-                          <input value={item.val} onChange={e => item.setVal(e.target.value)} className="w-full text-sm font-bold bg-zinc-50 p-3 rounded-2xl border-2 border-zinc-900 outline-none" />
-                          <button onClick={item.save} className="p-3 bg-zinc-900 text-white rounded-2xl active:scale-90"><Check className="w-5 h-5" /></button>
-                          <button onClick={item.cancel} className="p-3 bg-zinc-100 text-zinc-400 rounded-2xl active:scale-90"><X className="w-5 h-5" /></button>
+                          <input value={item.val} onChange={e => item.setVal(e.target.value)} className="w-full text-sm font-bold bg-slate-50 p-3 rounded-2xl border-2 border-slate-900 outline-none" />
+                          <button onClick={item.save} className="p-3 bg-slate-900 text-white rounded-2xl active:scale-90"><Check className="w-5 h-5" /></button>
+                          <button onClick={item.cancel} className="p-3 bg-slate-50 text-slate-400 rounded-2xl active:scale-90"><X className="w-5 h-5" /></button>
                         </div>
                       ) : (
                         <div className="flex items-center justify-between">
-                          <p className="text-base font-black text-zinc-900">{item.value || "Pendiente"}</p>
-                          <button onClick={item.edit} className="text-[10px] font-black text-white bg-zinc-900 px-4 py-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:scale-105">EDITAR</button>
+                          <p className="text-base font-black text-slate-900">{item.value || "Pendiente"}</p>
+                          <button onClick={item.edit} className="text-[10px] font-black text-white bg-slate-900 px-4 py-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:scale-105">EDITAR</button>
                         </div>
                       )}
                     </div>
                   ))}
                 </div>
 
-                <div className="bg-zinc-100/30 p-10 rounded-[4rem] border border-zinc-100 text-left mb-12">
-                   <div className="flex items-center justify-between mb-10 border-b border-zinc-200 pb-6">
+                <div className="bg-slate-100/50 p-10 rounded-[4rem] border border-slate-200 text-left mb-12">
+                   <div className="flex items-center justify-between mb-10 border-b border-slate-200 pb-6">
                       <div className="flex items-center gap-4">
-                        <div className="p-3 bg-white rounded-2xl shadow-sm text-zinc-900">
+                        <div className="p-3 bg-white rounded-2xl shadow-sm text-slate-900">
                           <Package className="w-6 h-6" />
                         </div>
-                        <h4 className="text-xl font-black uppercase tracking-tighter text-zinc-900">Historial de Pedidos</h4>
+                        <h4 className="text-xl font-black uppercase tracking-tighter text-slate-900">Historial de Pedidos</h4>
                       </div>
-                      <button onClick={() => setView("orders")} className="text-[11px] font-black uppercase tracking-widest text-zinc-500 hover:text-zinc-900 transition-colors border-b-2 border-transparent hover:border-zinc-900 pb-1">Ver Historial Completo</button>
+                      <button onClick={() => setView("orders")} className="text-[11px] font-black uppercase tracking-widest text-slate-500 hover:text-slate-900 transition-colors border-b-2 border-transparent hover:border-slate-900 pb-1">Ver Historial Completo</button>
                    </div>
                    
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {userOrders.length > 0 ? userOrders.slice(0, 4).map(o => (
-                        <div key={o.id} className="bg-white p-6 rounded-[2.5rem] flex items-center justify-between shadow-sm border border-zinc-50 hover:shadow-lg transition-all cursor-pointer group">
+                        <div key={o.id} className="bg-white p-6 rounded-[2.5rem] flex items-center justify-between shadow-sm border border-slate-100 hover:shadow-lg transition-all cursor-pointer group">
                            <div className="flex items-center gap-4">
                              <div className={`p-4 rounded-2xl border ${getStatusColor(o.estado)}`}>
                                 <Package className="w-5 h-5" />
@@ -271,8 +272,8 @@ export function ProfileModal() {
                    </div>
                 </div>
 
-                <button onClick={() => { signOut(); setIsProfileModalOpen(false); }} className="w-full py-8 rounded-[2.5rem] text-[13px] font-black uppercase tracking-[0.4em] text-zinc-400 hover:text-rose-600 hover:bg-rose-50 transition-all border border-zinc-100 hover:border-rose-100 flex items-center justify-center gap-4 group">
-                   <LogOut className="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" /> CERRAR SESIÓN SEGURA
+                <button onClick={() => { signOut(); setIsProfileModalOpen(false); }} className="w-full py-8 rounded-[3rem] text-[14px] font-black uppercase tracking-[0.4em] text-white bg-slate-900 hover:bg-rose-600 transition-all shadow-xl hover:scale-[1.01] active:scale-95 flex items-center justify-center gap-4 group">
+                   <LogOut className="w-6 h-6 group-hover:rotate-180 transition-transform duration-500" /> CERRAR SESIÓN SEGURA
                 </button>
               </div>
             ) : (
