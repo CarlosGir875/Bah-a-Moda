@@ -110,6 +110,8 @@ type StoreContextType = {
   fetchOrderRequests: () => Promise<void>;
   approveOrderRequest: (id: string) => Promise<void>;
   rejectOrderRequest: (id: string) => Promise<void>;
+  markRequestAsSeen: (id: string) => Promise<void>;
+  markOrderAsSeen: (id: string) => Promise<void>;
   isInitialLoading: boolean;
 };
 
@@ -584,6 +586,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (!error) await fetchOrderRequests();
   }, [fetchOrderRequests]);
 
+  const markOrderAsSeen = useCallback(async (orderId: string) => {
+    const { error } = await supabase
+      .from('pedidos')
+      .update({ visto: true })
+      .eq('id', orderId);
+    if (!error) await fetchAllOrders();
+  }, [fetchAllOrders]);
+
   useEffect(() => {
     if (isAdmin) {
       fetchOrderRequests();
@@ -661,7 +671,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         createOrderRequest,
         fetchOrderRequests,
         approveOrderRequest,
-        rejectOrderRequest
+        rejectOrderRequest,
+        markRequestAsSeen,
+        markOrderAsSeen
       }}
     >
       {children}
