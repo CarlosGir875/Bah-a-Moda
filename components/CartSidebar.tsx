@@ -52,10 +52,10 @@ export function CartSidebar() {
         items: orderItems,
         total: cartTotal,
         anticipo: depositAmount,
-        inversion: 0, // El administrador lo llenará después
-        estado: 'recibido',
+        inversion: 0, 
+        estado: 'pendiente', 
         tipo_entrega: deliveryType === 'domicilio' ? 'domicilio' : 'punto_encuentro',
-        ubicacion_entrega: formData.ubicacion
+        ubicacion_entrega: formData.ubicacion,
       });
 
       // 2. Preparar WhatsApp

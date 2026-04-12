@@ -37,9 +37,11 @@ export interface Order {
   anticipo: number;
   inversion: number;
   ganancia: number;
-  estado: 'recibido' | 'preparacion' | 'en_transito' | 'listo_entrega' | 'cancelado';
+  estado: 'pendiente' | 'recibido' | 'preparacion' | 'en_transito' | 'listo_entrega' | 'cancelado';
   tipo_entrega: 'domicilio' | 'punto_encuentro';
   ubicacion_entrega: string | null;
+  codigo_seguimiento: string | null;
+  visto: boolean;
   created_at: string;
 }
 
@@ -202,16 +204,20 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       .from('cliente_perfiles')
       .select('*')
       .eq('id', userId)
-      .single();
+      .maybeSingle(); // Permite 0 resultados sin lanzar error
     
     if (error) {
-      console.error('CRITICAL: Error fetching profile detail:', JSON.stringify(error, null, 2));
+      console.error('Error fetching profile:', error);
       return;
     }
 
     if (data) {
       setProfile(data as Profile);
       setIsAdmin(data.rol === 'admin');
+    } else {
+      // Si no existe perfil (ej: cuenta creada manual en dashboard), seteamos valores default
+      setProfile(null);
+      setIsAdmin(false);
     }
   }, []);
 
@@ -439,21 +445,57 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setAdminOrders(data || []);
   }, []);
 
-  const createOrder = useCallback(async (orderData: Omit<Order, 'id' | 'created_at' | 'ganancia'>) => {
-    const { error } = await supabase
+  const createOrder = useCallback(async (orderData: Omit<Order, 'id' | 'created_at' | 'ganancia' | 'codigo_seguimiento' | 'visto'>) => {
+    // Intentar insertar con los nuevos campos
+    const { error: initialError } = await supabase
       .from('pedidos')
-      .insert([orderData]);
+      .insert([{ 
+        ...orderData, 
+        estado: 'pendiente',
+        visto: false 
+      }]);
     
-    if (error) throw error;
+    // Si falla porque la columna 'visto' no existe (Error 42703 en Postgres)
+    if (initialError && initialError.code === '42703') {
+      console.warn("La columna 'visto' no existe en la DB. Intentando inserción básica.");
+      const { error: fallbackError } = await supabase
+        .from('pedidos')
+        .insert([{ 
+          ...orderData, 
+          estado: 'pendiente' 
+        }]);
+      
+      if (fallbackError) throw fallbackError;
+    } else if (initialError) {
+      throw initialError;
+    }
+    
     await fetchUserOrders();
   }, [fetchUserOrders]);
 
   const updateOrderStatus = useCallback(async (orderId: string, newStatus: string) => {
+    const updates: any = { estado: newStatus };
+    
+    // Si se confirma el pedido, generamos el ID numérico si no tiene uno
+    if (newStatus === 'recibido') {
+      const code = Math.floor(1000 + Math.random() * 9000).toString();
+      updates.codigo_seguimiento = code;
+    }
+
     const { error } = await supabase
       .from('pedidos')
-      .update({ estado: newStatus })
+      .update(updates)
       .eq('id', orderId);
     
+    if (error) throw error;
+    await fetchAllOrders();
+  }, [fetchAllOrders]);
+
+  const markOrderAsSeen = useCallback(async (orderId: string) => {
+    const { error } = await supabase
+      .from('pedidos')
+      .update({ visto: true })
+      .eq('id', orderId);
     if (error) throw error;
     await fetchAllOrders();
   }, [fetchAllOrders]);
