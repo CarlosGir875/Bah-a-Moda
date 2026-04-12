@@ -23,7 +23,7 @@ export function ProfileModal() {
   const [isEditingName, setIsEditingName] = useState(false);
   const [newName, setNewName] = useState(displayName || "");
   const [isEditingPhone, setIsEditingPhone] = useState(false);
-  const [newPhone, setNewPhone] = useState(profile?.telefono || "");
+  const [newCelular, setNewCelular] = useState(profile?.celular || "");
   const [isEditingAddress, setIsEditingAddress] = useState(false);
   const [newAddress, setNewAddress] = useState(profile?.direccion || "");
   const [isEditingMeetingPoint, setIsEditingMeetingPoint] = useState(false);
@@ -34,7 +34,7 @@ export function ProfileModal() {
       setIsVisible(true);
       setView("overview");
       setNewName(displayName || "");
-      setNewPhone(profile?.telefono || "");
+      setNewCelular(profile?.celular || "");
       setNewAddress(profile?.direccion || "");
       setNewMeetingPoint(profile?.punto_encuentro || "");
     } else {
@@ -206,11 +206,8 @@ export function ProfileModal() {
                       <ShieldCheck className="w-5 h-5 text-emerald-400 group-hover:text-white" /> ADMINISTRADOR JEFE
                     </span>
                   </div>
-                )}
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 text-left">
                   {[
-                    { label: "WhatsApp Contacto", icon: Phone, value: profile?.telefono, edit: () => setIsEditingPhone(true), cancel: () => setIsEditingPhone(false), isEditing: isEditingPhone, val: newPhone, setVal: setNewPhone, save: async () => { await updateProfile({ telefono: newPhone }); setIsEditingPhone(false); } },
+                    { label: "WhatsApp Contacto", icon: Phone, value: profile?.celular, edit: () => setIsEditingPhone(true), cancel: () => setIsEditingPhone(false), isEditing: isEditingPhone, val: newCelular, setVal: setNewCelular, save: async () => { await updateProfile({ celular: newCelular }); setIsEditingPhone(false); } },
                     { label: "Dirección de Entrega", icon: MapPin, value: profile?.direccion, edit: () => setIsEditingAddress(true), cancel: () => setIsEditingAddress(false), isEditing: isEditingAddress, val: newAddress, setVal: setNewAddress, save: async () => { await updateProfile({ direccion: newAddress }); setIsEditingAddress(false); } },
                     { label: "Punto de Referencia", icon: Map, value: profile?.punto_encuentro, edit: () => setIsEditingMeetingPoint(true), cancel: () => setIsEditingMeetingPoint(false), isEditing: isEditingMeetingPoint, val: newMeetingPoint, setVal: setNewMeetingPoint, save: async () => { await updateProfile({ punto_encuentro: newMeetingPoint }); setIsEditingMeetingPoint(false); } }
                   ].map((item, i) => (
