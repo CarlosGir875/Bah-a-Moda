@@ -26,16 +26,23 @@ export function AuthModal() {
   const [resetToken, setResetToken] = useState("");
   const [foundName, setFoundName] = useState("");
 
-  // Detect recovery flow
+  // Detect recovery flow or auth errors from URL hash
   useEffect(() => {
     if (typeof window !== "undefined") {
       const hash = window.location.hash;
       if (hash.includes("type=recovery") || hash.includes("access_token=")) {
         setMode("new-password");
         setIsAuthModalOpen(true);
+        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      } else if (hash.includes("error=")) {
+        // Catch expired link errors
+        const params = new URLSearchParams(hash.substring(1));
+        const errorDesc = params.get("error_description") ? decodeURIComponent(params.get("error_description")!.replace(/\+/g, ' ')) : "El enlace es inválido o ha expirado.";
+        setTimeout(() => addToast(`Error: ${errorDesc}`, "error"), 1000);
+        window.history.replaceState(null, '', window.location.pathname + window.location.search);
       }
     }
-  }, [setIsAuthModalOpen]);
+  }, [setIsAuthModalOpen, addToast]);
 
   if (!isAuthModalOpen) return null;
 
