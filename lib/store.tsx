@@ -602,6 +602,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (!error) await fetchOrderRequests();
   }, [fetchOrderRequests]);
 
+  const markRequestAsSeen = useCallback(async (requestId: string) => {
+    const { error } = await supabase
+      .from('solicitudes_pedidos')
+      .update({ visto: true })
+      .eq('id', requestId);
+    if (!error) await fetchOrderRequests();
+  }, [fetchOrderRequests]);
+
   return (
     <StoreContext.Provider
       value={{

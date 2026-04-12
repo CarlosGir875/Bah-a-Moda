@@ -15,7 +15,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export function FloatingStatus() {
-  const { isAdmin, orderRequests, user, setIsProfileOpen } = useStore();
+  const { isAdmin, orderRequests, user, setIsProfileOpen, markRequestAsSeen } = useStore();
   const [isOpen, setIsOpen] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const router = useRouter();
@@ -116,7 +116,13 @@ export function FloatingStatus() {
 
       {/* FLOATING BUBBLE */}
       <button 
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => {
+          setIsOpen(!isOpen);
+          // Marca como visto si es un cliente con confirmación pendiente
+          if (!isOpen && !isAdmin && userRequest?.estado === 'aprobado' && !userRequest.visto) {
+            markRequestAsSeen(userRequest.id);
+          }
+        }}
         className={`pointer-events-auto p-4 sm:p-5 rounded-[2rem] shadow-2xl transition-all active:scale-95 group relative border-4 border-white ${getStatusColor()}`}
       >
         {isAdmin ? (
