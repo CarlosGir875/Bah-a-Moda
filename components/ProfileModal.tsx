@@ -4,6 +4,7 @@ import { X, LogOut, User, ShieldCheck, Mail, ArrowRight, ArrowLeft, Check, Phone
 import { useStore } from "@/lib/store";
 import { useEffect, useState, useRef } from "react";
 import { OrderTracker } from "./OrderTracker";
+import { ImageCropperModal } from "./ImageCropperModal";
 
 export function ProfileModal() {
   const { isProfileModalOpen, setIsProfileModalOpen, user, profile, isAdmin, signOut, updateProfile, uploadAvatar, userOrders, fetchUserOrders, addToast } = useStore();
@@ -11,6 +12,8 @@ export function ProfileModal() {
   const [view, setView] = useState<"overview" | "orders">("overview");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [cropperOpen, setCropperOpen] = useState(false);
+  const [imageFileUrl, setImageFileUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (isProfileModalOpen && user) {
@@ -86,16 +89,30 @@ export function ProfileModal() {
       </div>
     );
   };
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    
+    // Preparar para cropper visual
+    setImageFileUrl(URL.createObjectURL(file));
+    setCropperOpen(true);
+    
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleCropComplete = async (croppedBlob: Blob) => {
     setIsUploading(true);
     try {
-      await uploadAvatar(file);
+      const croppedFile = new File([croppedBlob], `avatar-${Date.now()}.jpg`, { type: "image/jpeg" });
+      await uploadAvatar(croppedFile);
+      addToast("Foto actualizada correctamente", "success");
     } catch (err: unknown) {
       addToast("Error al subir imagen: " + (err instanceof Error ? err.message : "Error desconocido"), "error");
     } finally {
       setIsUploading(false);
+      setImageFileUrl(null);
     }
   };
 
@@ -105,6 +122,12 @@ export function ProfileModal() {
         isProfileModalOpen ? "opacity-100" : "opacity-0 pointer-events-none"
       }`}
     >
+      <ImageCropperModal
+        isOpen={cropperOpen}
+        imageSrc={imageFileUrl}
+        onClose={() => { setCropperOpen(false); setImageFileUrl(null); }}
+        onCropComplete={handleCropComplete}
+      />
       <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => setIsProfileModalOpen(false)} />
 
       <div 
