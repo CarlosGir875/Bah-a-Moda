@@ -124,7 +124,7 @@ export function AuthModal() {
         className="fixed inset-0 bg-black/60 z-50 backdrop-blur-sm"
         onClick={() => setIsAuthModalOpen(false)}
       />
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+      <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 pointer-events-none">
         <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden pointer-events-auto animate-in zoom-in-95 fade-in duration-200">
           {/* Header */}
           <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100">
@@ -222,7 +222,7 @@ export function AuthModal() {
                       placeholder="tuemail@gmail.com"
                       value={formData.email}
                       onChange={e => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full border border-gray-200 bg-gray-50 px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black transition-all"
+                      className="w-full border border-gray-200 bg-gray-50 px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black transition-all cursor-text"
                     />
                   </div>
                   <div>
@@ -298,7 +298,7 @@ export function AuthModal() {
                           placeholder="••••••••"
                           value={formData.password}
                           onChange={e => setFormData({ ...formData, password: e.target.value })}
-                          className="w-full border border-gray-200 bg-gray-50 px-4 py-3.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black transition-all pr-12 font-bold"
+                          className="w-full border border-gray-200 bg-gray-50 px-4 py-3.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black transition-all pr-12 font-bold cursor-text"
                         />
                         <button
                           type="button"
@@ -318,7 +318,7 @@ export function AuthModal() {
                           placeholder="••••••••"
                           value={formData.confirmPassword}
                           onChange={e => setFormData({ ...formData, confirmPassword: e.target.value })}
-                          className="w-full border border-gray-200 bg-gray-50 px-4 py-3.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black transition-all pr-12 font-bold"
+                          className="w-full border border-gray-200 bg-gray-50 px-4 py-3.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black transition-all pr-12 font-bold cursor-text"
                         />
                         <button
                           type="button"
@@ -354,7 +354,7 @@ export function AuthModal() {
                         placeholder="Ej. María García"
                         value={formData.name}
                         onChange={e => setFormData({ ...formData, name: e.target.value })}
-                        className="w-full border border-gray-200 bg-gray-50 px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black transition-all"
+                        className="w-full border border-gray-200 bg-gray-50 px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black transition-all cursor-text"
                       />
                     </div>
                     <div>
@@ -365,7 +365,7 @@ export function AuthModal() {
                         placeholder="Ej. 3045-8921"
                         value={formData.telefono}
                         onChange={e => setFormData({ ...formData, telefono: e.target.value })}
-                        className="w-full border border-gray-200 bg-gray-50 px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black transition-all"
+                        className="w-full border border-gray-200 bg-gray-50 px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black transition-all cursor-text"
                       />
                     </div>
                     <div>
@@ -375,7 +375,7 @@ export function AuthModal() {
                         placeholder="Barrio El Centro, Casa #..."
                         value={formData.direccion}
                         onChange={e => setFormData({ ...formData, direccion: e.target.value })}
-                        className="w-full border border-gray-200 bg-gray-50 px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black transition-all"
+                        className="w-full border border-gray-200 bg-gray-50 px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black transition-all cursor-text"
                       />
                     </div>
                     <div>
@@ -386,7 +386,7 @@ export function AuthModal() {
                         placeholder="Ej. Parque Central, Super 24..."
                         value={formData.punto_encuentro}
                         onChange={e => setFormData({ ...formData, punto_encuentro: e.target.value })}
-                        className="w-full border border-gray-200 bg-gray-50 px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black transition-all"
+                        className="w-full border border-gray-200 bg-gray-50 px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black transition-all cursor-text"
                       />
                     </div>
                   </>
@@ -400,7 +400,7 @@ export function AuthModal() {
                     placeholder="tuemail@gmail.com"
                     value={formData.email}
                     onChange={e => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full border border-gray-200 bg-gray-50 px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black transition-all"
+                    className="w-full border border-gray-200 bg-gray-50 px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black transition-all cursor-text"
                   />
                 </div>
               )}
@@ -425,7 +425,7 @@ export function AuthModal() {
                       placeholder="••••••••"
                       value={formData.password}
                       onChange={e => setFormData({ ...formData, password: e.target.value })}
-                      className="w-full border border-gray-200 bg-gray-50 px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black transition-all pr-12"
+                      className="w-full border border-gray-200 bg-gray-50 px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black transition-all pr-12 cursor-text"
                     />
                     <button
                       type="button"
@@ -448,7 +448,7 @@ export function AuthModal() {
                       placeholder="••••••••"
                       value={formData.confirmPassword}
                       onChange={e => setFormData({ ...formData, confirmPassword: e.target.value })}
-                      className="w-full border border-gray-200 bg-gray-50 px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black transition-all pr-12"
+                      className="w-full border border-gray-200 bg-gray-50 px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black transition-all pr-12 cursor-text"
                     />
                     <button
                       type="button"
