@@ -166,7 +166,13 @@ export default function AdminRequestsPage() {
                       <h3 className="text-xl font-black text-gray-900 leading-none tracking-tight mb-2 truncate">
                         {req.cliente_nombre}
                       </h3>
-                      <div className="flex flex-col gap-3 mt-6">
+                      {req.user_id && (
+                        <div className="flex items-center gap-1.5 text-green-600 bg-green-50 w-max px-2.5 py-1 rounded-md mb-2 border border-green-100">
+                          <CheckCircle2 className="w-3 h-3" />
+                          <span className="text-[9px] font-black uppercase tracking-widest">Cliente Verificado</span>
+                        </div>
+                      )}
+                      <div className="flex flex-col gap-3 mt-4">
                          <div className="flex items-center gap-3 text-indigo-600">
                             <div className="w-8 h-8 bg-indigo-50 rounded-lg flex items-center justify-center">
                                <Phone className="w-4 h-4" />

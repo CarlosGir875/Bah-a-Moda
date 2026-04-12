@@ -495,7 +495,7 @@ export function AuthModal() {
               <div className="bg-gray-50 border border-gray-100 rounded-2xl p-4">
                 <p className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-3">Beneficios gratuitos</p>
                 <ul className="space-y-2">
-                  {["Guarda el historial de tus pedidos", "Autocompletado en tus envíos", "Rastreo de paquetes en tiempo real"].map(b => (
+                  {["Guarda el historial de tus pedidos", "Autocompletado en tus envíos", "Rastreo de paquetes en tiempo real", "Atención y despacho prioritario"].map(b => (
                     <li key={b} className="flex items-center gap-2 text-xs font-medium text-gray-600">
                       <Package className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" /> {b}
                     </li>
