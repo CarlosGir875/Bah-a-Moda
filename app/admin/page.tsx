@@ -4,10 +4,11 @@ import { useStore } from "@/lib/store";
 import { CATEGORY_MAPPING, Product } from "@/lib/mockData";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Plus, Package, CheckSquare, Square, Trash2, ImagePlus, Calendar, Eye, Search, Pencil, ArrowUpRight, Inbox, Bell, BellOff, ShieldCheck, Key, ShieldAlert } from "lucide-react";
+import { Plus, Package, CheckSquare, Square, Trash2, ImagePlus, Calendar, Eye, Search, Pencil, ArrowUpRight, Inbox, Bell, BellOff, ShieldCheck, Key, ShieldAlert, Sparkles } from "lucide-react";
 import { ProductCard } from "@/components/ProductCard";
 import { EditProductModal } from "@/components/admin/EditProductModal";
 import { registerPush, subscribeUser } from "@/lib/push";
+import { supabase } from "@/lib/supabase";
 
 export default function AdminDashboard() {
   const { user, isAdmin, authLoading, addProduct, uploadProductImages, products, deleteProduct, orderRequests, addToast } = useStore();
@@ -27,7 +28,7 @@ export default function AdminDashboard() {
   const fetchResetRequests = async () => {
     setLoadingResets(true);
     try {
-      const { data, error } = await useStore.getState().supabase
+      const { data, error } = await supabase
         .from('peticiones_reset')
         .select('*')
         .eq('estado', 'pendiente')

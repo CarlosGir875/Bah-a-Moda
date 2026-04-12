@@ -16,7 +16,7 @@ export default function AdminUsersPage() {
 
   const filteredUsers = allUsers.filter(u => 
     u.nombre_completo?.toLowerCase().includes(search.toLowerCase()) ||
-    u.telefono?.includes(search) ||
+    u.celular?.includes(search) ||
     u.dpi?.includes(search)
   );
 
@@ -78,7 +78,7 @@ export default function AdminUsersPage() {
                       <Phone className="w-4 h-4 text-indigo-500 mt-1" />
                       <div>
                         <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-0.5">WhatsApp / Celular</p>
-                        <p className="text-xs font-black text-black">{u.telefono || "No registrado"}</p>
+                        <p className="text-xs font-black text-black">{u.celular || "No registrado"}</p>
                       </div>
                    </div>
                    <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100">

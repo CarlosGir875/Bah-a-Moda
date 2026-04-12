@@ -8,7 +8,29 @@ export function CartSidebar() {
   const { isCartOpen, setIsCartOpen, cart, removeFromCart, user, profile, createOrderRequest, clearCart, addToast } = useStore();
   const [checkoutStep, setCheckoutStep] = useState<"cart" | "form" | "success">("cart");
   const [isProcessing, setIsProcessing] = useState(false);
-  // ... rest of state ...
+  const [deliveryType, setDeliveryType] = useState<"domicilio" | "punto">("domicilio");
+  const [formData, setFormData] = useState({
+    nombre: "",
+    celular: "",
+    ubicacion: "",
+    horario: ""
+  });
+
+  // Auto-fill form if user is logged in
+  useEffect(() => {
+    if (user && profile && isCartOpen) {
+      setFormData(prev => ({
+        ...prev,
+        nombre: profile.nombre_completo || "",
+        celular: profile.celular || "",
+        ubicacion: profile.punto_encuentro || profile.direccion || ""
+      }));
+    }
+  }, [user, profile, isCartOpen]);
+
+  const cartTotal = cart.reduce((acc, item) => acc + (item.product.price * item.quantity), 0);
+  const depositAmount = cartTotal * 0.5;
+  const pendingBalance = cartTotal * 0.5;
 
   const confirmAndSendRequest = async (e: React.FormEvent) => {
     e.preventDefault();
