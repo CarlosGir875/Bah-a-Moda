@@ -637,12 +637,19 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         if (isAdmin) fetchAllOrders();
         if (user) fetchUserOrders();
       })
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'products' 
+      }, () => {
+        fetchProducts();
+      })
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [isAdmin, user, fetchOrderRequests, fetchUserOrders, fetchAllOrders]);
+  }, [isAdmin, user, fetchOrderRequests, fetchUserOrders, fetchAllOrders, fetchProducts]);
 
   return (
     <StoreContext.Provider

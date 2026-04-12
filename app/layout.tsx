@@ -11,6 +11,7 @@ import { AuthModal } from "@/components/AuthModal";
 import { ProfileModal } from "@/components/ProfileModal";
 import { FloatingStatus } from "@/components/FloatingStatus";
 import { Toaster } from "@/components/Toaster";
+import type { Viewport } from 'next';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -25,6 +26,14 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  themeColor: "#6366f1",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5, // Permit accessibility zoom but control initial layout
+  userScalable: true,
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -33,10 +42,9 @@ export default function RootLayout({
   return (
     <html lang="es" className={`${inter.className} h-full antialiased`}>
       <head>
-        <meta name="theme-color" content="#6366f1" />
         <link rel="apple-touch-icon" href="/icon-192.png" />
       </head>
-      <body className="min-h-full flex flex-col bg-white text-black selection:bg-gray-200">
+      <body className="min-h-full flex flex-col bg-white text-black selection:bg-gray-200 overflow-x-hidden w-full">
         <StoreProvider>
           <DisableInspect />
           <LoadingScreen />

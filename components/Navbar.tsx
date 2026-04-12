@@ -49,7 +49,7 @@ export function Navbar() {
   }, []);
 
   return (
-    <nav className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-gray-200 h-16 flex items-center px-3 sm:px-8 transition-all">
+    <nav className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-gray-200 h-auto min-h-[4rem] py-2 flex flex-wrap items-center px-3 sm:px-8 transition-all w-full select-none">
       {/* Menu Izquierdo */}
       {!searchOpen && (
         <div className="flex-none w-20 flex justify-start">
@@ -66,7 +66,7 @@ export function Navbar() {
 
       {/* Buscador expandible */}
       {searchOpen ? (
-        <div className="flex-1 flex items-center gap-2 animate-in slide-in-from-top-1 fade-in duration-200">
+        <div className="flex-1 flex items-center gap-2 animate-in slide-in-from-top-1 fade-in duration-200 min-w-0 w-full">
           <Search className="h-5 w-5 text-gray-400 flex-shrink-0" />
           <input
             ref={inputRef}
@@ -74,27 +74,27 @@ export function Navbar() {
             placeholder="Buscar en el catálogo..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="flex-1 bg-transparent text-black placeholder-gray-400 text-sm font-medium focus:outline-none"
+            className="flex-1 min-w-0 w-full bg-transparent text-black placeholder-gray-400 text-sm font-medium focus:outline-none overflow-hidden text-ellipsis"
           />
-          <button onClick={closeSearch} className="p-1.5 text-gray-400 hover:text-black transition-colors">
+          <button onClick={closeSearch} className="flex-shrink-0 p-1.5 text-gray-400 hover:text-black transition-colors">
             <X className="h-5 w-5" />
           </button>
         </div>
       ) : (
         <>
           {/* Titulo Central */}
-          <div className="flex-1 flex justify-center">
-            <Link href="/" className="font-black text-xl sm:text-2xl tracking-[0.2em] uppercase text-black hover:opacity-70 transition-opacity">
+          <div className="flex-1 min-w-0 flex justify-center items-center overflow-hidden px-2">
+            <Link href="/" className="font-black text-lg sm:text-2xl tracking-[0.1em] sm:tracking-[0.2em] uppercase text-black hover:opacity-70 transition-opacity truncate w-full text-center">
               Bahía Moda
             </Link>
           </div>
 
           {/* Utilidades: Buscar, Cuenta, Bolsa */}
-          <div className="flex-none flex justify-end items-center gap-0.5 sm:gap-2">
-            <button onClick={openSearch} aria-label="Buscar" className="p-2 text-gray-500 hover:text-black hover:bg-gray-200 rounded-full transition-colors">
+          <div className="flex-none flex justify-end items-center gap-1 sm:gap-2 overflow-x-auto scrollbar-hide py-1">
+            <button onClick={openSearch} aria-label="Buscar" className="p-2 text-gray-500 hover:text-black hover:bg-gray-200 rounded-full transition-colors flex-shrink-0">
               <Search className="h-5 w-5" strokeWidth={1.7} />
             </button>
-            <div className="flex items-center gap-1 sm:gap-2">
+            <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
               {user ? (
                 <button 
                   onClick={() => setIsProfileModalOpen(true)}
