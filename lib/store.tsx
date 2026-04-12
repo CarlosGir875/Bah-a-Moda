@@ -521,33 +521,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     await fetchAllOrders();
   }, [fetchAllOrders]);
 
-  useEffect(() => {
-    if (isAdmin) {
-      fetchOrderRequests();
-    } else if (user) {
-      // Clientes solo cargan sus propias solicitudes (RLS filtra)
-      fetchOrderRequests();
-    }
-    
-    // SUSCRIPCIÓN REALTIME
-    const channel = supabase
-      .channel('solicitudes_pedidos_changes')
-      .on('postgres_changes', { 
-        event: '*', 
-        schema: 'public', 
-        table: 'solicitudes_pedidos' 
-      }, () => {
-        fetchOrderRequests();
-        if (user) fetchUserOrders();
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [isAdmin, user, fetchOrderRequests, fetchUserOrders]);
-
-  const [loading, setLoading] = useState(true);
+  const [orderRequests, setOrderRequests] = useState<OrderRequest[]>([]);
 
   const fetchOrderRequests = useCallback(async () => {
     const { data, error } = await supabase
@@ -609,6 +583,32 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       .eq('id', requestId);
     if (!error) await fetchOrderRequests();
   }, [fetchOrderRequests]);
+
+  useEffect(() => {
+    if (isAdmin) {
+      fetchOrderRequests();
+    } else if (user) {
+      // Clientes solo cargan sus propias solicitudes (RLS filtra)
+      fetchOrderRequests();
+    }
+    
+    // SUSCRIPCIÓN REALTIME
+    const channel = supabase
+      .channel('solicitudes_pedidos_changes')
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'solicitudes_pedidos' 
+      }, () => {
+        fetchOrderRequests();
+        if (user) fetchUserOrders();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [isAdmin, user, fetchOrderRequests, fetchUserOrders]);
 
   return (
     <StoreContext.Provider
