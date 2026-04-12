@@ -11,7 +11,7 @@ interface EditProductModalProps {
 }
 
 export function EditProductModal({ product, onClose }: EditProductModalProps) {
-  const { updateProduct, uploadProductImages } = useStore();
+  const { updateProduct, uploadProductImages, addToast } = useStore();
   
   const [loading, setLoading] = useState(false);
   const [hasSizes, setHasSizes] = useState(!!product.sizes && product.sizes.length > 0);
@@ -65,12 +65,12 @@ export function EditProductModal({ product, onClose }: EditProductModalProps) {
   const handlePublish = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.price || !formData.category) {
-      alert("Por favor completa los campos obligatorios (Nombre, Precio, Categoría)");
+      addToast("Por favor completa los campos obligatorios", "error");
       return;
     }
 
     if (previews.length === 0) {
-      alert("Por favor incluye al menos una fotografía del producto");
+      addToast("Por favor incluye al menos una fotografía", "error");
       return;
     }
 
@@ -82,8 +82,7 @@ export function EditProductModal({ product, onClose }: EditProductModalProps) {
       if (isImagesModified && selectedFiles.length > 0) {
         finalImages = await uploadProductImages(selectedFiles);
       } else if (isImagesModified && selectedFiles.length === 0) {
-          // Edge case: they removed all images. Not allowed.
-          alert("Debes añadir imágenes.");
+          addToast("Debes añadir imágenes.", "error");
           setLoading(false);
           return;
       }
@@ -100,10 +99,10 @@ export function EditProductModal({ product, onClose }: EditProductModalProps) {
         description: formData.description,
         sizes: hasSizes ? formData.sizes.split(",").map(s => s.trim()).filter(s => s !== "") : undefined
       });
-      alert("¡Producto actualizado con éxito!");
+      addToast("¡Producto actualizado con éxito!", "success");
       onClose();
     } catch (error: Error | any) {
-      alert("Error al actualizar: " + (error.message || "Error desconocido"));
+      addToast("Error al actualizar: " + (error.message || "Error desconocido"), "error");
     } finally {
       setLoading(false);
     }

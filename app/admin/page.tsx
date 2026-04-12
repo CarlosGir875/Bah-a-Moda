@@ -10,7 +10,7 @@ import { EditProductModal } from "@/components/admin/EditProductModal";
 import { registerPush, subscribeUser } from "@/lib/push";
 
 export default function AdminDashboard() {
-  const { user, isAdmin, authLoading, addProduct, uploadProductImages, products, deleteProduct, orderRequests } = useStore();
+  const { user, isAdmin, authLoading, addProduct, uploadProductImages, products, deleteProduct, orderRequests, addToast } = useStore();
   const router = useRouter();
 
   // Notification State
@@ -29,10 +29,10 @@ export default function AdminDashboard() {
       const sub = await subscribeUser();
       if (sub) {
         setIsSubscribed(true);
-        alert("¡Notificaciones activadas en este dispositivo!");
+        addToast("¡Notificaciones activadas!", "success");
       }
     } catch (error) {
-      alert("Error al activar notificaciones. Asegúrate de estar en HTTPS y permitir los permisos.");
+      addToast("Error al activar notificaciones. Asegúrate de estar en HTTPS.", "error");
     } finally {
       setSubscribing(false);
     }
@@ -50,9 +50,9 @@ export default function AdminDashboard() {
           url: "/admin/requests"
         })
       });
-      if (res.ok) alert("Prueba enviada. Deberías recibirla en unos segundos.");
+      if (res.ok) addToast("Prueba enviada. Deberías recibirla pronto.", "success");
     } catch (error) {
-      alert("Error al probar la notificación.");
+      addToast("Error al probar la notificación.", "error");
     } finally {
       setTesting(false);
     }
@@ -130,12 +130,12 @@ export default function AdminDashboard() {
   const handlePublish = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.price || !formData.category) {
-      alert("Por favor completa los campos obligatorios (Nombre, Precio, Categoría)");
+      addToast("Por favor completa los campos obligatorios", "error");
       return;
     }
 
     if (selectedFiles.length === 0) {
-      alert("Por favor sube al menos una fotografía del producto");
+      addToast("Por favor sube al menos una fotografía", "error");
       return;
     }
 
@@ -157,7 +157,7 @@ export default function AdminDashboard() {
         description: formData.description,
         sizes: hasSizes ? formData.sizes.split(",").map(s => s.trim()) : undefined
       });
-      alert("¡Producto publicado con éxito!");
+      addToast("¡Producto publicado con éxito!", "success");
       setFormData({
         name: "",
         price: "",
@@ -173,7 +173,7 @@ export default function AdminDashboard() {
       setSelectedFiles([]);
       setPreviews([]);
     } catch (error: Error | any) {
-      alert("Error al publicar: " + (error.message || "Error desconocido"));
+      addToast("Error al publicar: " + (error.message || "Error desconocido"), "error");
     } finally {
       setLoading(false);
     }

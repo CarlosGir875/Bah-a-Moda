@@ -6,7 +6,7 @@ import { useEffect, useState, useRef } from "react";
 import { OrderTracker } from "./OrderTracker";
 
 export function ProfileModal() {
-  const { isProfileModalOpen, setIsProfileModalOpen, user, profile, isAdmin, signOut, updateProfile, uploadAvatar, userOrders, fetchUserOrders } = useStore();
+  const { isProfileModalOpen, setIsProfileModalOpen, user, profile, isAdmin, signOut, updateProfile, uploadAvatar, userOrders, fetchUserOrders, addToast } = useStore();
   const [isVisible, setIsVisible] = useState(false);
   const [view, setView] = useState<"overview" | "orders">("overview");
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -93,7 +93,7 @@ export function ProfileModal() {
     try {
       await uploadAvatar(file);
     } catch (err: unknown) {
-      alert("Error al subir imagen: " + (err instanceof Error ? err.message : "Error desconocido"));
+      addToast("Error al subir imagen: " + (err instanceof Error ? err.message : "Error desconocido"), "error");
     } finally {
       setIsUploading(false);
     }

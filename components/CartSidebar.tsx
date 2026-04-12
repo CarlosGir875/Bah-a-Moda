@@ -5,7 +5,7 @@ import { X, Trash2, ShoppingBag, ArrowLeft, Send } from "lucide-react";
 import { useStore } from "@/lib/store";
 
 export function CartSidebar() {
-  const { isCartOpen, setIsCartOpen, cart, removeFromCart, user, profile, createOrderRequest, clearCart } = useStore();
+  const { isCartOpen, setIsCartOpen, cart, removeFromCart, user, profile, createOrderRequest, clearCart, addToast } = useStore();
   const [checkoutStep, setCheckoutStep] = useState<"cart" | "form" | "success">("cart");
   const [isProcessing, setIsProcessing] = useState(false);
   // ... rest of state ...
@@ -45,7 +45,7 @@ export function CartSidebar() {
       window.open(`https://wa.me/${phoneNumber}?text=${totalMsg}`, '_blank');
 
     } catch (err: unknown) {
-      alert("Error al enviar solicitud: " + (err instanceof Error ? err.message : "Error desconocido"));
+      addToast("Error al enviar solicitud: " + (err instanceof Error ? err.message : "Error desconocido"), "error");
     } finally {
       setIsProcessing(false);
     }

@@ -61,6 +61,12 @@ export interface OrderRequest {
   created_at: string;
 }
 
+export interface Toast {
+  id: string;
+  message: string;
+  type: 'success' | 'error' | 'info';
+}
+
 type StoreContextType = {
   isLeftSidebarOpen: boolean;
   setIsLeftSidebarOpen: (val: boolean) => void;
@@ -112,6 +118,9 @@ type StoreContextType = {
   rejectOrderRequest: (id: string) => Promise<void>;
   markRequestAsSeen: (id: string) => Promise<void>;
   markOrderAsSeen: (id: string) => Promise<void>;
+  toasts: Toast[];
+  addToast: (message: string, type?: 'success' | 'error' | 'info') => void;
+  removeToast: (id: string) => void;
   isInitialLoading: boolean;
 };
 
@@ -136,6 +145,21 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   // Products State
   const [products, setProducts] = useState<Product[]>([]);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [toasts, setToasts] = useState<Toast[]>([]);
+
+  const addToast = useCallback((message: string, type: 'success' | 'error' | 'info' = 'info') => {
+    const id = Math.random().toString(36).substr(2, 9);
+    setToasts(prev => [...prev, { id, message, type }]);
+    
+    // Auto-remove after 4 seconds
+    setTimeout(() => {
+      setToasts(prev => prev.filter(t => t.id !== id));
+    }, 4000);
+  }, []);
+
+  const removeToast = useCallback((id: string) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  }, []);
 
   const fetchProducts = useCallback(async () => {
     const { data, error } = await supabase
@@ -586,14 +610,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (!error) await fetchOrderRequests();
   }, [fetchOrderRequests]);
 
-  const markOrderAsSeen = useCallback(async (orderId: string) => {
-    const { error } = await supabase
-      .from('pedidos')
-      .update({ visto: true })
-      .eq('id', orderId);
-    if (!error) await fetchAllOrders();
-  }, [fetchAllOrders]);
-
   useEffect(() => {
     if (isAdmin) {
       fetchOrderRequests();
@@ -673,7 +689,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         approveOrderRequest,
         rejectOrderRequest,
         markRequestAsSeen,
-        markOrderAsSeen
+        markOrderAsSeen,
+        toasts,
+        addToast,
+        removeToast
       }}
     >
       {children}

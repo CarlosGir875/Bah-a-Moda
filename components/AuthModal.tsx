@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, User, LogIn, UserPlus, Package } from "lucide-react";
+import { X, User, LogIn, UserPlus, Package, Eye, EyeOff, Check } from "lucide-react";
 import { useStore } from "@/lib/store";
 
 export function AuthModal() {
-  const { isAuthModalOpen, setIsAuthModalOpen, signIn, signUp, resetPassword, updateUserPassword } = useStore();
+  const { isAuthModalOpen, setIsAuthModalOpen, signIn, signUp, resetPassword, updateUserPassword, addToast } = useStore();
   const [mode, setMode] = useState<"login" | "register" | "reset" | "new-password">("login");
   const [formData, setFormData] = useState({ 
     email: "", 
@@ -20,6 +20,8 @@ export function AuthModal() {
   const [resetSent, setResetSent] = useState(false);
   const [emailConfirmSent, setEmailConfirmSent] = useState(false);
   const [welcomeName, setWelcomeName] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Detect recovery flow
   useEffect(() => {
@@ -57,7 +59,7 @@ export function AuthModal() {
           throw new Error("Las contraseñas no coinciden");
         }
         await updateUserPassword(formData.password);
-        alert("¡Contraseña actualizada con éxito! Ya puedes iniciar sesión.");
+        addToast("¡Contraseña actualizada con éxito!", "success");
         setMode("login");
       }
     } catch (error: any) {
@@ -66,7 +68,7 @@ export function AuthModal() {
         setEmailConfirmSent(true);
         return;
       }
-      alert(error.message || "Ocurrió un error");
+      addToast(error.message || "Ocurrió un error", "error");
     } finally {
       setLoading(false);
     }
@@ -251,28 +253,46 @@ export function AuthModal() {
                       </button>
                     )}
                   </div>
-                  <input
-                    required
-                    type="password"
-                    placeholder="••••••••"
-                    value={formData.password}
-                    onChange={e => setFormData({ ...formData, password: e.target.value })}
-                    className="w-full border border-gray-200 bg-gray-50 px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black transition-all"
-                  />
+                  <div className="relative">
+                    <input
+                      required
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      value={formData.password}
+                      onChange={e => setFormData({ ...formData, password: e.target.value })}
+                      className="w-full border border-gray-200 bg-gray-50 px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black transition-all pr-12"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black transition-colors"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
               )}
 
               {mode === "new-password" && (
                 <div>
                   <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">Confirmar Nueva Contraseña</label>
-                  <input
-                    required
-                    type="password"
-                    placeholder="••••••••"
-                    value={formData.confirmPassword}
-                    onChange={e => setFormData({ ...formData, confirmPassword: e.target.value })}
-                    className="w-full border border-gray-200 bg-gray-50 px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black transition-all"
-                  />
+                  <div className="relative">
+                    <input
+                      required
+                      type={showConfirmPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      value={formData.confirmPassword}
+                      onChange={e => setFormData({ ...formData, confirmPassword: e.target.value })}
+                      className="w-full border border-gray-200 bg-gray-50 px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black transition-all pr-12"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black transition-colors"
+                    >
+                      {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
               )}
 
