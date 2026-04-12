@@ -19,6 +19,7 @@ export function AuthModal() {
   const [loading, setLoading] = useState(false);
   const [resetSent, setResetSent] = useState(false);
   const [emailConfirmSent, setEmailConfirmSent] = useState(false);
+  const [welcomeName, setWelcomeName] = useState<string | null>(null);
 
   // Detect recovery flow
   useEffect(() => {
@@ -42,11 +43,12 @@ export function AuthModal() {
         setIsAuthModalOpen(false);
       } else if (mode === "register") {
         await signUp(formData.email, formData.password, formData.name, {
-          telefono: formData.telefono,
+          celular: formData.telefono,
           direccion: formData.direccion,
           punto_encuentro: formData.punto_encuentro
-        });
-        setIsAuthModalOpen(false);
+        } as any);
+        setWelcomeName(formData.name);
+        // We don't close immediately to show the welcome screen
       } else if (mode === "reset") {
         await resetPassword(formData.email);
         setResetSent(true);
@@ -97,7 +99,43 @@ export function AuthModal() {
           </div>
 
           {/* Body */}
-          {emailConfirmSent ? (
+          {welcomeName ? (
+            <div className="p-10 text-center space-y-6 animate-in fade-in zoom-in duration-500">
+              <div className="relative mx-auto w-24 h-24">
+                <div className="absolute inset-0 bg-black rounded-full animate-ping opacity-20"></div>
+                <div className="relative bg-black text-white rounded-full w-full h-full flex items-center justify-center shadow-2xl">
+                  <User className="w-10 h-10" strokeWidth={1.5} />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <h3 className="text-2xl font-black uppercase tracking-tighter text-black leading-none">
+                  ¡BIENVENIDA, {welcomeName.split('')[0] === welcomeName.split('')[0].toUpperCase() ? welcomeName.split(' ')[0] : welcomeName.toUpperCase()}!
+                </h3>
+                <p className="text-[11px] text-gray-500 font-bold uppercase tracking-[0.2em]">Ya eres parte de Bahía Moda</p>
+              </div>
+
+              <div className="py-4 px-6 bg-gray-50 rounded-2xl border border-gray-100 flex items-center gap-4 text-left">
+                <div className="bg-white p-2 rounded-lg shadow-sm border border-gray-100">
+                  <Package className="w-5 h-5 text-black" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-black">Explora el Catálogo</p>
+                  <p className="text-[9px] text-gray-500 font-medium">Tus datos de entrega ya están listos.</p>
+                </div>
+              </div>
+
+              <button 
+                onClick={() => {
+                  setWelcomeName(null);
+                  setIsAuthModalOpen(false);
+                }}
+                className="w-full bg-black text-white font-black text-[11px] uppercase tracking-[0.3em] py-5 rounded-2xl hover:bg-gray-900 transition-all shadow-xl hover:scale-[1.02] active:scale-95"
+              >
+                EMPEZAR A COMPRAR
+              </button>
+            </div>
+          ) : emailConfirmSent ? (
             <div className="p-8 text-center space-y-4 animate-in fade-in duration-500">
               <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-3xl">✅</span>
