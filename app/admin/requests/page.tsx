@@ -25,6 +25,7 @@ export default function AdminRequestsPage() {
     fetchOrderRequests, 
     approveOrderRequest, 
     rejectOrderRequest,
+    markRequestAsSeen,
     authLoading 
   } = useStore();
   const router = useRouter();
@@ -35,6 +36,14 @@ export default function AdminRequestsPage() {
       fetchOrderRequests();
     }
   }, [isAdmin, fetchOrderRequests]);
+
+  // Marcar como visto automáticamente al entrar
+  useEffect(() => {
+    const unseenPendientes = orderRequests.filter(r => r.estado === 'pendiente' && !r.visto);
+    if (unseenPendientes.length > 0) {
+      unseenPendientes.forEach(r => markRequestAsSeen(r.id));
+    }
+  }, [orderRequests, markRequestAsSeen]);
 
   if (authLoading) {
     return (

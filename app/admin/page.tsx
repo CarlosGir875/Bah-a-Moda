@@ -4,13 +4,59 @@ import { useStore } from "@/lib/store";
 import { CATEGORY_MAPPING, Product } from "@/lib/mockData";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Plus, Package, CheckSquare, Square, Trash2, ImagePlus, Calendar, Eye, Search, Pencil, ArrowUpRight, Inbox } from "lucide-react";
+import { Plus, Package, CheckSquare, Square, Trash2, ImagePlus, Calendar, Eye, Search, Pencil, ArrowUpRight, Inbox, Bell, BellOff } from "lucide-react";
 import { ProductCard } from "@/components/ProductCard";
 import { EditProductModal } from "@/components/admin/EditProductModal";
+import { registerPush, subscribeUser } from "@/lib/push";
 
 export default function AdminDashboard() {
   const { user, isAdmin, authLoading, addProduct, uploadProductImages, products, deleteProduct, orderRequests } = useStore();
   const router = useRouter();
+
+  // Notification State
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [subscribing, setSubscribing] = useState(false);
+  const [testing, setTesting] = useState(false);
+
+  useEffect(() => {
+    // Register SW on load
+    registerPush();
+  }, []);
+
+  const handleSubscribe = async () => {
+    setSubscribing(true);
+    try {
+      const sub = await subscribeUser();
+      if (sub) {
+        setIsSubscribed(true);
+        alert("¡Notificaciones activadas en este dispositivo!");
+      }
+    } catch (error) {
+      alert("Error al activar notificaciones. Asegúrate de estar en HTTPS y permitir los permisos.");
+    } finally {
+      setSubscribing(false);
+    }
+  };
+
+  const handleTestNotification = async () => {
+    setTesting(true);
+    try {
+      const res = await fetch('/api/push/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: "¡Prueba de Bahía Moda! 🔔",
+          body: "Si recibiste esto, tus notificaciones están configuradas correctamente.",
+          url: "/admin/requests"
+        })
+      });
+      if (res.ok) alert("Prueba enviada. Deberías recibirla en unos segundos.");
+    } catch (error) {
+      alert("Error al probar la notificación.");
+    } finally {
+      setTesting(false);
+    }
+  };
 
   // Lógica inteligente para el Badge de solicitudes
   const pendingCount = orderRequests.filter(r => r.estado === 'pendiente').length;
@@ -144,6 +190,44 @@ export default function AdminDashboard() {
             <p className="text-[10px] sm:text-sm text-gray-500 mt-1 sm:mt-2 font-medium">Gestor de Contenidos Sincronizado</p>
           </div>
           <div className="flex items-center gap-3 w-full sm:w-auto">
+             <button 
+               onClick={handleSubscribe}
+               disabled={subscribing || isSubscribed}
+               className={`p-3 rounded-2xl transition-all flex items-center gap-2 ${
+                 isSubscribed 
+                   ? 'bg-green-50 text-green-600 cursor-default' 
+                   : 'bg-amber-50 text-amber-600 hover:bg-amber-100'
+               }`}
+               title={isSubscribed ? "Notificaciones Activas" : "Activar Notificaciones Push"}
+             >
+                {subscribing ? (
+                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-amber-500 border-t-white" />
+                ) : isSubscribed ? (
+                  <Bell className="w-5 h-5 fill-current" />
+                ) : (
+                  <BellOff className="w-5 h-5" />
+                )}
+                <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">
+                  {isSubscribed ? 'Alertas OK' : 'Alertas Off'}
+                </span>
+             </button>
+
+             {isSubscribed && (
+               <button 
+                 onClick={handleTestNotification}
+                 disabled={testing}
+                 className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl hover:bg-indigo-100 transition-colors flex items-center gap-2"
+                 title="Mandar Notificación de Prueba"
+               >
+                 {testing ? (
+                   <div className="animate-spin rounded-full h-4 w-4 border-2 border-indigo-600 border-t-white" />
+                 ) : (
+                   <Sparkles className="w-4 h-4" />
+                 )}
+                 <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">Probar</span>
+               </button>
+             )}
+
              <button 
                onClick={() => router.push('/admin/requests')}
                className="relative p-3 bg-indigo-50 text-indigo-600 rounded-2xl hover:bg-indigo-100 transition-colors group flex items-center gap-2"
