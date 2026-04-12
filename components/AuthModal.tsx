@@ -237,11 +237,10 @@ export function AuthModal() {
                   />
                 </div>
               )}
+              {mode !== "reset" && mode !== "new-password" && (
                 <div>
                   <div className="flex justify-between items-center mb-2">
-                    <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500">
-                      {mode === "new-password" ? "Nueva Contraseña" : "Contraseña"}
-                    </label>
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500">Contraseña</label>
                     {mode === "login" && (
                       <button 
                         type="button"
