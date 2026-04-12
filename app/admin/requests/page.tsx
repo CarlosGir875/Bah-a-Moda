@@ -83,64 +83,52 @@ export default function AdminRequestsPage() {
   const pendingRequests = orderRequests.filter(r => r.estado === 'pendiente');
 
   return (
-    <div className="min-h-screen bg-[#fafafa] pb-24 selection:bg-indigo-100">
+    <div className="min-h-screen bg-white pb-24 selection:bg-indigo-100">
       
-      {/* LUXURY HEADER */}
-      <div className="bg-white/80 backdrop-blur-xl border-b border-gray-100 sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-6">
-            <button 
-              onClick={() => router.back()} 
-              className="group flex items-center gap-2 text-gray-400 hover:text-black transition-all"
-            >
-              <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-              <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">Volver</span>
-            </button>
-            <div className="h-6 w-px bg-gray-100" />
-            <div className="flex items-center gap-3">
-               <div className="bg-black p-2.5 rounded-2xl shadow-xl shadow-black/10">
-                 <Inbox className="w-5 h-5 text-white" />
-               </div>
-               <div>
-                 <h1 className="text-lg font-black uppercase tracking-tight leading-none text-gray-900">Bandeja de Solicitudes</h1>
-                 <p className="text-[9px] font-bold text-indigo-500 uppercase tracking-widest mt-1">Bahía Moda Intelligence</p>
-               </div>
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-2 sm:gap-4">
-             <div className="hidden md:flex flex-col items-end">
-                <span className="text-[8px] font-black uppercase tracking-widest text-gray-400">Estado del Sistema</span>
-                <div className="flex items-center gap-1.5 mt-0.5">
-                   <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-                   <span className="text-[10px] font-bold text-gray-900">Sincronizado</span>
-                </div>
+      {/* LUXURY BRUTALIST HEADER */}
+      <div className="bg-white border-b-4 border-black sticky top-0 z-50">
+        <div className="max-w-6xl mx-auto px-6 h-24 flex items-center justify-between">
+           <div className="flex items-center gap-4 sm:gap-6">
+             <button 
+               onClick={() => router.back()} 
+               className="group w-12 h-12 bg-black text-white rounded-xl flex items-center justify-center hover:bg-indigo-600 transition-colors shadow-[2px_2px_0px_0px_rgba(79,70,229,0.3)] hover:shadow-none translate-y-0 hover:translate-y-0.5 active:scale-95"
+             >
+               <ArrowLeft className="w-5 h-5" />
+             </button>
+             <div>
+               <h1 className="text-xl sm:text-2xl font-black uppercase tracking-tighter text-black leading-none">Reservas</h1>
+               <p className="text-[8px] sm:text-[10px] font-black text-indigo-600 uppercase tracking-[0.2em] mt-1.5">Tráfico de Entradas</p>
              </div>
-          </div>
+           </div>
+           
+           <div className="hidden sm:flex items-center gap-3 px-4 py-2 bg-zinc-100 rounded-lg border-2 border-black">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+              <span className="text-[10px] font-black text-black uppercase tracking-widest">Sync</span>
+           </div>
         </div>
       </div>
 
       <div className="max-w-5xl mx-auto px-6 mt-10 space-y-10">
         
         {/* EXECUTIVE STATS */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-           <div className="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm flex items-center gap-5">
-              <div className="w-14 h-14 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600">
-                 <TrendingUp className="w-6 h-6" />
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+           <div className="bg-white p-8 rounded-3xl border-[3px] border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex flex-col gap-4 transition-transform hover:-translate-y-1">
+              <div className="w-12 h-12 bg-black rounded-xl flex items-center justify-center text-white">
+                 <TrendingUp className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-[9px] font-black uppercase text-gray-400 tracking-widest mb-1">Por Confirmar</p>
-                <p className="text-3xl font-black text-gray-900 tracking-tighter">{pendingRequests.length}</p>
+                <p className="text-[10px] font-black uppercase text-gray-500 tracking-widest mb-1">Por Confirmar</p>
+                <p className="text-4xl font-black text-black tracking-tighter">{pendingRequests.length}</p>
               </div>
            </div>
-           <div className="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm flex items-center gap-5 sm:col-span-2">
-              <div className="w-14 h-14 bg-green-50 rounded-2xl flex items-center justify-center text-green-600">
-                 <CheckCircle2 className="w-6 h-6" />
+           <div className="bg-white p-8 rounded-3xl border-[3px] border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex flex-col gap-4 sm:col-span-2 transition-transform hover:-translate-y-1">
+              <div className="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center text-white border-2 border-black">
+                 <CheckCircle2 className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-[9px] font-black uppercase text-gray-400 tracking-widest mb-1">Guía Ejecutiva</p>
-                <p className="text-xs font-bold text-gray-600 leading-relaxed">
-                  Confirma las solicitudes para generar el <strong>Código de Rastreo</strong> y notificar al cliente automáticamente en su portal.
+                <p className="text-[10px] font-black uppercase text-gray-500 tracking-widest mb-2">Comando Ejecutivo</p>
+                <p className="text-xs sm:text-sm font-bold text-gray-800 leading-relaxed">
+                  Verifica las solicitudes de clientes para ingresarlas. El sistema creará los pedidos oficiales y enviará un <strong>Rastreo en Vivo</strong> al portal del cliente.
                 </p>
               </div>
            </div>
@@ -149,12 +137,14 @@ export default function AdminRequestsPage() {
         {/* REQUESTS LIST */}
         <div className="space-y-6">
           {orderRequests.length === 0 ? (
-            <div className="py-32 text-center bg-white rounded-[3rem] border border-dashed border-gray-200">
-              <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Sparkles className="w-10 h-10 text-gray-200" />
+            <div className="py-32 text-center bg-zinc-900 rounded-[2rem] border-[4px] border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center justify-center mx-2 sm:mx-0">
+              <div className="w-24 h-24 bg-black rounded-3xl flex items-center justify-center mb-8 border border-zinc-800 shadow-inner">
+                <Inbox className="w-10 h-10 text-zinc-600" />
               </div>
-              <p className="font-black uppercase tracking-[0.2em] text-xs text-gray-400">Bandeja impecable</p>
-              <p className="text-[10px] text-gray-300 font-bold mt-2 uppercase">No hay nuevas solicitudes en el puerto</p>
+              <h3 className="text-xl sm:text-2xl font-black uppercase tracking-[0.3em] text-white">Bandeja Impecable</h3>
+              <p className="text-[10px] sm:text-[11px] font-bold text-zinc-500 uppercase tracking-widest mt-4 leading-loose">
+                No hay reservas pendientes<br/>El puerto está tranquilo
+              </p>
             </div>
           ) : (
             orderRequests.map((req, index) => (
