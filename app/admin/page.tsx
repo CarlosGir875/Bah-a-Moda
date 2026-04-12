@@ -4,7 +4,7 @@ import { useStore } from "@/lib/store";
 import { CATEGORY_MAPPING, Product } from "@/lib/mockData";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Plus, Package, CheckSquare, Square, Trash2, ImagePlus, Calendar, Eye, Search, Pencil, ArrowUpRight, Inbox, Bell, BellOff } from "lucide-react";
+import { Plus, Package, CheckSquare, Square, Trash2, ImagePlus, Calendar, Eye, Search, Pencil, ArrowUpRight, Inbox, Bell, BellOff, ShieldCheck, Key, ShieldAlert } from "lucide-react";
 import { ProductCard } from "@/components/ProductCard";
 import { EditProductModal } from "@/components/admin/EditProductModal";
 import { registerPush, subscribeUser } from "@/lib/push";
@@ -21,7 +21,42 @@ export default function AdminDashboard() {
   useEffect(() => {
     // Register SW on load
     registerPush();
+    fetchResetRequests();
   }, []);
+
+  const fetchResetRequests = async () => {
+    setLoadingResets(true);
+    try {
+      const { data, error } = await useStore.getState().supabase
+        .from('peticiones_reset')
+        .select('*')
+        .eq('estado', 'pendiente')
+        .order('created_at', { ascending: false });
+      
+      if (!error) setResetRequests(data || []);
+    } catch (err) {
+      console.error("Error fetching resets:", err);
+    } finally {
+      setLoadingResets(false);
+    }
+  };
+
+  const handleApproveReset = async (requestId: string) => {
+    try {
+      const res = await fetch('/api/auth/approve-reset', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requestId })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      addToast("✅ Solicitud aprobada con éxito", "success");
+      fetchResetRequests(); // Refresh list
+    } catch (err: any) {
+      addToast(err.message || "Error al aprobar", "error");
+    }
+  };
 
   const handleSubscribe = async () => {
     setSubscribing(true);
@@ -78,9 +113,11 @@ export default function AdminDashboard() {
   });
 
   // NEW INVENTORY STATE
-  const [activeTab, setActiveTab] = useState<'upload' | 'inventory'>('upload');
+  const [activeTab, setActiveTab] = useState<'upload' | 'inventory' | 'resets'>('upload');
   const [searchTerm, setSearchTerm] = useState("");
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [resetRequests, setResetRequests] = useState<any[]>([]);
+  const [loadingResets, setLoadingResets] = useState(false);
 
   // 1. loading state while Supabase checks the session
   if (authLoading) {
@@ -242,23 +279,27 @@ export default function AdminDashboard() {
                   </div>
                 )}
              </button>
-             <div className="flex bg-gray-200/50 p-1 rounded-xl flex-1 sm:w-auto">
-             <button
-                onClick={() => setActiveTab('upload')}
-                className={`flex-1 sm:px-6 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'upload' ? 'bg-white shadow-sm text-black' : 'text-gray-500 hover:text-black'}`}
-             >
-                Subir Producto
-             </button>
-             <button
-                onClick={() => setActiveTab('inventory')}
-                className={`flex-1 sm:px-6 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'inventory' ? 'bg-white shadow-sm text-black' : 'text-gray-500 hover:text-black'}`}
-             >
-                Mi Inventario
-             </button>
-             <div className="absolute left-[33.3%] top-1 bottom-1 w-1/3 bg-transparent pointer-events-none transition-all duration-300" 
-                  style={{ transform: activeTab === 'upload' ? 'translateX(-100%)' : activeTab === 'inventory' ? 'translateX(100%)' : 'none' }}>
-             </div>
-           </div>
+             <div className="flex bg-gray-200/50 p-1 rounded-xl w-full">
+              <button
+                 onClick={() => setActiveTab('upload')}
+                 className={`flex-1 py-2.5 rounded-lg text-[9px] sm:text-xs font-black uppercase tracking-[0.1em] transition-all flex items-center justify-center gap-1 ${activeTab === 'upload' ? 'bg-white shadow-sm text-black' : 'text-gray-500 hover:text-black'}`}
+              >
+                 <Plus className="w-3 h-3 sm:hidden" /> <span className="hidden sm:inline">Subir Producto</span><span className="sm:hidden">Subir</span>
+              </button>
+              <button
+                 onClick={() => setActiveTab('inventory')}
+                 className={`flex-1 py-2.5 rounded-lg text-[9px] sm:text-xs font-black uppercase tracking-[0.1em] transition-all flex items-center justify-center gap-1 ${activeTab === 'inventory' ? 'bg-white shadow-sm text-black' : 'text-gray-500 hover:text-black'}`}
+              >
+                 <Package className="w-3 h-3 sm:hidden" /> <span className="hidden sm:inline">Mi Inventario</span><span className="sm:hidden">Stock</span>
+              </button>
+              <button
+                 onClick={() => setActiveTab('resets')}
+                 className={`flex-1 py-2.5 rounded-lg text-[9px] sm:text-xs font-black uppercase tracking-[0.1em] transition-all flex items-center justify-center gap-1 relative ${activeTab === 'resets' ? 'bg-white shadow-sm text-indigo-600' : 'text-gray-500 hover:text-black'}`}
+              >
+                 <ShieldCheck className="w-3 h-3 sm:hidden" /> <span className="hidden sm:inline">Seguridad (Reset)</span><span className="sm:hidden">Reset</span>
+                 {resetRequests.length > 0 && <span className="absolute -top-1 -right-1 w-2 h-2 bg-indigo-500 rounded-full animate-pulse" />}
+              </button>
+            </div>
         </div>
       </div>
         
@@ -625,6 +666,85 @@ export default function AdminDashboard() {
             </div>
           </div>
         )}
+
+        {activeTab === 'resets' && (
+          <div className="p-6 sm:p-10 space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+               <div>
+                 <h2 className="text-xl font-black uppercase tracking-tight text-black flex items-center gap-2">
+                   <ShieldCheck className="w-6 h-6 text-indigo-500" /> Solicitudes de Acceso
+                 </h2>
+                 <p className="text-xs text-gray-500 font-medium font-bold uppercase tracking-tight">Validación manual de contraseñas olvidadas</p>
+               </div>
+               <button 
+                 onClick={fetchResetRequests}
+                 className="p-2.5 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors border border-gray-100 flex items-center gap-2"
+               >
+                 <ArrowUpRight className="w-4 h-4 text-gray-400 rotate-45" />
+                 <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Refrescar</span>
+               </button>
+             </div>
+
+             {loadingResets ? (
+               <div className="py-20 flex flex-col items-center justify-center text-gray-400">
+                 <div className="animate-spin rounded-full h-8 w-8 border-2 border-indigo-500 border-t-transparent mb-4" />
+                 <p className="text-[10px] font-black uppercase tracking-widest">Buscando solicitudes...</p>
+               </div>
+             ) : resetRequests.length === 0 ? (
+               <div className="py-20 flex flex-col items-center justify-center text-center space-y-4">
+                 <div className="bg-slate-50 p-6 rounded-[3rem]">
+                   <ShieldAlert className="w-12 h-12 text-slate-200" />
+                 </div>
+                 <div className="space-y-1">
+                   <p className="text-sm font-black text-slate-400 uppercase tracking-tight">Todo bajo control</p>
+                   <p className="text-[9px] text-slate-300 font-bold uppercase tracking-widest">No hay peticiones de recuperación pendientes</p>
+                 </div>
+               </div>
+             ) : (
+               <div className="grid grid-cols-1 gap-4">
+                 {resetRequests.map((req) => (
+                   <div key={req.id} className="bg-white border border-gray-100 p-6 rounded-[2.5rem] shadow-sm hover:shadow-md transition-all flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 group">
+                     <div className="flex items-center gap-5">
+                       <div className="bg-indigo-50 p-4 rounded-3xl text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                         <Key className="w-6 h-6" />
+                       </div>
+                       <div>
+                         <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">CÓDIGO: <span className="text-indigo-600 group-hover:text-indigo-400">#{req.token}</span></p>
+                         <h3 className="text-base font-black text-black uppercase tracking-tight break-all">{req.email}</h3>
+                         <div className="flex flex-wrap items-center gap-3 mt-2">
+                            <div className="px-3 py-1 bg-amber-50 rounded-full flex items-center gap-1.5 border border-amber-100">
+                               <div className="w-1.5 h-1.5 bg-amber-400 rounded-full" />
+                               <span className="text-[9px] font-black text-amber-600 uppercase">Punto: {req.punto_encuentro}</span>
+                            </div>
+                            <span className="text-[9px] text-gray-300 font-bold uppercase tracking-[0.2em]">{new Date(req.created_at).toLocaleDateString()}</span>
+                         </div>
+                       </div>
+                     </div>
+                     <button
+                       onClick={() => handleApproveReset(req.id)}
+                       className="w-full lg:w-auto bg-black text-white font-black text-[10px] uppercase tracking-[0.2em] px-8 py-4 rounded-2xl shadow-lg hover:shadow-indigo-200 hover:-translate-y-1 transition-all flex items-center justify-center gap-2"
+                     >
+                       <ShieldCheck className="w-4 h-4" /> Aprobar Acceso
+                     </button>
+                   </div>
+                 ))}
+               </div>
+             )}
+
+             <div className="bg-amber-50/50 p-6 rounded-[2.5rem] border border-amber-100 flex items-start gap-4">
+                <div className="bg-amber-100 p-2 rounded-xl mt-1">
+                   <ShieldAlert className="w-4 h-4 text-amber-600" />
+                </div>
+                <div>
+                   <p className="text-[11px] font-black text-amber-900 uppercase tracking-tight leading-none">Recordatorio de Seguridad</p>
+                   <p className="text-[10px] text-amber-700 leading-relaxed mt-2 font-medium">
+                     Solo aprueba estas solicitudes si el cliente te ha contactado por WhatsApp y has verificado su identidad. Al aprobar, el cliente podrá cambiar su contraseña inmediatamente desde su navegador.
+                   </p>
+                </div>
+             </div>
+          </div>
+        )}
+
 
       </div>
       
