@@ -132,9 +132,9 @@ export function AuthModal() {
         onClick={() => setIsAuthModalOpen(false)}
       />
       <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 pointer-events-none">
-        <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden pointer-events-auto animate-in zoom-in-95 fade-in duration-200">
+        <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden pointer-events-auto animate-in zoom-in-95 fade-in duration-200 flex flex-col max-h-[95vh]">
           {/* Header */}
-          <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100">
+          <div className="flex-shrink-0 flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100">
             <div className="flex items-center gap-3">
               <div className="bg-black text-white rounded-xl p-2">
                 <User className="w-5 h-5" />
@@ -151,7 +151,8 @@ export function AuthModal() {
             </button>
           </div>
 
-          {/* Body */}
+          {/* Scrollable Body */}
+          <div className="overflow-y-auto flex-1 custom-scrollbar relative">
           {welcomeName ? (
             <div className="p-10 text-center space-y-7 animate-in fade-in zoom-in duration-700 relative overflow-hidden">
               {/* Background Glow */}
@@ -212,7 +213,7 @@ export function AuthModal() {
               </button>
             </div>
           ) : mode === "reset" ? (
-            <div className="max-h-[70vh] overflow-y-auto px-6 py-4 custom-scrollbar">
+            <div className="px-6 py-4">
               {resetStep === "request" ? (
                 <form onSubmit={handleSubmit} className="space-y-4 px-1">
                   <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest text-center px-4 leading-none mb-6">
@@ -349,7 +350,7 @@ export function AuthModal() {
               )}
             </div>
           ) : (
-            <div className="max-h-[70vh] overflow-y-auto px-6 py-4 custom-scrollbar">
+            <div className="px-6 py-4">
               <form onSubmit={handleSubmit} className="space-y-4">
                 {mode === "register" && (
                   <>
@@ -521,6 +522,8 @@ export function AuthModal() {
               </button>
             </p>
           </div>
+          
+          </div> {/* End of Scrollable Body */}
         </div>
       </div>
     </>
