@@ -45,9 +45,11 @@ export function ProductSection() {
   return (
     <section id="catalog" className="w-full bg-white min-h-screen">
       <div className="max-w-7xl mx-auto px-2 sm:px-8 py-3 sm:py-6 w-full">
-      {/* Botones Rápidos (Quick Filters) */}
+      {/* Botones Rápidos (Quick Filters) Dinámicos */}
       <div className="flex overflow-x-auto hide-scrollbar gap-2 sm:gap-3 mb-4 sm:mb-6 pb-1 sm:pb-2">
-        {QUICK_FILTERS.map(f => (
+        {QUICK_FILTERS.filter(f => 
+          f === "Todo" || products.some(p => p.filterTag === f)
+        ).map(f => (
           <button 
             key={f} 
             onClick={() => {
