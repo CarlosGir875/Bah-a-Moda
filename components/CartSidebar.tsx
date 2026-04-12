@@ -5,39 +5,16 @@ import { X, Trash2, ShoppingBag, ArrowLeft, Send } from "lucide-react";
 import { useStore } from "@/lib/store";
 
 export function CartSidebar() {
-  const { isCartOpen, setIsCartOpen, cart, removeFromCart, user, profile, createOrder, clearCart } = useStore();
-  const [checkoutStep, setCheckoutStep] = useState<"cart" | "form">("cart");
+  const { isCartOpen, setIsCartOpen, cart, removeFromCart, user, profile, createOrderRequest, clearCart } = useStore();
+  const [checkoutStep, setCheckoutStep] = useState<"cart" | "form" | "success">("cart");
   const [isProcessing, setIsProcessing] = useState(false);
-  const [deliveryType, setDeliveryType] = useState<"domicilio" | "punto">("domicilio");
-  const [formData, setFormData] = useState({
-    nombre: "",
-    celular: "",
-    ubicacion: "",
-    horario: ""
-  });
+  // ... rest of state ...
 
-  // Auto-fill from profile
-  useEffect(() => {
-    if (user && profile && checkoutStep === "form") {
-      setFormData(prev => ({
-        ...prev,
-        nombre: prev.nombre || profile.nombre_completo || "",
-        celular: prev.celular || profile.telefono || "",
-        ubicacion: prev.ubicacion || profile.punto_encuentro || profile.direccion || ""
-      }));
-    }
-  }, [user, profile, checkoutStep]);
-
-  const cartTotal = cart.reduce((acc, item) => acc + (item.product.price * item.quantity), 0);
-  const depositAmount = cartTotal * 0.5;
-  const pendingBalance = cartTotal - depositAmount;
-
-  const confirmAndSendWhatsApp = async (e: React.FormEvent) => {
+  const confirmAndSendRequest = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsProcessing(true);
     
     try {
-      // 1. Guardar en Base de Datos (Si el usuario esta logueado o como invitado)
       const orderItems = cart.map(item => ({
         id: item.product.id,
         name: item.product.name,
@@ -46,55 +23,28 @@ export function CartSidebar() {
         size: item.size
       }));
 
-      await createOrder({
-        cliente_id: user?.id || null,
-        nombre_cliente: formData.nombre,
+      await createOrderRequest({
+        user_id: user?.id || null,
+        cliente_nombre: formData.nombre,
+        cliente_telefono: formData.celular,
+        cliente_email: user?.email || null,
         items: orderItems,
         total: cartTotal,
         anticipo: depositAmount,
-        inversion: 0, 
-        estado: 'pendiente', 
         tipo_entrega: deliveryType === 'domicilio' ? 'domicilio' : 'punto_encuentro',
-        ubicacion_entrega: formData.ubicacion,
+        ubicacion: formData.ubicacion,
       });
 
-      // 2. Preparar WhatsApp
-      const phoneNumber = "50242721798"; 
-      const itemsText = cart.map((item) => {
-        const pName = item.product.name ? item.product.name : `Producto Bahía ${item.product.category}`;
-        return `- ${item.quantity}x ${pName} ${item.size ? `(Talla: ${item.size})` : ''}`;
-      }).join("%0A");
-
-      const userEmail = user?.email || "Invitado (Sin correo)";
-      const accountName = profile?.nombre_completo || formData.nombre;
-
-      const totalMsg = 
-        `🌟 *SOLICITUD DE RESERVA - BAHÍA MODA*%0A` +
-        `------------------------%0A` +
-        `*📥 Datos de Cuenta:*%0A` +
-        `• Nombre: ${accountName}%0A` +
-        `• Correo: ${userEmail}%0A%0A` +
-        `*👤 Datos de Entrega:*%0A` +
-        `• Contacto: ${formData.nombre}%0A` +
-        `• WhatsApp: ${formData.celular}%0A` +
-        `• Modalidad: ${deliveryType === 'domicilio' ? '🚚 Domicilio' : '📍 Punto Seguro'}%0A` +
-        `• Ubicación: ${formData.ubicacion}%0A` +
-        `------------------------%0A` +
-        `*🛒 Detalle de Pedido:*%0A${itemsText}%0A` +
-        `------------------------%0A` +
-        `*💰 Resumen Financiero:*%0A` +
-        `📦 Valor Total: Q${cartTotal.toFixed(2)}%0A` +
-        `💳 *ANTICIPO (50%): Q${depositAmount.toFixed(2)}*%0A` +
-        `🚚 Saldo Final: Q${pendingBalance.toFixed(2)}%0A%0A` +
-        `_Hola Bahía Moda, acabo de confirmar mi pedido en la web. ¡Espero su respuesta para el pago!_`;
-
-      window.open(`https://wa.me/${phoneNumber}?text=${totalMsg}`, '_blank');
-      
       clearCart();
-      setIsCartOpen(false);
-      setTimeout(() => setCheckoutStep("cart"), 500);
+      setCheckoutStep("success");
+      
+      // Enviar a WhatsApp opcionalmente para avisar
+      const phoneNumber = "50242721798";
+      const totalMsg = `🌟 *SOLICITUD ENVIADA - BAHÍA MODA*%0A_Hola, acabo de enviar mi solicitud desde la web. Quedo a la espera de confirmación._`;
+      window.open(`https://wa.me/${phoneNumber}?text=${totalMsg}`, '_blank');
+
     } catch (err: unknown) {
-      alert("Error al procesar pedido: " + (err instanceof Error ? err.message : "Error desconocido"));
+      alert("Error al enviar solicitud: " + (err instanceof Error ? err.message : "Error desconocido"));
     } finally {
       setIsProcessing(false);
     }
@@ -196,7 +146,15 @@ export function CartSidebar() {
                   <span className="text-sm font-black text-indigo-700">Q{depositAmount.toFixed(2)}</span>
                 </div>
 
-                <div className="flex items-center justify-between mb-4 px-3">
+                <div className="flex items-center justify-between px-4 py-3 bg-white rounded-2xl border border-gray-100 shadow-sm transition-transform hover:scale-[1.02]">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></div>
+                    <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest">Anticipo Reserva (50%)</span>
+                  </div>
+                  <span className="text-sm font-black text-indigo-600">Q{depositAmount.toFixed(2)}</span>
+                </div>
+
+                <div className="flex items-center justify-between px-4 opacity-60">
                   <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Saldo Contra Entrega</span>
                   <span className="text-xs font-black text-gray-800">Q{pendingBalance.toFixed(2)}</span>
                 </div>
@@ -205,7 +163,7 @@ export function CartSidebar() {
                   onClick={() => setCheckoutStep("form")}
                   className="w-full bg-black text-white font-bold tracking-widest uppercase text-[11px] sm:text-xs py-4 rounded-xl hover:bg-gray-900 shadow-xl transition-all transform hover:-translate-y-0.5"
                 >
-                  Solicitar Reserva (Paso 1/2)
+                  Continuar a Datos de Envío
                 </button>
               </div>
             )}
@@ -227,7 +185,7 @@ export function CartSidebar() {
                  </p>
               </div>
 
-              <form id="checkout-form" onSubmit={confirmAndSendWhatsApp} className="space-y-6">
+              <form id="checkout-form" onSubmit={confirmAndSendRequest} className="space-y-6">
                  <div>
                    <label className="block text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-3">Modo de Entrega</label>
                    <div className="grid grid-cols-2 gap-2">
@@ -282,19 +240,18 @@ export function CartSidebar() {
             </div>
 
             <div className="p-4 sm:p-6 border-t border-gray-100 bg-gray-50 relative">
-              {/* Form submit link layer */}
               <button
                 type="submit"
                 form="checkout-form"
                 disabled={isProcessing}
-                className={`w-full bg-[#25D366] text-white font-bold tracking-widest uppercase text-xs py-4 rounded-xl flex items-center justify-center gap-2 hover:bg-[#128C7E] shadow-xl shadow-[#25D366]/20 transition-all transform hover:-translate-y-0.5 ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`w-full bg-black text-white font-bold tracking-widest uppercase text-xs py-4 rounded-xl flex items-center justify-center gap-2 hover:bg-zinc-900 shadow-xl transition-all transform hover:-translate-y-0.5 ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 {isProcessing ? (
                   <div className="animate-spin rounded-full h-5 w-5 border-2 border-white/20 border-t-white" />
                 ) : (
                   <Send className="w-5 h-5" />
                 )}
-                {isProcessing ? "Procesando Pedido..." : "Coordinar Reserva por WhatsApp"}
+                {isProcessing ? "Enviando Solicitud..." : "Enviar Pedido a Bahía Moda"}
               </button>
             </div>
           </>

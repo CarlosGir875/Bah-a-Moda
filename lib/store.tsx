@@ -45,6 +45,22 @@ export interface Order {
   created_at: string;
 }
 
+export interface OrderRequest {
+  id: string;
+  user_id: string | null;
+  cliente_nombre: string;
+  cliente_telefono: string;
+  cliente_email: string | null;
+  items: any[];
+  total: number;
+  anticipo: number;
+  tipo_entrega: string;
+  ubicacion: string;
+  estado: 'pendiente' | 'aprobado' | 'rechazado';
+  visto: boolean;
+  created_at: string;
+}
+
 type StoreContextType = {
   isLeftSidebarOpen: boolean;
   setIsLeftSidebarOpen: (val: boolean) => void;
@@ -89,6 +105,11 @@ type StoreContextType = {
   updateOrderStatus: (orderId: string, newStatus: string) => Promise<void>;
   allUsers: Profile[];
   fetchAllUsers: () => Promise<void>;
+  orderRequests: OrderRequest[];
+  createOrderRequest: (data: Omit<OrderRequest, 'id' | 'created_at' | 'estado' | 'visto'>) => Promise<void>;
+  fetchOrderRequests: () => Promise<void>;
+  approveOrderRequest: (id: string) => Promise<void>;
+  rejectOrderRequest: (id: string) => Promise<void>;
   isInitialLoading: boolean;
 };
 
@@ -506,6 +527,61 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   }, [user, fetchUserOrders]);
 
+  const [orderRequests, setOrderRequests] = useState<OrderRequest[]>([]);
+
+  const fetchOrderRequests = useCallback(async () => {
+    const { data, error } = await supabase
+      .from('solicitudes_pedidos')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (!error) setOrderRequests(data || []);
+  }, []);
+
+  const createOrderRequest = useCallback(async (data: Omit<OrderRequest, 'id' | 'created_at' | 'estado' | 'visto'>) => {
+    const { error } = await supabase
+      .from('solicitudes_pedidos')
+      .insert([data]);
+    if (error) throw error;
+  }, []);
+
+  const approveOrderRequest = useCallback(async (requestId: string) => {
+    const request = orderRequests.find(r => r.id === requestId);
+    if (!request) return;
+
+    // 1. Crear el pedido oficial
+    const { error: orderError } = await supabase
+      .from('pedidos')
+      .insert([{
+        cliente_id: request.user_id,
+        nombre_cliente: request.cliente_nombre,
+        items: request.items,
+        total: request.total,
+        anticipo: request.anticipo,
+        inversion: 0,
+        estado: 'recibido',
+        tipo_entrega: request.tipo_entrega,
+        ubicacion_entrega: request.ubicacion,
+        visto: false
+      }]);
+
+    if (orderError) throw orderError;
+
+    // 2. Marcar solicitud como aprobada
+    await supabase.from('solicitudes_pedidos').update({ estado: 'aprobado' }).eq('id', requestId);
+    
+    // 3. Actualizar listas
+    await fetchOrderRequests();
+    await fetchAllOrders();
+  }, [orderRequests, fetchOrderRequests, fetchAllOrders]);
+
+  const rejectOrderRequest = useCallback(async (id: string) => {
+    const { error } = await supabase
+      .from('solicitudes_pedidos')
+      .update({ estado: 'rechazado' })
+      .eq('id', id);
+    if (!error) await fetchOrderRequests();
+  }, [fetchOrderRequests]);
+
   return (
     <StoreContext.Provider
       value={{
@@ -552,7 +628,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         allUsers,
         fetchAllUsers,
         clearCart,
-        isInitialLoading
+        isInitialLoading,
+        orderRequests,
+        createOrderRequest,
+        fetchOrderRequests,
+        approveOrderRequest,
+        rejectOrderRequest
       }}
     >
       {children}

@@ -4,7 +4,7 @@ import { useStore } from "@/lib/store";
 import { CATEGORY_MAPPING, Product } from "@/lib/mockData";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Plus, Package, CheckSquare, Square, Trash2, ImagePlus, Calendar, Eye, Search, Pencil, ArrowUpRight } from "lucide-react";
+import { Plus, Package, CheckSquare, Square, Trash2, ImagePlus, Calendar, Eye, Search, Pencil, ArrowUpRight, Inbox } from "lucide-react";
 import { ProductCard } from "@/components/ProductCard";
 import { EditProductModal } from "@/components/admin/EditProductModal";
 
@@ -140,7 +140,20 @@ export default function AdminDashboard() {
             </h1>
             <p className="text-[10px] sm:text-sm text-gray-500 mt-1 sm:mt-2 font-medium">Gestor de Contenidos Sincronizado</p>
           </div>
-          <div className="flex bg-gray-200/50 p-1 rounded-xl w-full sm:w-auto">
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+             <button 
+               onClick={() => router.push('/admin/requests')}
+               className="relative p-3 bg-indigo-50 text-indigo-600 rounded-2xl hover:bg-indigo-100 transition-colors group flex items-center gap-2"
+               title="Ver Solicitudes Pendientes"
+             >
+                <Inbox className="w-5 h-5" />
+                <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">Solicitudes</span>
+                {/* NOTIFICATION BADGE */}
+                <div className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-white animate-pulse">
+                   !
+                </div>
+             </button>
+             <div className="flex bg-gray-200/50 p-1 rounded-xl flex-1 sm:w-auto">
              <button
                 onClick={() => setActiveTab('upload')}
                 className={`flex-1 sm:px-6 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'upload' ? 'bg-white shadow-sm text-black' : 'text-gray-500 hover:text-black'}`}
