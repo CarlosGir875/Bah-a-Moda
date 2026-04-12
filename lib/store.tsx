@@ -269,52 +269,27 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [fetchProfile]);
 
   const signUp = useCallback(async (email: string, password: string, fullName: string, metadata?: Partial<Profile>) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
-          ...metadata
-        },
-      },
+    // Llamar a la API de servidor (usa admin key, sin límite de rate)
+    const res = await fetch('/api/auth/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email,
+        password,
+        fullName,
+        celular: (metadata as any)?.celular ?? (metadata as any)?.telefono ?? null,
+        direccion: metadata?.direccion ?? null,
+        punto_encuentro: metadata?.punto_encuentro ?? null,
+      }),
     });
-    if (error) throw error;
 
-    // Helper to create/update profile in cliente_perfiles
-    const upsertProfile = async (userId: string) => {
-      const { error: profileError } = await supabase
-        .from('cliente_perfiles')
-        .upsert({
-          id: userId,
-          nombre_completo: fullName,
-          celular: metadata?.celular ?? (metadata as any)?.telefono ?? null,
-          direccion: metadata?.direccion ?? null,
-          punto_encuentro: metadata?.punto_encuentro ?? null,
-          rol: 'cliente',
-        }, { onConflict: 'id' });
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.error || 'Error al crear la cuenta');
 
-      if (profileError) {
-        console.error('Error creating profile:', JSON.stringify(profileError, null, 2));
-      }
-    };
-
-    // If session is null, try auto-sign-in (happens when email confirm is disabled but Supabase still delays session)
-    if (!data.session) {
-      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-      if (!signInError && signInData.user) {
-        await upsertProfile(signInData.user.id);
-        await fetchProfile(signInData.user.id);
-        return;
-      }
-      // Last resort: show confirmation screen
-      throw new Error('EMAIL_CONFIRMATION_REQUIRED');
-    }
-
-    if (data.user) {
-      await upsertProfile(data.user.id);
-      await fetchProfile(data.user.id);
-    }
+    // Iniciar sesión automáticamente tras el registro exitoso
+    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+    if (signInError) throw signInError;
+    if (signInData.user) await fetchProfile(signInData.user.id);
   }, [fetchProfile]);
 
   const signOut = useCallback(async () => {
