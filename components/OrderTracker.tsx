@@ -29,18 +29,25 @@ export function OrderTracker({ status, orderId }: OrderTrackerProps) {
   const progress = ((currentStepIndex + 1) / steps.length) * 100;
 
   return (
-    <div className="space-y-8 py-6">
+    <div className="space-y-8 py-6 relative">
       <div className="flex justify-between items-center px-2">
         <div>
+          <div className="flex items-center gap-2 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-100 mb-3 w-max shadow-sm">
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+            </span>
+            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-emerald-700">Sistema en Vivo</span>
+          </div>
           <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Estado del Pedido</p>
           <h4 className="text-xl font-black text-slate-900 uppercase tracking-tighter">
             {steps[currentStepIndex]?.label || 'Procesando'}
           </h4>
         </div>
         {orderId && (
-          <div className="bg-slate-900 text-white px-4 py-2 rounded-2xl shadow-lg">
-             <p className="text-[8px] font-black uppercase tracking-widest opacity-50 mb-0.5 text-center">Código</p>
-             <p className="text-sm font-black tracking-widest">#{orderId}</p>
+          <div className="bg-black text-white px-5 py-3 rounded-2xl shadow-2xl border border-zinc-800">
+             <p className="text-[9px] font-black uppercase tracking-[0.3em] opacity-60 mb-1 text-center">Ticket</p>
+             <p className="text-sm font-black tracking-widest font-mono">#{orderId}</p>
           </div>
         )}
       </div>

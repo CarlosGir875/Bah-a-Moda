@@ -618,9 +618,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       fetchOrderRequests();
     }
     
-    // SUSCRIPCIÓN REALTIME
+    // SUSCRIPCIÓN REALTIME GLOBAL (Pedidos + Solicitudes)
     const channel = supabase
-      .channel('solicitudes_pedidos_changes')
+      .channel('db_changes_global')
       .on('postgres_changes', { 
         event: '*', 
         schema: 'public', 
@@ -629,12 +629,20 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         fetchOrderRequests();
         if (user) fetchUserOrders();
       })
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'pedidos' 
+      }, () => {
+        if (isAdmin) fetchAllOrders();
+        if (user) fetchUserOrders();
+      })
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [isAdmin, user, fetchOrderRequests, fetchUserOrders]);
+  }, [isAdmin, user, fetchOrderRequests, fetchUserOrders, fetchAllOrders]);
 
   return (
     <StoreContext.Provider

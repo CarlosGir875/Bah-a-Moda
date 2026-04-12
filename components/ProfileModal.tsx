@@ -260,37 +260,52 @@ export function ProfileModal() {
                   </div>
                 </div>
                 
-                <div className="space-y-6 pb-20">
+                <div className="space-y-10 pb-20 relative">
+                   {/* Background watermark */}
+                   <div className="absolute inset-0 pointer-events-none opacity-[0.02] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]" />
+                   
                    {userOrders.map(o => (
-                     <div key={o.id} className="bg-white p-10 rounded-[4rem] border border-zinc-200 shadow-sm hover:shadow-xl transition-all group">
-                        <div className="flex justify-between items-center mb-8">
+                     <div key={o.id} className="relative bg-[#fffdfb] p-10 md:p-12 rounded-2xl border-[3px] border-zinc-900 shadow-[8px_8px_0px_#18181b] overflow-hidden transition-all hover:translate-y-1 hover:shadow-[4px_4px_0px_#18181b] group">
+                        
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10 border-b-2 border-dashed border-zinc-300 pb-8">
                            <div>
-                             <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">ID PEDIDO: {o.id.slice(0, 12).toUpperCase()}</p>
-                             <p className="text-xl font-black text-zinc-900">{new Date(o.created_at).toLocaleDateString('es-GT', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                             <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] mb-2">TICKET NO. {o.id.slice(0, 12).toUpperCase()}</p>
+                             <p className="text-2xl font-black text-zinc-900 uppercase italic tracking-tighter">{new Date(o.created_at).toLocaleDateString('es-GT', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
                            </div>
-                           <span className={`text-[12px] font-black uppercase px-6 py-2 rounded-full border shadow-sm ${getStatusColor(o.estado)}`}>{getStatusLabel(o.estado)}</span>
+                           <span className={`text-[11px] font-black uppercase tracking-[0.2em] px-6 py-3 rounded-xl border-2 ${getStatusColor(o.estado)}`}>{getStatusLabel(o.estado)}</span>
                         </div>
                         
                         {renderTracker(o)}
-                        <div className="space-y-4 mb-8 bg-zinc-50/50 p-8 rounded-3xl border border-zinc-100">
+                        
+                        <div className="mt-8 mb-8 border-y-2 border-dashed border-zinc-300 py-8 space-y-4">
+                           <div className="flex justify-between text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-4">
+                             <span>Artículo</span>
+                             <span>Importe</span>
+                           </div>
                            {o.items.map((item: any, i: number) => (
-                             <div key={i} className="flex justify-between text-sm font-bold text-zinc-700">
-                               <span className="flex items-center gap-3"><div className="w-2 h-2 bg-indigo-600 rounded-full" /> {item.quantity}x {item.name}</span>
-                               <span className="text-zinc-900 font-black">Q{item.price * item.quantity}</span>
+                             <div key={i} className="flex justify-between items-center text-sm font-bold text-zinc-800">
+                               <span className="flex items-center gap-4 text-xs font-black uppercase tracking-widest"><div className="w-1.5 h-1.5 bg-black" /> {item.quantity}x {item.name}</span>
+                               <span className="text-black font-black text-base font-mono">Q{item.price * item.quantity}</span>
                              </div>
                            ))}
                         </div>
-                        <div className="flex flex-col md:flex-row justify-between items-center gap-6 pt-8 border-t border-zinc-100">
-                           <div className="flex flex-col gap-1">
-                              <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Estado de Pago</p>
-                              <p className="text-2xl font-black text-indigo-600">Q{o.total} Total</p>
-                           </div>
-                           <div className="flex gap-4">
-                              <div className="text-right">
-                                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Anticipo / Reserva</p>
-                                <p className="text-lg font-black text-emerald-600">Q{o.anticipo}</p>
+                        
+                        <div className="flex flex-col md:flex-row justify-between items-end gap-6 pt-4">
+                           <div className="flex gap-8">
+                              <div className="text-left bg-zinc-100 p-4 rounded-xl border border-zinc-200">
+                                <p className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] mb-1">Abonado / Reserva</p>
+                                <p className="text-xl font-black text-emerald-600 font-mono">Q{o.anticipo}</p>
                               </div>
                            </div>
+                           <div className="text-right">
+                              <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] mb-2">Total del Pedido</p>
+                              <p className="text-4xl font-black text-black tracking-tighter font-mono">Q{o.total}</p>
+                           </div>
+                        </div>
+
+                        {/* Barcode representation */}
+                        <div className="mt-12 flex justify-center opacity-30 mix-blend-multiply pointer-events-none">
+                          <div className="h-12 w-3/4 max-w-sm bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjEwMCI+PHJlY3Qgd2lkdGg9IjIiIGhlaWdodD0iMTAwIiBmaWxsPSIjMDAwIi8+PC9zdmc+')] bg-repeat-x" />
                         </div>
                      </div>
                    ))}
