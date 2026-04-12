@@ -206,6 +206,9 @@ export function ProfileModal() {
                       <ShieldCheck className="w-5 h-5 text-emerald-400 group-hover:text-white" /> ADMINISTRADOR JEFE
                     </span>
                   </div>
+                )}
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 text-left">
                   {[
                     { label: "WhatsApp Contacto", icon: Phone, value: profile?.celular, edit: () => setIsEditingPhone(true), cancel: () => setIsEditingPhone(false), isEditing: isEditingPhone, val: newCelular, setVal: setNewCelular, save: async () => { await updateProfile({ celular: newCelular }); setIsEditingPhone(false); } },
                     { label: "Dirección de Entrega", icon: MapPin, value: profile?.direccion, edit: () => setIsEditingAddress(true), cancel: () => setIsEditingAddress(false), isEditing: isEditingAddress, val: newAddress, setVal: setNewAddress, save: async () => { await updateProfile({ direccion: newAddress }); setIsEditingAddress(false); } },
