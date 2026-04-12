@@ -2,12 +2,16 @@
 
 import { useStore } from "@/lib/store";
 import { useEffect, useState } from "react";
-import { ArrowLeft, User, Phone, MapPin, CreditCard, Search, ShoppingBag } from "lucide-react";
+import { ArrowLeft, User, Phone, MapPin, CreditCard, Search, ShoppingBag, X, ShieldAlert } from "lucide-react";
 import Link from "next/link";
 
 export default function AdminUsersPage() {
-  const { allUsers, fetchAllUsers, adminOrders, fetchAllOrders } = useStore();
+  const { allUsers, fetchAllUsers, adminOrders, fetchAllOrders, addToast } = useStore();
   const [search, setSearch] = useState("");
+  const [resetModalOpen, setResetModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [newPassword, setNewPassword] = useState("");
+  const [isResetting, setIsResetting] = useState(false);
 
   useEffect(() => {
     fetchAllUsers();
@@ -25,6 +29,31 @@ export default function AdminUsersPage() {
     const completed = userOrders.filter(o => o.estado === 'listo_entrega').length;
     const totalSpent = userOrders.reduce((acc, curr) => acc + (curr.estado === 'listo_entrega' ? Number(curr.total) : 0), 0);
     return { count: userOrders.length, completed, totalSpent };
+  };
+
+  const handleForceReset = async () => {
+    if (!selectedUser || newPassword.length < 6) {
+      addToast("La contraseña debe tener al menos 6 caracteres", "error");
+      return;
+    }
+    setIsResetting(true);
+    try {
+      const res = await fetch('/api/auth/force-reset', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: selectedUser.id, newPassword })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error al restablecer contraseña');
+      
+      addToast(`!Contraseña de ${selectedUser.nombre_completo} actualizada!`, "success");
+      setResetModalOpen(false);
+      setNewPassword("");
+    } catch (e: any) {
+      addToast(e.message, "error");
+    } finally {
+      setIsResetting(false);
+    }
   };
 
   return (
@@ -103,6 +132,15 @@ export default function AdminUsersPage() {
                      <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Invertido</p>
                    </div>
                 </div>
+
+                <div className="mt-6 pt-6 border-t border-gray-100">
+                   <button 
+                     onClick={() => { setSelectedUser(u); setResetModalOpen(true); }}
+                     className="w-full bg-red-50 text-red-600 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-colors flex items-center justify-center gap-2 group"
+                   >
+                     <ShieldAlert className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" /> FORZAR ACCESO
+                   </button>
+                </div>
               </div>
             );
           })}
@@ -116,6 +154,42 @@ export default function AdminUsersPage() {
           </div>
         )}
       </div>
+
+      {resetModalOpen && selectedUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-white rounded-[3rem] p-8 max-w-sm w-full shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
+            <button onClick={() => setResetModalOpen(false)} className="absolute top-6 right-6 p-2 bg-gray-100 rounded-full hover:bg-gray-200 text-gray-500 transition-colors">
+               <X className="w-4 h-4" />
+            </button>
+            <div className="mb-8">
+              <div className="w-12 h-12 bg-red-50 rounded-2xl flex items-center justify-center text-red-500 mb-4 shadow-sm">
+                <ShieldAlert className="w-6 h-6" />
+              </div>
+              <h3 className="text-2xl font-black uppercase tracking-tighter text-black leading-none mb-2">Forzar Acceso</h3>
+              <p className="text-xs text-gray-500 font-bold leading-relaxed">Asigna una nueva clave a <span className="text-black">{selectedUser.nombre_completo}</span>.</p>
+            </div>
+            <div className="space-y-4">
+               <div>
+                  <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 px-1">Nueva Contraseña Temporal</label>
+                  <input 
+                    type="text"
+                    value={newPassword}
+                    onChange={e => setNewPassword(e.target.value)}
+                    placeholder="Ej. Bahia456!"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-4 py-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-red-500 transition-all font-mono"
+                  />
+               </div>
+               <button 
+                 onClick={handleForceReset}
+                 disabled={isResetting}
+                 className={`w-full bg-red-600 text-white py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-[0_10px_20px_-10px_rgba(220,38,38,0.5)] hover:bg-red-700 hover:scale-[1.02] active:scale-95 transition-all flex justify-center items-center gap-2 mt-2 ${isResetting ? 'opacity-50 cursor-not-allowed' : ''}`}
+               >
+                 {isResetting ? 'APLICANDO...' : 'RESETEAR CONTRASEÑA'}
+               </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
