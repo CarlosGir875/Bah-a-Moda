@@ -411,7 +411,10 @@ export function AuthModal() {
                     {mode === "login" && (
                       <button 
                         type="button"
-                        onClick={() => setMode("reset")}
+                        onClick={() => {
+                          setMode("reset");
+                          setResetStep("request");
+                        }}
                         className="text-[9px] font-black uppercase tracking-tighter text-indigo-600 hover:underline"
                       >
                         ¿Olvidaste tu contraseña?
