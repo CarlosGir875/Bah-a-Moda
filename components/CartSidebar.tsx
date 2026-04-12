@@ -59,27 +59,34 @@ export function CartSidebar() {
       });
 
       // 2. Preparar WhatsApp
-      const phoneNumber = "50230000000"; // Reemplazar con el WhatsApp real sin '+'
+      const phoneNumber = "50242721798"; 
       const itemsText = cart.map((item) => {
         const pName = item.product.name ? item.product.name : `Producto Bahía ${item.product.category}`;
         return `- ${item.quantity}x ${pName} ${item.size ? `(Talla: ${item.size})` : ''}`;
       }).join("%0A");
 
+      const userEmail = user?.email || "Invitado (Sin correo)";
+      const accountName = profile?.nombre_completo || formData.nombre;
+
       const totalMsg = 
         `🌟 *SOLICITUD DE RESERVA - BAHÍA MODA*%0A` +
         `------------------------%0A` +
-        `*👤 Cliente:* ${formData.nombre}%0A` +
-        `*📱 Celular:* ${formData.celular}%0A` +
-        `*🚚 Entrega:* ${deliveryType === 'domicilio' ? 'A Domicilio' : '📍 Punto de Encuentro (Seguro)'}%0A` +
-        `*📍 Dirección/Punto:* ${formData.ubicacion}%0A` +
-        `*⏰ Horario:* ${formData.horario}%0A` +
+        `*📥 Datos de Cuenta:*%0A` +
+        `• Nombre: ${accountName}%0A` +
+        `• Correo: ${userEmail}%0A%0A` +
+        `*👤 Datos de Entrega:*%0A` +
+        `• Contacto: ${formData.nombre}%0A` +
+        `• WhatsApp: ${formData.celular}%0A` +
+        `• Modalidad: ${deliveryType === 'domicilio' ? '🚚 Domicilio' : '📍 Punto Seguro'}%0A` +
+        `• Ubicación: ${formData.ubicacion}%0A` +
         `------------------------%0A` +
-        `*🛒 Mi Compra:*%0A${itemsText}%0A` +
+        `*🛒 Detalle de Pedido:*%0A${itemsText}%0A` +
         `------------------------%0A` +
+        `*💰 Resumen Financiero:*%0A` +
         `📦 Valor Total: Q${cartTotal.toFixed(2)}%0A` +
-        `💳 *Anticipo Seguridad (50%): Q${depositAmount.toFixed(2)}*%0A` +
-        `🚚 Saldo Contra Entrega: Q${pendingBalance.toFixed(2)}%0A%0A` +
-        `_Hola Bahía Moda, quiero coordinar mi pedido en el Puerto. Ya tengo mis datos listos._`;
+        `💳 *ANTICIPO (50%): Q${depositAmount.toFixed(2)}*%0A` +
+        `🚚 Saldo Final: Q${pendingBalance.toFixed(2)}%0A%0A` +
+        `_Hola Bahía Moda, acabo de confirmar mi pedido en la web. ¡Espero su respuesta para el pago!_`;
 
       window.open(`https://wa.me/${phoneNumber}?text=${totalMsg}`, '_blank');
       
