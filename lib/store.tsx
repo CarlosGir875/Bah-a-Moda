@@ -560,7 +560,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const createOrderRequest = useCallback(async (data: Omit<OrderRequest, 'id' | 'created_at' | 'estado' | 'visto'>) => {
     const { error } = await supabase
       .from('solicitudes_pedidos')
-      .insert([data]);
+      .insert([{ ...data, estado: 'pendiente', visto: false }]);
     if (error) throw error;
   }, []);
 

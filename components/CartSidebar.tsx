@@ -55,7 +55,7 @@ export function CartSidebar() {
         total: cartTotal,
         anticipo: depositAmount,
         tipo_entrega: deliveryType === 'domicilio' ? 'domicilio' : 'punto_encuentro',
-        ubicacion: formData.ubicacion,
+        ubicacion: `${formData.ubicacion} | Horario: ${formData.horario}`,
       });
 
       clearCart();
@@ -256,8 +256,8 @@ export function CartSidebar() {
                  </div>
                  
                  <div>
-                   <label className="block text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Horario de Entrega</label>
-                   <input required type="text" placeholder="Ej. Mañana de 9am a 12pm" value={formData.horario} onChange={e => setFormData({...formData, horario: e.target.value})} className="w-full border border-gray-100 bg-gray-50 px-5 py-4 rounded-2xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-black transition-all" />
+                   <label className="block text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Preferencia de Horario</label>
+                   <input required type="text" placeholder="Ej. Por la mañana (10:00 AM - 12:00 PM)" value={formData.horario} onChange={e => setFormData({...formData, horario: e.target.value})} className="w-full border border-gray-100 bg-gray-50 px-5 py-4 rounded-2xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-black transition-all" />
                  </div>
               </form>
             </div>
