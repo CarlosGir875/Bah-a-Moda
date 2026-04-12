@@ -88,7 +88,7 @@ export function AuthModal() {
               </div>
               <div>
                 <h2 className="text-base font-black uppercase tracking-tight text-black">
-                  {mode === "login" ? "Iniciar Sesión" : mode === "register" ? "Crear Cuenta" : "Recuperar Acceso"}
+                  {mode === "login" ? "Iniciar Sesión" : mode === "register" ? "Crear Cuenta" : mode === "new-password" ? "Nueva Contraseña" : "Recuperar Acceso"}
                 </h2>
                 <p className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Bahía Moda</p>
               </div>
@@ -100,28 +100,34 @@ export function AuthModal() {
 
           {/* Body */}
           {welcomeName ? (
-            <div className="p-10 text-center space-y-6 animate-in fade-in zoom-in duration-500">
+            <div className="p-10 text-center space-y-7 animate-in fade-in zoom-in duration-700 relative overflow-hidden">
+              {/* Background Glow */}
+              <div className="absolute -top-20 -right-20 w-40 h-40 bg-black/5 rounded-full blur-3xl"></div>
+              <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-black/5 rounded-full blur-3xl"></div>
+
               <div className="relative mx-auto w-24 h-24">
-                <div className="absolute inset-0 bg-black rounded-full animate-ping opacity-20"></div>
-                <div className="relative bg-black text-white rounded-full w-full h-full flex items-center justify-center shadow-2xl">
-                  <User className="w-10 h-10" strokeWidth={1.5} />
+                <div className="absolute inset-0 bg-black rounded-full animate-ping opacity-10"></div>
+                <div className="relative bg-black text-white rounded-full w-full h-full flex items-center justify-center shadow-2xl transition-transform hover:scale-110 duration-500">
+                  <User className="w-10 h-10" strokeWidth={1.2} />
                 </div>
               </div>
               
-              <div className="space-y-2">
-                <h3 className="text-2xl font-black uppercase tracking-tighter text-black leading-none">
-                  ¡BIENVENIDA, {welcomeName.split('')[0] === welcomeName.split('')[0].toUpperCase() ? welcomeName.split(' ')[0] : welcomeName.toUpperCase()}!
+              <div className="space-y-3 relative z-10">
+                <h3 className="text-3xl font-black uppercase tracking-tighter text-black leading-none italic">
+                  ¡BIENVENIDA!
                 </h3>
-                <p className="text-[11px] text-gray-500 font-bold uppercase tracking-[0.2em]">Ya eres parte de Bahía Moda</p>
+                <p className="text-xl font-bold text-gray-900 uppercase tracking-tight">{welcomeName.split(' ')[0]}</p>
+                <div className="h-0.5 w-12 bg-black mx-auto rounded-full"></div>
+                <p className="text-[10px] text-gray-500 font-black uppercase tracking-[0.3em] pt-2">Ya eres parte de la familia <br/> Bahía Moda</p>
               </div>
 
-              <div className="py-4 px-6 bg-gray-50 rounded-2xl border border-gray-100 flex items-center gap-4 text-left">
-                <div className="bg-white p-2 rounded-lg shadow-sm border border-gray-100">
+              <div className="py-5 px-6 bg-gray-50 rounded-[2rem] border border-gray-100 flex items-center gap-4 text-left shadow-sm">
+                <div className="bg-white p-3 rounded-2xl shadow-sm border border-gray-100 flex-shrink-0">
                   <Package className="w-5 h-5 text-black" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-black">Explora el Catálogo</p>
-                  <p className="text-[9px] text-gray-500 font-medium">Tus datos de entrega ya están listos.</p>
+                  <p className="text-[11px] font-black uppercase tracking-widest text-black">Catálogo Completo</p>
+                  <p className="text-[9px] text-gray-500 font-bold uppercase tracking-tighter">Haz tu primer pedido hoy</p>
                 </div>
               </div>
 
@@ -130,7 +136,7 @@ export function AuthModal() {
                   setWelcomeName(null);
                   setIsAuthModalOpen(false);
                 }}
-                className="w-full bg-black text-white font-black text-[11px] uppercase tracking-[0.3em] py-5 rounded-2xl hover:bg-gray-900 transition-all shadow-xl hover:scale-[1.02] active:scale-95"
+                className="w-full bg-black text-white font-black text-xs uppercase tracking-[0.4em] py-6 rounded-[2rem] hover:bg-gray-900 transition-all shadow-2xl hover:scale-[1.02] active:scale-95 border-b-4 border-gray-800"
               >
                 EMPEZAR A COMPRAR
               </button>
@@ -218,21 +224,24 @@ export function AuthModal() {
                     </div>
                   </>
                 )}
-              <div>
-                <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">Correo Electrónico</label>
-                <input
-                  required
-                  type="email"
-                  placeholder="tuemail@gmail.com"
-                  value={formData.email}
-                  onChange={e => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full border border-gray-200 bg-gray-50 px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black transition-all"
-                />
-              </div>
-              {mode !== "reset" && (
+              {mode !== "new-password" && (
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">Correo Electrónico</label>
+                  <input
+                    required
+                    type="email"
+                    placeholder="tuemail@gmail.com"
+                    value={formData.email}
+                    onChange={e => setFormData({ ...formData, email: e.target.value })}
+                    className="w-full border border-gray-200 bg-gray-50 px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black transition-all"
+                  />
+                </div>
+              )}
                 <div>
                   <div className="flex justify-between items-center mb-2">
-                    <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500">Contraseña</label>
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                      {mode === "new-password" ? "Nueva Contraseña" : "Contraseña"}
+                    </label>
                     {mode === "login" && (
                       <button 
                         type="button"
@@ -254,6 +263,20 @@ export function AuthModal() {
                 </div>
               )}
 
+              {mode === "new-password" && (
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">Confirmar Nueva Contraseña</label>
+                  <input
+                    required
+                    type="password"
+                    placeholder="••••••••"
+                    value={formData.confirmPassword}
+                    onChange={e => setFormData({ ...formData, confirmPassword: e.target.value })}
+                    className="w-full border border-gray-200 bg-gray-50 px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black transition-all"
+                  />
+                </div>
+              )}
+
               <button
                 type="submit"
                 disabled={loading}
@@ -262,9 +285,9 @@ export function AuthModal() {
                 {loading ? (
                   <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/20 border-t-white" />
                 ) : (
-                  mode === "login" ? <LogIn className="w-4 h-4" /> : mode === "register" ? <UserPlus className="w-4 h-4" /> : "Enviar Instrucciones"
+                  mode === "login" ? <LogIn className="w-4 h-4" /> : mode === "register" ? <UserPlus className="w-4 h-4" /> : mode === "new-password" ? <Check className="w-4 h-4" /> : "Enviar Instrucciones"
                 )}
-                {loading ? "Procesando..." : (mode === "login" ? "Entrar a mi Cuenta" : mode === "register" ? "Crear Cuenta Gratis" : "Recuperar Contraseña")}
+                {loading ? "Procesando..." : (mode === "login" ? "Entrar a mi Cuenta" : mode === "register" ? "Crear Cuenta Gratis" : mode === "new-password" ? "Actualizar Contraseña" : "Recuperar Contraseña")}
               </button>
             </form>
           </div>
