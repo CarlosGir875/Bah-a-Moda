@@ -1,8 +1,9 @@
 "use client";
 
-import { X, LogOut, User, ShieldCheck, Mail, ArrowRight, ArrowLeft, Check, Phone, MapPin, Map, Package } from "lucide-react";
+import { X, LogOut, User, ShieldCheck, Mail, ArrowRight, ArrowLeft, Check, Phone, MapPin, Map, Package, Clock } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { useEffect, useState, useRef } from "react";
+import { OrderTracker } from "./OrderTracker";
 
 export function ProfileModal() {
   const { isProfileModalOpen, setIsProfileModalOpen, user, profile, isAdmin, signOut, updateProfile, uploadAvatar, userOrders, fetchUserOrders } = useStore();
@@ -56,6 +57,7 @@ export function ProfileModal() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
+      case 'pendiente': return 'bg-slate-100/50 text-slate-900 border-slate-200';
       case 'recibido': return 'bg-amber-100/50 text-amber-900 border-amber-200';
       case 'preparacion': return 'bg-blue-100/50 text-blue-900 border-blue-200';
       case 'en_transito': return 'bg-indigo-100/50 text-indigo-900 border-indigo-200';
@@ -67,51 +69,23 @@ export function ProfileModal() {
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'recibido': return 'Recibido';
-      case 'preparacion': return 'En Preparación';
-      case 'en_transito': return 'En Tránsito';
-      case 'listo_entrega': return 'Listo / Entregado';
+      case 'pendiente': return 'En Espera';
+      case 'recibido': return 'Confirmado';
+      case 'preparacion': return 'Preparación';
+      case 'en_transito': return 'En Camino';
+      case 'listo_entrega': return 'Entregado';
       case 'cancelado': return 'Cancelado';
       default: return status;
     }
   };
 
-  const renderTracker = (status: string) => {
-    if (status === 'cancelado') return (
-      <div className="bg-rose-50 border border-rose-100 rounded-2xl p-6 text-center mt-6 mb-8">
-        <p className="text-xs font-black uppercase tracking-widest text-rose-600">Este pedido ha sido cancelado.</p>
-      </div>
-    );
-    
-    const steps = ['recibido', 'preparacion', 'en_transito', 'listo_entrega'];
-    const labels = ['Recibida', 'Preparación', 'En Tránsito', 'Lista / Entregada'];
-    const currentIndex = steps.indexOf(status);
-    
+  const renderTracker = (order: any) => {
     return (
-      <div className="flex items-center justify-between mt-6 mb-16 relative px-4 md:px-8">
-         <div className="absolute left-4 right-4 md:left-8 md:right-8 top-1/2 -translate-y-1/2 h-1 bg-zinc-100 rounded-full" />
-         <div 
-           className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 h-1 bg-green-500 rounded-full transition-all duration-1000 ease-out"
-           style={{ width: `calc(${(currentIndex / (steps.length - 1)) * 100}% - 2rem)` }}
-         />
-         {steps.map((step, idx) => {
-           const isCompleted = idx <= currentIndex;
-           const isCurrent = idx === currentIndex;
-           return (
-             <div key={step} className="relative z-10 flex flex-col items-center group">
-               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs text-white shadow-sm transition-all duration-500 ring-4 ring-white ${isCompleted ? 'bg-green-500 font-bold scale-110' : 'bg-zinc-200 font-medium'}`}>
-                 {isCompleted ? <Check className="w-4 h-4" /> : idx + 1}
-               </div>
-               <span className={`absolute top-12 w-24 text-center text-[9px] uppercase tracking-widest font-black transition-colors ${isCurrent ? 'text-green-600' : isCompleted ? 'text-zinc-500' : 'text-zinc-300'}`}>
-                 {labels[idx]}
-               </span>
-             </div>
-           );
-         })}
+      <div className="mt-8 mb-4">
+        <OrderTracker status={order.estado} orderId={order.codigo_seguimiento} />
       </div>
     );
   };
-
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -297,7 +271,7 @@ export function ProfileModal() {
                            <span className={`text-[12px] font-black uppercase px-6 py-2 rounded-full border shadow-sm ${getStatusColor(o.estado)}`}>{getStatusLabel(o.estado)}</span>
                         </div>
                         
-                        {renderTracker(o.estado)}
+                        {renderTracker(o)}
                         <div className="space-y-4 mb-8 bg-zinc-50/50 p-8 rounded-3xl border border-zinc-100">
                            {o.items.map((item: any, i: number) => (
                              <div key={i} className="flex justify-between text-sm font-bold text-zinc-700">
