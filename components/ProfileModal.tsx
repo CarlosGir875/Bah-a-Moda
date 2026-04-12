@@ -127,8 +127,8 @@ export function ProfileModal() {
           </div>
 
           {/* Avatar move inside scroll */}
-          <div className="relative -mt-20 md:-mt-24 mb-10 flex justify-center z-10">
-            <div className="inline-flex items-center justify-center w-40 h-40 md:w-48 md:h-48 bg-slate-50 rounded-full border-[10px] border-slate-50 shadow-2xl overflow-hidden group relative">
+          <div className="relative -mt-16 md:-mt-20 mb-6 flex justify-center z-10">
+            <div className="inline-flex items-center justify-center w-32 h-32 md:w-40 md:h-40 bg-slate-50 rounded-full border-[8px] border-slate-50 shadow-2xl overflow-hidden group relative">
               <div className="w-full h-full bg-slate-100 flex items-center justify-center text-black">
                 {isUploading && (
                   <div className="absolute inset-0 bg-white/60 backdrop-blur-sm flex items-center justify-center z-20">
@@ -139,7 +139,7 @@ export function ProfileModal() {
                   <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover transition-transform group-hover:scale-110" />
                 ) : (
                   <div className="w-full h-full bg-slate-200 flex items-center justify-center">
-                    <span className="text-6xl font-black text-slate-900 uppercase tracking-tighter">{displayName?.charAt(0)}</span>
+                    <span className="text-5xl md:text-6xl font-black text-slate-900 uppercase tracking-tighter">{displayName?.charAt(0)}</span>
                   </div>
                 )}
               </div>
@@ -151,25 +151,25 @@ export function ProfileModal() {
               </button>
             </div>
           </div>
-          <div className="px-6 md:px-20 pb-16 pt-6 text-center">
+          <div className="px-5 md:px-12 pb-12 pt-4 text-center">
             
             {view === "overview" ? (
               <div className="animate-in fade-in slide-in-from-bottom-6 duration-700 max-w-5xl mx-auto">
-                <div className="mb-12">
+                <div className="mb-8">
                    {isEditingName ? (
-                     <div className="flex gap-2 justify-center max-w-md mx-auto">
-                        <input value={newName} onChange={e => setNewName(e.target.value)} className="flex-1 text-2xl font-black bg-zinc-50 p-4 rounded-3xl border-2 border-black outline-none" placeholder="Tu Nombre" />
-                        <button onClick={handleSaveName} className="p-4 bg-black text-white rounded-3xl active:scale-95 transition-all"><Check className="w-6 h-6" /></button>
-                        <button onClick={() => setIsEditingName(false)} className="p-4 bg-zinc-100 text-zinc-400 rounded-3xl active:scale-95 transition-all"><X className="w-6 h-6" /></button>
+                     <div className="flex gap-2 justify-center max-w-sm mx-auto">
+                        <input value={newName} onChange={e => setNewName(e.target.value)} className="flex-1 text-xl font-black bg-zinc-50 p-3 rounded-2xl border-2 border-black outline-none" placeholder="Tu Nombre" />
+                        <button onClick={handleSaveName} className="p-3 bg-black text-white rounded-2xl active:scale-95 transition-all"><Check className="w-5 h-5" /></button>
+                        <button onClick={() => setIsEditingName(false)} className="p-3 bg-zinc-100 text-zinc-400 rounded-2xl active:scale-95 transition-all"><X className="w-5 h-5" /></button>
                      </div>
                    ) : (
                      <div className="flex flex-col items-center">
-                       <div className="flex items-center gap-4 mb-2">
-                         <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter text-zinc-900">{displayName}</h2>
-                         <button onClick={() => setIsEditingName(true)} className="p-2 hover:bg-zinc-100 rounded-xl text-zinc-300 hover:text-zinc-900 transition-all active:scale-90" title="Editar Nombre"><User className="w-5 h-5" /></button>
+                       <div className="flex items-center justify-center gap-3 mb-2 w-full">
+                         <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-zinc-900 truncate max-w-[80%]">{displayName}</h2>
+                         <button onClick={() => setIsEditingName(true)} className="p-2 hover:bg-zinc-100 rounded-xl text-zinc-400 hover:text-zinc-900 transition-all active:scale-90" title="Editar Nombre"><User className="w-4 h-4" /></button>
                        </div>
-                       <div className="flex items-center gap-3 text-zinc-600 text-[11px] font-black uppercase tracking-[0.3em] bg-zinc-100 px-6 py-2 rounded-full border border-zinc-200">
-                         <Mail className="w-4 h-4 opacity-50" /> {user?.email}
+                       <div className="flex items-center gap-2 text-zinc-500 text-[10px] font-bold uppercase tracking-widest bg-zinc-100 px-4 py-1.5 rounded-full border border-zinc-200 max-w-full truncate">
+                         <Mail className="w-3.5 h-3.5 opacity-50 shrink-0" /> <span className="truncate">{user?.email}</span>
                        </div>
                      </div>
                    )}
@@ -183,71 +183,71 @@ export function ProfileModal() {
                   </div>
                 )}
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 text-left">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 text-left">
                   {[
                     { label: "WhatsApp Contacto", icon: Phone, value: profile?.celular, edit: () => setIsEditingPhone(true), cancel: () => setIsEditingPhone(false), isEditing: isEditingPhone, val: newCelular, setVal: setNewCelular, save: async () => { await updateProfile({ celular: newCelular }); setIsEditingPhone(false); } },
                     { label: "Dirección de Entrega", icon: MapPin, value: profile?.direccion, edit: () => setIsEditingAddress(true), cancel: () => setIsEditingAddress(false), isEditing: isEditingAddress, val: newAddress, setVal: setNewAddress, save: async () => { await updateProfile({ direccion: newAddress }); setIsEditingAddress(false); } },
                     { label: "Punto de Referencia", icon: Map, value: profile?.punto_encuentro, edit: () => setIsEditingMeetingPoint(true), cancel: () => setIsEditingMeetingPoint(false), isEditing: isEditingMeetingPoint, val: newMeetingPoint, setVal: setNewMeetingPoint, save: async () => { await updateProfile({ punto_encuentro: newMeetingPoint }); setIsEditingMeetingPoint(false); } }
                   ].map((item, i) => (
-                    <div key={i} className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all group overflow-hidden">
-                      <div className="flex items-center gap-3 mb-6 text-slate-900">
-                         <item.icon className="w-5 h-5 opacity-40 text-indigo-600" />
-                         <span className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">{item.label}</span>
+                    <div key={i} className="bg-white p-5 md:p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-all group overflow-hidden">
+                      <div className="flex items-center gap-2 mb-4 text-slate-900">
+                         <item.icon className="w-4 h-4 opacity-40 text-indigo-600 shrink-0" />
+                         <span className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-slate-400">{item.label}</span>
                       </div>
                       {item.isEditing ? (
                         <div className="flex gap-2">
-                          <input value={item.val} onChange={e => item.setVal(e.target.value)} className="w-full text-sm font-bold bg-slate-50 p-3 rounded-2xl border-2 border-slate-900 outline-none" />
-                          <button onClick={item.save} className="p-3 bg-slate-900 text-white rounded-2xl active:scale-90"><Check className="w-5 h-5" /></button>
-                          <button onClick={item.cancel} className="p-3 bg-slate-50 text-slate-400 rounded-2xl active:scale-90"><X className="w-5 h-5" /></button>
+                          <input value={item.val} onChange={e => item.setVal(e.target.value)} className="w-full text-xs font-bold bg-slate-50 p-2.5 rounded-xl border-2 border-slate-900 outline-none" />
+                          <button onClick={item.save} className="p-2.5 bg-slate-900 text-white rounded-xl active:scale-90"><Check className="w-4 h-4" /></button>
+                          <button onClick={item.cancel} className="p-2.5 bg-slate-50 text-slate-400 rounded-xl active:scale-90"><X className="w-4 h-4" /></button>
                         </div>
                       ) : (
-                        <div className="flex items-center justify-between">
-                          <p className="text-base font-black text-slate-900">{item.value || "Pendiente"}</p>
-                          <button onClick={item.edit} className="text-[10px] font-black text-white bg-slate-900 px-4 py-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:scale-105">EDITAR</button>
+                        <div className="flex items-center justify-between gap-2 border-t border-slate-50 pt-2">
+                          <p className="text-sm font-black text-slate-900 truncate">{item.value || "Pendiente"}</p>
+                          <button onClick={item.edit} className="text-[9px] font-black text-white bg-slate-900 px-3 py-1.5 rounded-full opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all shrink-0">EDITAR</button>
                         </div>
                       )}
                     </div>
                   ))}
                 </div>
 
-                <div className="bg-slate-100/50 p-10 rounded-[4rem] border border-slate-200 text-left mb-12">
-                   <div className="flex items-center justify-between mb-10 border-b border-slate-200 pb-6">
-                      <div className="flex items-center gap-4">
-                        <div className="p-3 bg-white rounded-2xl shadow-sm text-slate-900">
-                          <Package className="w-6 h-6" />
+                <div className="bg-slate-100/50 p-5 md:p-8 rounded-3xl border border-slate-200 text-left mb-6">
+                   <div className="flex flex-col md:flex-row md:items-center justify-between mb-5 border-b border-slate-200 pb-4 gap-3">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2.5 bg-white rounded-xl shadow-sm text-slate-900">
+                          <Package className="w-5 h-5" />
                         </div>
-                        <h4 className="text-xl font-black uppercase tracking-tighter text-slate-900">Historial de Pedidos</h4>
+                        <h4 className="text-base font-black uppercase tracking-tight text-slate-900">Mis Pedidos</h4>
                       </div>
-                      <button onClick={() => setView("orders")} className="text-[11px] font-black uppercase tracking-widest text-slate-500 hover:text-slate-900 transition-colors border-b-2 border-transparent hover:border-slate-900 pb-1">Ver Historial Completo</button>
+                      <button onClick={() => setView("orders")} className="text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-slate-900 w-max bg-white md:bg-transparent px-3 py-1.5 md:p-0 rounded-full border border-slate-200 md:border-none shadow-sm md:shadow-none">Historial Completo →</button>
                    </div>
                    
-                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {userOrders.length > 0 ? userOrders.slice(0, 4).map(o => (
-                        <div key={o.id} className="bg-white p-6 rounded-[2.5rem] flex items-center justify-between shadow-sm border border-slate-100 hover:shadow-lg transition-all cursor-pointer group">
-                           <div className="flex items-center gap-4">
-                             <div className={`p-4 rounded-2xl border ${getStatusColor(o.estado)}`}>
-                                <Package className="w-5 h-5" />
+                        <div key={o.id} className="bg-white p-4 rounded-2xl flex items-center justify-between shadow-sm border border-slate-100 hover:shadow-md transition-all cursor-pointer group" onClick={() => setView("orders")}>
+                           <div className="flex items-center gap-3">
+                             <div className={`p-3 rounded-xl border ${getStatusColor(o.estado)}`}>
+                                <Package className="w-4 h-4" />
                              </div>
-                             <div>
-                               <p className="text-sm font-black text-zinc-900">Q{o.total}</p>
-                               <p className="text-[10px] font-bold text-zinc-400 uppercase mt-0.5">{new Date(o.created_at).toLocaleDateString('es-GT', { day: 'numeric', month: 'long' })}</p>
+                             <div className="min-w-0">
+                               <p className="text-sm font-black text-zinc-900 truncate">Q{o.total}</p>
+                               <p className="text-[9px] font-bold text-zinc-400 uppercase mt-0.5 truncate">{new Date(o.created_at).toLocaleDateString('es-GT', { day: 'numeric', month: 'short' })}</p>
                              </div>
                            </div>
-                           <div className="flex flex-col items-end gap-2">
-                             <span className={`text-[9px] font-black uppercase px-3 py-1 rounded-full border ${getStatusColor(o.estado)}`}>{getStatusLabel(o.estado)}</span>
-                             <ArrowRight className="w-4 h-4 text-zinc-200 group-hover:text-zinc-900 transition-all" />
+                           <div className="flex flex-col items-end gap-1.5 shrink-0 pl-2">
+                             <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-md border ${getStatusColor(o.estado)}`}>{getStatusLabel(o.estado)}</span>
+                             <ArrowRight className="w-3 h-3 text-zinc-300 group-hover:text-zinc-900 transition-all" />
                            </div>
                         </div>
                       )) : (
-                        <div className="col-span-full py-16 text-center">
-                           <p className="text-sm font-black uppercase tracking-[0.4em] text-zinc-300 italic">No se han registrado pedidos aún</p>
+                        <div className="col-span-full py-8 text-center bg-white rounded-2xl border border-dashed border-slate-200">
+                           <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 italic">Sin pedidos aún</p>
                         </div>
                       )}
                    </div>
                 </div>
 
-                <button onClick={() => { signOut(); setIsProfileModalOpen(false); }} className="w-full py-8 rounded-[3rem] text-[14px] font-black uppercase tracking-[0.4em] text-white bg-slate-900 hover:bg-rose-600 transition-all shadow-xl hover:scale-[1.01] active:scale-95 flex items-center justify-center gap-4 group">
-                   <LogOut className="w-6 h-6 group-hover:rotate-180 transition-transform duration-500" /> CERRAR SESIÓN SEGURA
+                <button onClick={() => { signOut(); setIsProfileModalOpen(false); }} className="w-full py-4 md:py-5 rounded-[1.5rem] text-[10px] md:text-[11px] font-black uppercase tracking-widest text-white bg-slate-900 hover:bg-rose-600 transition-all shadow-md hover:scale-[1.01] active:scale-95 flex items-center justify-center gap-3 group">
+                   <LogOut className="w-4 h-4 group-hover:rotate-180 transition-transform duration-500" /> CERRAR SESIÓN LOGUEADA
                 </button>
               </div>
             ) : (
