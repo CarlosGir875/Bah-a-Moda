@@ -9,8 +9,11 @@ import { ProductCard } from "@/components/ProductCard";
 import { EditProductModal } from "@/components/admin/EditProductModal";
 
 export default function AdminDashboard() {
-  const { user, isAdmin, authLoading, addProduct, uploadProductImages, products, deleteProduct } = useStore();
+  const { user, isAdmin, authLoading, addProduct, uploadProductImages, products, deleteProduct, orderRequests } = useStore();
   const router = useRouter();
+
+  // Lógica inteligente para el Badge de solicitudes
+  const pendingCount = orderRequests.filter(r => r.estado === 'pendiente').length;
   
   const [loading, setLoading] = useState(false);
   const [hasSizes, setHasSizes] = useState(false);
@@ -148,10 +151,12 @@ export default function AdminDashboard() {
              >
                 <Inbox className="w-5 h-5" />
                 <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">Solicitudes</span>
-                {/* NOTIFICATION BADGE */}
-                <div className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-white animate-pulse">
-                   !
-                </div>
+                {/* NOTIFICATION BADGE INTELIGENTE */}
+                {pendingCount > 0 && (
+                  <div className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-white animate-pulse">
+                     !
+                  </div>
+                )}
              </button>
              <div className="flex bg-gray-200/50 p-1 rounded-xl flex-1 sm:w-auto">
              <button
@@ -166,6 +171,9 @@ export default function AdminDashboard() {
              >
                 Mi Inventario
              </button>
+             <div className="absolute left-[33.3%] top-1 bottom-1 w-1/3 bg-transparent pointer-events-none transition-all duration-300" 
+                  style={{ transform: activeTab === 'upload' ? 'translateX(-100%)' : activeTab === 'inventory' ? 'translateX(100%)' : 'none' }}>
+             </div>
            </div>
         </div>
       </div>
