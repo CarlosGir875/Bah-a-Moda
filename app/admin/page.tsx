@@ -18,6 +18,10 @@ export default function AdminDashboard() {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [subscribing, setSubscribing] = useState(false);
   const [testing, setTesting] = useState(false);
+  
+  // Password Reset State
+  const [resetRequests, setResetRequests] = useState<any[]>([]);
+  const [loadingResets, setLoadingResets] = useState(false);
 
   useEffect(() => {
     // Register SW on load
