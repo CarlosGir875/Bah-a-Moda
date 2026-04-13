@@ -1,6 +1,7 @@
 "use client";
 
-import { X, LogOut, User, ShieldCheck, Mail, ArrowRight, ArrowLeft, Check, Phone, MapPin, Map, Package, Clock } from "lucide-react";
+import { X, LogOut, User, ShieldCheck, Mail, ArrowRight, ArrowLeft, Check, Phone, MapPin, Map, Package, Clock, CheckCircle2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useStore } from "@/lib/store";
 import { useEffect, useState, useRef } from "react";
 import { ImageCropperModal } from "./ImageCropperModal";
@@ -79,6 +80,51 @@ export function ProfileModal() {
       case 'cancelado': return 'Cancelado';
       default: return status;
     }
+  };
+  
+  const renderMiniMasterTruck = (order: any) => {
+    const steps = [
+      { id: 'pendiente', label: 'Pendiente' },
+      { id: 'recibido', label: 'Confirmado' },
+      { id: 'preparacion', label: 'Preparación' },
+      { id: 'en_transito', label: 'En Camino' },
+      { id: 'listo_entrega', label: 'Entregado' }
+    ];
+    
+    const currentIndex = steps.findIndex(s => s.id === order.estado);
+    const progressPercent = Math.max(0, (currentIndex / (steps.length - 1)) * 100);
+
+    return (
+      <div className="mt-6 mb-2 px-2">
+        <div className="relative h-1 w-full bg-slate-100 rounded-full overflow-hidden">
+          <motion.div 
+            initial={{ width: 0 }}
+            animate={{ width: `${progressPercent}%` }}
+            className="h-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]"
+          />
+        </div>
+        <div className="relative mt-[-10px] h-12 pointer-events-none">
+          <motion.div 
+            animate={{ left: `${progressPercent}%`, x: "-50%" }}
+            transition={{ type: "spring", damping: 15 }}
+            className="absolute top-0"
+          >
+            <motion.svg 
+              width="50" height="40" viewBox="0 0 100 90" 
+              className="drop-shadow-[0_8px_15px_rgba(0,0,0,0.2)]"
+              animate={{ y: [0, -4, 0], scaleY: [1, 0.95, 1.05, 1] }}
+              transition={{ repeat: Infinity, duration: 0.6 }}
+            >
+              <rect x="2" y="10" width="70" height="52" rx="16" fill="#4f46e5" />
+              <text x="37" y="42" className="text-[22px] font-black italic fill-white" textAnchor="middle">BM</text>
+              <path d="M72 62 L98 62 C101 62 103 60 103 57 L103 36 C103 26 92 20 78 20 L72 20 Z" fill="#1e1b4b" />
+              <circle cx="88" cy="70" r="10" fill="#020617" />
+              <circle cx="28" cy="70" r="10" fill="#020617" />
+            </motion.svg>
+          </motion.div>
+        </div>
+      </div>
+    );
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -290,6 +336,7 @@ export function ProfileModal() {
                            <span className={`text-[11px] font-black uppercase tracking-[0.2em] px-6 py-3 rounded-xl border-2 ${getStatusColor(o.estado)}`}>{getStatusLabel(o.estado)}</span>
                         </div>
                         
+                        {renderMiniMasterTruck(o)}
                         
                         <div className="mt-8 mb-8 border-y-2 border-dashed border-zinc-300 py-8 space-y-4">
                            <div className="flex justify-between text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-4">
