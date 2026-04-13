@@ -1,7 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { useStore } from "@/lib/store";
+import { MAIN_CATEGORIES } from "@/lib/mockData";
+import { X, Package, ShieldCheck, Users } from "lucide-react";
 
 export function SidebarLeft() {
   const { isLeftSidebarOpen, setIsLeftSidebarOpen, selectedCategory, setSelectedCategory, setSelectedFilter, user, profile, isAdmin, signOut } = useStore();
