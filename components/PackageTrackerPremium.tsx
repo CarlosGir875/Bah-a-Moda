@@ -185,39 +185,8 @@ export function PackageTrackerPremium() {
                        </motion.g>
                     </svg>
                  </div>
-
-                    {/* Headlight Glow */}
-                    <motion.div 
-                       className="absolute right-[-40px] top-[45px] w-20 h-10 bg-yellow-400/20 blur-xl rounded-full"
-                       animate={{ opacity: [0.2, 0.4, 0.2] }}
-                       transition={{ repeat: Infinity, duration: 1 }}
-                    />
-
-                    {/* High-Fidelity Smoke Particles */}
-                    <div className="absolute left-0 bottom-4">
-                       {[0, 1, 2, 3].map((i) => (
-                         <motion.div
-                           key={i}
-                           initial={{ opacity: 0, scale: 0 }}
-                           animate={{ 
-                             opacity: [0, 0.8, 0],
-                             scale: [0.5, 2, 3],
-                             x: [-15, -50],
-                             y: [0, -25]
-                           }}
-                           transition={{ 
-                             repeat: Infinity, 
-                             duration: 1.2, 
-                             delay: i * 0.3 
-                           }}
-                           className="absolute w-4 h-4 bg-slate-400/40 rounded-full blur-sm"
-                         />
-                       ))}
-                    </div>
-                  </div>
-                </motion.div>
-             </div>
-          </div>
+              </div>
+           </div>
 
           {/* Details Card */}
           <div className="p-8 pt-0 space-y-6">
