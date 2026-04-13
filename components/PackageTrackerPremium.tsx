@@ -13,9 +13,9 @@ export function PackageTrackerPremium() {
   if (!isTrackingOpen) return null;
 
   const steps = [
-    { id: 'recibido', label: 'Confirmado', icon: CheckCircle2, progress: 20 },
-    { id: 'preparacion', label: 'En Inventario', icon: Package, progress: 45 },
-    { id: 'en_transito', label: 'En Ruta', icon: Truck, progress: 75 },
+    { id: 'pendiente', label: 'Bodega', icon: Package, progress: 10 },
+    { id: 'recibido', label: 'Confirmado', icon: CheckCircle2, progress: 35 },
+    { id: 'en_transito', label: 'En Ruta', icon: Truck, progress: 70 },
     { id: 'listo_entrega', label: 'Entregado', icon: MapPin, progress: 100 }
   ];
 
@@ -98,17 +98,17 @@ export function PackageTrackerPremium() {
                               )}
                            </motion.div>
                            
-                           {/* SMART TYPOGRAPHY (Bugfix Final) */}
-                           <div className="absolute top-12 flex flex-col items-center pointer-events-none">
-                              <span className={`text-[11px] font-black uppercase tracking-[0.3em] whitespace-nowrap transition-all duration-700 ${
-                                isCurrent ? 'text-emerald-500 scale-110 opacity-100' : 'text-slate-300 scale-90 opacity-0 md:opacity-40'
+                           {/* SMART TYPOGRAPHY (Top Aligned - No More Overlap) */}
+                           <div className="absolute bottom-20 flex flex-col items-center pointer-events-none">
+                              <span className={`text-[12px] font-black uppercase tracking-[0.4em] whitespace-nowrap transition-all duration-700 ${
+                                isCurrent ? 'text-emerald-500 scale-125 opacity-100' : 'text-slate-300 scale-90 opacity-0 md:opacity-40'
                               }`}>
                                 {step.label}
                               </span>
                               {isCurrent && (
                                 <motion.div 
                                   layoutId="activeStepIndicator"
-                                  className="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-2 shadow-[0_0_10px_#10b981]"
+                                  className="w-2 h-2 bg-emerald-500 rounded-full mt-2 shadow-[0_0_15px_#10b981]"
                                 />
                               )}
                            </div>
@@ -116,27 +116,14 @@ export function PackageTrackerPremium() {
                      );
                    })}
                 </div>
-                 {/* DYNAMIC ATMOSPHERE (5.0) */}
-                 <div className="absolute top-1/2 left-0 right-0 h-80 flex flex-col items-center justify-center -translate-y-1/2 overflow-hidden pointer-events-none">
+                 {/* EPIC 3D DIORAMA ENVIRONMENT (Alignment Fix) */}
+                 <div className="absolute top-1/2 left-0 right-0 h-96 flex flex-col items-center justify-center -translate-y-1/2 overflow-hidden pointer-events-none">
                      
-                     {/* LUXURY CLOUDS */}
-                     <div className="absolute top-4 w-[200%] flex justify-around opacity-20">
-                        <motion.div 
-                          animate={{ x: [0, -200] }}
-                          transition={{ repeat: Infinity, duration: 40, ease: "linear" }}
-                          className="flex gap-64"
-                        >
-                           {[...Array(6)].map((_, i) => (
-                             <div key={i} className="w-48 h-8 bg-indigo-200/40 rounded-full blur-3xl shrink-0" />
-                           ))}
-                        </motion.div>
-                     </div>
-
-                     {/* FAR MOUNTAINS (Slow Parallax) */}
-                     <div className="absolute bottom-24 w-[150%] left-[-25%] flex justify-around opacity-25">
+                     {/* FAR MOUNTAINS (Grounded) */}
+                     <div className="absolute bottom-32 w-[150%] left-[-25%] flex justify-around opacity-25">
                         <motion.div 
                           animate={{ x: [0, -100] }}
-                          transition={{ repeat: Infinity, duration: 30, ease: "linear" }}
+                          transition={{ repeat: Infinity, duration: 35, ease: "linear" }}
                           className="flex gap-40"
                         >
                            {[...Array(6)].map((_, i) => (
@@ -148,15 +135,15 @@ export function PackageTrackerPremium() {
                         </motion.div>
                      </div>
 
-                     {/* NEAR FOREST (Fast Parallax) */}
-                     <div className="absolute bottom-14 w-[250%] left-[-75%] flex justify-around opacity-40">
+                     {/* NEAR FOREST (Grounded to Road Edge) */}
+                     <div className="absolute bottom-16 w-[250%] left-[-75%] flex justify-around opacity-40">
                         <motion.div 
                           animate={{ x: [0, -300] }}
-                          transition={{ repeat: Infinity, duration: 12, ease: "linear" }}
+                          transition={{ repeat: Infinity, duration: 15, ease: "linear" }}
                           className="flex gap-24"
                         >
                            {[...Array(15)].map((_, i) => (
-                             <svg key={i} width="50" height="100" viewBox="0 0 40 80" fill="none">
+                             <svg key={i} width="50" height="120" viewBox="0 0 40 80" fill="none">
                                <path d="M20 0 L40 60 L0 60 Z" fill="#064e3b" />
                                <rect x="18" y="60" width="4" height="20" fill="#451a03" />
                              </svg>
@@ -164,24 +151,27 @@ export function PackageTrackerPremium() {
                         </motion.div>
                      </div>
 
-                     {/* The Ultra Asphalt 5.0 (Speed Blur) */}
-                     <div className="w-[120%] h-5 bg-slate-900 rounded-full flex items-center overflow-hidden shadow-2xl border-y-2 border-white/5 relative">
-                        <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-transparent to-slate-900 z-10" />
+                     {/* PERSPECTIVE ROAD GROUND (The Floor) */}
+                     <div className="relative w-full h-24 mt-16 flex items-center justify-center overflow-visible">
+                        {/* Perspective Trapezoid */}
+                        <div className="absolute bottom-0 w-[120%] h-full bg-slate-900 shadow-2xl skew-x-[0deg] border-t-4 border-white/10" style={{ clipPath: 'polygon(10% 0, 90% 0, 100% 100%, 0% 100%)' }} />
+                        
+                        {/* The High-Speed Lines */}
                         <motion.div 
-                          animate={{ x: [0, -80] }}
+                          animate={{ x: [0, -100] }}
                           transition={{ repeat: Infinity, duration: 0.25, ease: "linear" }}
-                          className="flex gap-16 px-8"
+                          className="flex gap-20 px-10 relative z-20"
                         >
                           {[...Array(20)].map((_, i) => (
-                            <div key={i} className="w-12 h-1.5 bg-yellow-400/90 rounded-full shrink-0 shadow-[0_0_15px_#facc15]" />
+                            <div key={i} className="w-16 h-2 bg-yellow-400 rounded-full shrink-0 shadow-[0_0_20px_#facc15]" />
                           ))}
                         </motion.div>
                      </div>
                  </div>
 
-                {/* THE ULTRA TRUCK BM ELITE 3D */}
+                {/* THE MASTERPIECE TRUCK (Alignment Fix) */}
                 <motion.div 
-                  className="absolute top-1/2 -translate-y-[85px]"
+                  className="absolute top-1/2 -translate-y-[-12px]"
                   animate={{ 
                     left: `${progressPercent}%`,
                     x: "-50%" 
