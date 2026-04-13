@@ -152,141 +152,113 @@ export default function AdminRequestsPage() {
               </p>
             </div>
           ) : (
-            orderRequests.map((req, index) => (
-              <div 
-                key={req.id} 
-                className={`group bg-white rounded-[3rem] border shadow-sm hover:shadow-2xl hover:shadow-indigo-100 transition-all duration-500 overflow-hidden ${
-                  req.estado === 'aprobado' ? 'opacity-40 grayscale-[0.5] border-gray-50' : 'border-gray-100'
-                }`}
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                <div className="flex flex-col lg:flex-row">
-                  
-                  {/* LEFT SIDE: CLIENT PROFILE */}
-                  <div className="lg:w-80 p-8 lg:p-10 bg-gray-50/50 border-r border-gray-100 flex flex-col justify-between">
-                    <div>
-                      <div className="w-16 h-16 bg-black rounded-[1.2rem] flex items-center justify-center text-white mb-6 shadow-xl shadow-black/10 transition-transform group-hover:rotate-3">
-                        <User className="w-8 h-8" />
-                      </div>
-                      <h3 className="text-xl font-black text-gray-900 leading-none tracking-tight mb-2 truncate">
-                        {req.cliente_nombre}
-                      </h3>
-                      {req.user_id && (
-                        <div className="flex items-center gap-1.5 text-green-600 bg-green-50 w-max px-2.5 py-1 rounded-md mb-2 border border-green-100">
-                          <CheckCircle2 className="w-3 h-3" />
-                          <span className="text-[9px] font-black uppercase tracking-widest">Cliente Verificado</span>
-                        </div>
-                      )}
-                      <div className="flex flex-col gap-3 mt-4">
-                         <div className="flex items-center gap-3 text-indigo-600">
-                            <div className="w-8 h-8 bg-indigo-50 rounded-lg flex items-center justify-center">
-                               <Phone className="w-4 h-4" />
+            <div className="bg-white rounded-[2rem] border-[3px] border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse min-w-[600px]">
+                  <thead>
+                    <tr className="bg-zinc-100 border-b-2 border-black text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500">
+                      <th className="p-4 w-12 text-center">STS</th>
+                      <th className="p-4">Cliente / Contacto</th>
+                      <th className="p-4">Resumen de Pedido</th>
+                      <th className="p-4 text-right">Inversión</th>
+                      <th className="p-4 text-center">Acciones Masivas</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y-2 divide-zinc-100">
+                    {orderRequests.map((req, index) => {
+                      const isApproved = req.estado === 'aprobado';
+                      const itemCount = req.items.reduce((acc: number, item: any) => acc + (item.quantity || 1), 0);
+                      const topItem = req.items[0]?.name || 'Varios';
+                      const isNew = req.estado === 'pendiente' && !req.visto;
+                      
+                      return (
+                        <tr 
+                          key={req.id} 
+                          className={`group transition-all duration-300 hover:bg-indigo-50/50 ${isApproved ? 'opacity-50 grayscale bg-zinc-50/50 hover:bg-zinc-50/50' : 'bg-white'}`}
+                        >
+                          {/* STATUS DOT */}
+                          <td className="p-4 text-center align-middle">
+                            {isApproved ? (
+                              <CheckCircle2 className="w-5 h-5 text-emerald-500 mx-auto" />
+                            ) : (
+                              <div className={`w-3 h-3 rounded-full mx-auto ${isNew ? 'bg-red-500 animate-ping shadow-[0_0_10px_rgba(239,68,68,0.8)]' : 'bg-amber-400'}`} />
+                            )}
+                          </td>
+                          
+                          {/* CLIENT & CONTACT */}
+                          <td className="p-4 align-middle">
+                            <div className="flex items-center gap-3">
+                               <div className="w-10 h-10 rounded-xl bg-black text-white flex items-center justify-center text-sm font-black uppercase shrink-0 shadow-md">
+                                 {req.cliente_nombre.charAt(0)}
+                               </div>
+                               <div className="flex flex-col min-w-0">
+                                 <span className="text-sm font-black text-black truncate max-w-[150px] sm:max-w-[200px] leading-tight mb-1">{req.cliente_nombre}</span>
+                                 <div className="flex items-center gap-2">
+                                     <a href={`https://wa.me/502${req.cliente_telefono}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 hover:text-indigo-600 transition-colors">
+                                       <Phone className="w-3 h-3 text-indigo-500" />
+                                       <span className="text-[10px] font-bold text-zinc-500">{req.cliente_telefono}</span>
+                                     </a>
+                                     <span className="text-[8px] font-black text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100 uppercase tracking-widest">{req.tipo_entrega === 'domicilio' ? '🏠 Dom' : '📍 Punto'}</span>
+                                 </div>
+                               </div>
                             </div>
-                            <span className="text-sm font-bold tracking-tight">{req.cliente_telefono}</span>
-                         </div>
-                         <div className="flex items-start gap-3 text-gray-500 pt-3 border-t border-gray-100">
-                            <Clock className="w-4 h-4 mt-0.5 shrink-0" />
+                          </td>
+
+                          {/* ORDER SUMMARY */}
+                          <td className="p-4 align-middle">
                             <div className="flex flex-col">
-                               <span className="text-[9px] font-black uppercase tracking-widest leading-none mb-1">Solicitado en</span>
-                               <span className="text-[11px] font-bold">{new Date(req.created_at).toLocaleDateString('es-GT', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
-                            </div>
-                         </div>
-                      </div>
-                    </div>
-
-                    {req.estado === 'aprobado' && (
-                      <div className="mt-8 py-2 px-4 bg-green-500/10 text-green-600 rounded-full text-[10px] font-black uppercase text-center border border-green-500/20">
-                        Confirmado ✓
-                      </div>
-                    )}
-                  </div>
-
-                  {/* RIGHT SIDE: ORDER CONTENT */}
-                  <div className="flex-1 p-8 lg:p-10 flex flex-col">
-                    <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-100">
-                       <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Contenido del Pedido</span>
-                       <div className="flex items-center gap-2">
-                          <span className="text-[10px] font-black uppercase tracking-widest text-indigo-500">{req.tipo_entrega === 'domicilio' ? '🏠 Domicilio' : '📍 Punto de Encuentro'}</span>
-                       </div>
-                    </div>
-
-                    <div className="space-y-5 flex-1">
-                      {req.items.map((item: any, idx: number) => {
-                         const isFood = item.supplier === '🥘 Venta de Comida';
-                         return (
-                          <div key={idx} className="flex items-center justify-between group/item">
-                            <div className="flex items-center gap-4">
-                              <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center text-xs font-black text-gray-400 border border-gray-100">
-                                x{item.quantity}
-                              </div>
-                              <div className="flex flex-col">
-                                {item.supplier && (
-                                   <div className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest w-max mb-1.5 flex items-center gap-1 ${
-                                      isFood ? 'bg-orange-500/10 text-orange-600' : 'bg-indigo-500/10 text-indigo-600'
-                                   }`}>
-                                      {isFood ? '🍳 Menú' : `📖 ${item.supplier}`}
-                                   </div>
-                                )}
-                                <span className="text-sm font-bold text-gray-900 group-hover/item:text-indigo-600 transition-colors uppercase truncate">
-                                  {item.name} {item.size ? `· Talla ${item.size}` : ''}
+                              <span className="text-sm font-bold text-zinc-800 truncate max-w-[180px] sm:max-w-[280px]">
+                                <span className="font-black text-black mr-1">{itemCount}x</span>
+                                {topItem} {req.items.length > 1 ? '[...]' : ''}
+                              </span>
+                              {isApproved ? (
+                                <span className="text-[9px] font-black uppercase tracking-widest text-emerald-600 mt-1 flex items-center gap-1">
+                                  <Package className="w-3 h-3" /> ➔ En Logística (Pedidos)
                                 </span>
-                              </div>
+                              ) : (
+                                <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-400 mt-1 flex items-center gap-1">
+                                  <Clock className="w-3 h-3" /> {new Date(req.created_at).toLocaleDateString('es-GT', { weekday: 'short', hour: '2-digit', minute:'2-digit' })}
+                                </span>
+                              )}
                             </div>
-                            <span className="text-sm font-black text-gray-900 tracking-tighter">Q{(item.price * item.quantity).toFixed(2)}</span>
-                          </div>
-                         );
-                      })}
-                    </div>
+                          </td>
 
-                    <div className="mt-8 p-6 bg-gray-50 rounded-[2rem] border border-gray-100/50 flex flex-col sm:flex-row gap-6 items-center">
-                       <div className="flex-1 min-w-0">
-                          <p className="text-[9px] font-black uppercase text-gray-400 mb-1.5 flex items-center gap-1.5 tracking-widest"><TrendingUp className="w-3 h-3" /> Ubicación Detallada</p>
-                          <p className="text-xs font-bold text-gray-700 leading-relaxed italic">{req.ubicacion}</p>
-                       </div>
-                       <div className="flex flex-col items-end shrink-0">
-                          <p className="text-[9px] font-black uppercase text-indigo-500 mb-0.5 tracking-[0.2em]">Total Inversión</p>
-                          <p className="text-2xl font-black text-gray-900 tracking-tighter">Q{req.total.toFixed(2)}</p>
-                       </div>
-                    </div>
+                          {/* TOTAL */}
+                          <td className="p-4 text-right align-middle">
+                            <span className="text-base font-black font-mono text-black">Q{req.total.toFixed(0)}</span>
+                          </td>
 
-                    {/* ACTION BUTTONS */}
-                    {req.estado === 'pendiente' && (
-                      <div className="mt-8 flex flex-col sm:flex-row gap-4">
-                        <button 
-                          onClick={() => window.open(`https://wa.me/502${req.cliente_telefono}`, '_blank')}
-                          className="flex-1 group h-14 bg-white hover:bg-green-500 border-2 border-green-500 text-green-500 hover:text-white rounded-[1.2rem] transition-all flex items-center justify-center gap-3 active:scale-95"
-                        >
-                          <Phone className="w-4 h-4 group-hover:rotate-12 transition-transform" />
-                          <span className="text-[10px] font-black uppercase tracking-[0.2em]">Llamar WhatsApp</span>
-                        </button>
-                        
-                        <button 
-                          onClick={() => handleApprove(req.id)}
-                          disabled={!!processingId}
-                          className="flex-[1.5] h-14 bg-black hover:bg-zinc-800 disabled:opacity-50 text-white rounded-[1.2rem] transition-all flex items-center justify-center gap-3 shadow-xl active:scale-95"
-                        >
-                          {processingId === req.id ? (
-                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/20 border-t-white" />
-                          ) : (
-                            <Sparkles className="w-4 h-4 text-indigo-400" />
-                          )}
-                          <span className="text-[10px] font-black uppercase tracking-[0.2em]">Confirmar Reserva</span>
-                          <ChevronRight className="w-4 h-4" />
-                        </button>
-
-                        <button 
-                           onClick={() => handleReject(req.id)}
-                           className="w-14 h-14 bg-red-50 hover:bg-red-500 text-red-500 hover:text-white rounded-[1.2rem] transition-all flex items-center justify-center shrink-0 border border-red-100"
-                           title="Descartar Solicitud"
-                        >
-                          <XSquare className="w-6 h-6" />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                          {/* ACTIONS */}
+                          <td className="p-4 text-center align-middle">
+                            {req.estado === 'pendiente' ? (
+                              <div className="flex items-center justify-center gap-3">
+                                <button
+                                  onClick={() => handleApprove(req.id)}
+                                  disabled={!!processingId}
+                                  className="w-10 h-10 rounded-[0.8rem] bg-black text-white hover:bg-emerald-500 hover:scale-110 active:scale-95 transition-all flex items-center justify-center shadow-[0_4px_10px_rgba(0,0,0,0.2)] hover:shadow-[0_4px_15px_rgba(16,185,129,0.4)] disabled:opacity-50 group/btn"
+                                  title="Aprobar Pedido a Logística"
+                                >
+                                  {processingId === req.id ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <CheckCircle2 className="w-5 h-5 group-hover:scale-110 transition-transform" />}
+                                </button>
+                                <button
+                                  onClick={() => handleReject(req.id)}
+                                  className="w-10 h-10 rounded-[0.8rem] bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white hover:scale-110 active:scale-95 transition-all flex items-center justify-center border border-rose-100 group/btn"
+                                  title="Descartar Solicitud"
+                                >
+                                  <XSquare className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                </button>
+                              </div>
+                            ) : (
+                               <span className="px-3 py-1 bg-zinc-100 text-zinc-400 border border-zinc-200 rounded-full text-[9px] font-black uppercase tracking-widest inline-block pointer-events-none">Resuelto</span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
-            ))
+            </div>
           )}
         </div>
       </div>
