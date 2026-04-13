@@ -155,6 +155,5 @@ export function SidebarLeft() {
           </>
         )}
       </AnimatePresence>
-    </>
   );
 }
