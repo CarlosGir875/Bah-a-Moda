@@ -13,10 +13,10 @@ export function PackageTrackerPremium() {
   if (!isTrackingOpen) return null;
 
   const steps = [
-    { id: 'pendiente', label: 'Bodega', icon: Package, progress: 10 },
-    { id: 'recibido', label: 'Confirmado', icon: CheckCircle2, progress: 35 },
-    { id: 'en_transito', label: 'En Ruta', icon: Truck, progress: 70 },
-    { id: 'listo_entrega', label: 'Entregado', icon: MapPin, progress: 100 }
+    { id: 'pendiente', label: 'Bodega', progress: 10 },
+    { id: 'recibido', label: 'Confirmado', progress: 35 },
+    { id: 'en_transito', label: 'En Ruta', progress: 70 },
+    { id: 'listo_entrega', label: 'Entregado', progress: 100 }
   ];
 
   const currentStepIndex = steps.findIndex(s => s.id === activeOrder?.estado) || 0;
@@ -68,110 +68,74 @@ export function PackageTrackerPremium() {
                      className="absolute h-full bg-gradient-to-r from-emerald-400 to-indigo-600 rounded-full"
                    />
                 </div>
-                
-                {/* Steps Nodes (Neon Green Lights) */}
-                <div className="absolute top-1/2 -translate-y-1/2 left-24 right-24 flex justify-between h-0">
-                   {steps.map((step, idx) => {
-                     const isCompleted = idx <= currentStepIndex;
-                     const isCurrent = idx === currentStepIndex;
-                     return (
-                        <div key={idx} className="relative flex flex-col items-center">
-                           {/* THE NEON LIGHT */}
-                           <motion.div 
-                             initial={{ scale: 0 }}
+                                 {/* SMART STATUS INDICATORS (Top Aligned - No Overlap) */}
+                 <div className="absolute top-12 left-16 right-16 flex justify-between">
+                    {steps.map((step, idx) => {
+                      const isCurrent = idx === currentStepIndex;
+                      const isCompleted = idx <= currentStepIndex;
+                      return (
+                        <div key={idx} className="flex flex-col items-center">
+                           <div className={`w-3 h-3 rounded-full border-2 transition-all duration-700 ${
+                             isCompleted ? 'bg-emerald-500 border-white shadow-[0_0_10px_#10b981]' : 'bg-slate-200 border-transparent'
+                           }`} />
+                           <motion.span 
+                             initial={false}
                              animate={{ 
-                               scale: 1,
-                               boxShadow: isCompleted 
-                                 ? "0 0 25px rgba(16, 185, 129, 0.8)" 
-                                 : "0 0 0px rgba(0,0,0,0)"
+                               opacity: isCurrent ? 1 : 0.3, 
+                               scale: isCurrent ? 1.1 : 0.9,
+                               y: isCurrent ? 5 : 0 
                              }}
-                             className={`w-10 h-10 rounded-full border-4 flex items-center justify-center transition-all duration-700 ${
-                               isCompleted 
-                                 ? "bg-emerald-500 border-white" 
-                                 : "bg-white border-slate-100"
-                             }`}
+                             className={`mt-2 text-[10px] font-black uppercase tracking-[0.2em] whitespace-nowrap ${isCurrent ? 'text-emerald-600' : 'text-slate-400'}`}
                            >
-                              {isCompleted ? (
-                                <CheckCircle2 className="w-5 h-5 text-white" />
-                              ) : (
-                                <div className="w-2 h-2 bg-slate-200 rounded-full" />
-                              )}
-                           </motion.div>
-                           
-                           {/* SMART TYPOGRAPHY (Top Aligned - No More Overlap) */}
-                           <div className="absolute bottom-20 flex flex-col items-center pointer-events-none">
-                              <span className={`text-[12px] font-black uppercase tracking-[0.4em] whitespace-nowrap transition-all duration-700 ${
-                                isCurrent ? 'text-emerald-500 scale-125 opacity-100' : 'text-slate-300 scale-90 opacity-0 md:opacity-40'
-                              }`}>
-                                {step.label}
-                              </span>
-                              {isCurrent && (
-                                <motion.div 
-                                  layoutId="activeStepIndicator"
-                                  className="w-2 h-2 bg-emerald-500 rounded-full mt-2 shadow-[0_0_15px_#10b981]"
-                                />
-                              )}
-                           </div>
+                              {step.label}
+                           </motion.span>
                         </div>
-                     );
-                   })}
-                </div>
-                 {/* EPIC 3D DIORAMA ENVIRONMENT (Alignment Fix) */}
-                 <div className="absolute top-1/2 left-0 right-0 h-96 flex flex-col items-center justify-center -translate-y-1/2 overflow-hidden pointer-events-none">
+                      );
+                    })}
+                 </div>
+                
+                 {/* AGENCY DIORAMA 7.0 (Baseline Alignment) */}
+                 <div className="absolute inset-0 flex flex-col items-center justify-center overflow-hidden pointer-events-none">
                      
-                     {/* FAR MOUNTAINS (Grounded) */}
-                     <div className="absolute bottom-32 w-[150%] left-[-25%] flex justify-around opacity-25">
-                        <motion.div 
-                          animate={{ x: [0, -100] }}
-                          transition={{ repeat: Infinity, duration: 35, ease: "linear" }}
-                          className="flex gap-40"
-                        >
-                           {[...Array(6)].map((_, i) => (
-                             <svg key={i} width="400" height="200" viewBox="0 0 300 150" fill="none">
-                               <path d="M0 150 L150 0 L300 150 Z" fill="#94a3b8" />
-                               <path d="M120 150 L220 50 L300 150 Z" fill="#64748b" opacity="0.4" />
-                             </svg>
-                           ))}
-                        </motion.div>
+                     {/* FAR MOUNTAINS (Stationary Illustration) */}
+                     <div className="absolute bottom-32 w-full flex justify-around opacity-10">
+                        <svg width="600" height="200" viewBox="0 0 600 200" fill="none">
+                           <path d="M0 200 L150 50 L300 200 Z" fill="#94a3b8" />
+                           <path d="M250 200 L400 80 L550 200 Z" fill="#64748b" />
+                        </svg>
                      </div>
 
-                     {/* NEAR FOREST (Grounded to Road Edge) */}
-                     <div className="absolute bottom-16 w-[250%] left-[-75%] flex justify-around opacity-40">
-                        <motion.div 
-                          animate={{ x: [0, -300] }}
-                          transition={{ repeat: Infinity, duration: 15, ease: "linear" }}
-                          className="flex gap-24"
-                        >
-                           {[...Array(15)].map((_, i) => (
-                             <svg key={i} width="50" height="120" viewBox="0 0 40 80" fill="none">
-                               <path d="M20 0 L40 60 L0 60 Z" fill="#064e3b" />
-                               <rect x="18" y="60" width="4" height="20" fill="#451a03" />
-                             </svg>
-                           ))}
-                        </motion.div>
+                     {/* THE HORIZON LINE (Baseline) */}
+                     <div className="absolute bottom-32 w-full h-[2px] bg-slate-100/50" />
+
+                     {/* NEAR FOREST (Fixed to Baseline) */}
+                     <div className="absolute bottom-32 w-full px-12 flex justify-between opacity-30">
+                        {[...Array(4)].map((_, i) => (
+                           <svg key={i} width="60" height="100" viewBox="0 0 40 80" fill="none" className="translate-y-4">
+                              <path d="M20 0 L40 60 L0 60 Z" fill="#064e3b" />
+                              <rect x="18" y="60" width="4" height="20" fill="#451a03" />
+                           </svg>
+                        ))}
                      </div>
 
-                     {/* PERSPECTIVE ROAD GROUND (The Floor) */}
-                     <div className="relative w-full h-24 mt-16 flex items-center justify-center overflow-visible">
-                        {/* Perspective Trapezoid */}
-                        <div className="absolute bottom-0 w-[120%] h-full bg-slate-900 shadow-2xl skew-x-[0deg] border-t-4 border-white/10" style={{ clipPath: 'polygon(10% 0, 90% 0, 100% 100%, 0% 100%)' }} />
-                        
-                        {/* The High-Speed Lines */}
+                     {/* THE PROFESSIONAL ROAD (Pixel Perfect) */}
+                     <div className="absolute bottom-0 w-full h-32 bg-slate-50 border-t-2 border-slate-100 flex items-center justify-center overflow-hidden">
+                        <div className="absolute top-0 w-full h-1 bg-white opacity-50" />
                         <motion.div 
-                          animate={{ x: [0, -100] }}
-                          transition={{ repeat: Infinity, duration: 0.25, ease: "linear" }}
-                          className="flex gap-20 px-10 relative z-20"
+                          animate={{ x: [0, -120] }}
+                          transition={{ repeat: Infinity, duration: 0.5, ease: "linear" }}
+                          className="flex gap-20 px-10"
                         >
-                          {[...Array(20)].map((_, i) => (
-                            <div key={i} className="w-16 h-2 bg-yellow-400 rounded-full shrink-0 shadow-[0_0_20px_#facc15]" />
+                          {[...Array(15)].map((_, i) => (
+                            <div key={i} className="w-16 h-2 bg-slate-200 rounded-full shrink-0" />
                           ))}
                         </motion.div>
                      </div>
                  </div>
 
-                {/* THE MASTERPIECE TRUCK (Alignment Fix) */}
+                {/* THE PROFESSIONAL TRUCK (Reference-Based Alignment) */}
                 <motion.div 
-                  className="absolute top-1/2 -translate-y-[-12px]"
+                  className="absolute bottom-24"
                   animate={{ 
                     left: `${progressPercent}%`,
                     x: "-50%" 
@@ -179,130 +143,51 @@ export function PackageTrackerPremium() {
                   transition={{ duration: 2, ease: "easeInOut" }}
                 >
                   <div className="relative">
-                    {/* Dynamic Ground Shadow */}
-                    <motion.div 
-                      className="absolute -bottom-2 -left-2 w-[110%] h-3 bg-black/10 blur-md rounded-full"
-                      animate={{ 
-                        scaleX: [1, 1.1, 1],
-                        opacity: [0.15, 0.25, 0.15]
-                      }}
-                      transition={{ repeat: Infinity, duration: 0.4 }}
-                    />
+                    {/* Shadow Ground-Touch */}
+                    <div className="absolute -bottom-1 left-2 w-[90%] h-2 bg-black/5 blur-sm rounded-full" />
 
-                    {/* Truck Entity (Masterpiece 5.0 - Professional Cinematic) */}
+                    {/* Truck Agency Illustration 7.0 */}
                     <motion.svg 
-                      width="140" height="120" viewBox="0 0 100 90" 
-                      className="drop-shadow-[0_40px_80px_rgba(0,0,0,0.5)] overflow-visible"
-                      animate={{ 
-                        y: [0, -10, 0],
-                        rotateX: [0, 4, -4, 0], // Advanced 3D Tilt
-                        rotateY: [0, 1, -1, 0],
-                        scaleY: [1, 0.96, 1.04, 1]
-                      }}
-                      transition={{ 
-                        repeat: Infinity, 
-                        duration: 0.35,
-                        ease: "easeInOut"
-                      }}
+                      width="160" height="100" viewBox="0 0 160 100" 
+                      className="overflow-visible"
+                      animate={{ y: [0, -2, 0] }}
+                      transition={{ repeat: Infinity, duration: 0.4 }}
                     >
-                       <defs>
-                          <linearGradient id="masterBody" x1="0%" y1="0%" x2="100%" y2="100%">
-                             <stop offset="0%" stopColor="#4f46e5" />
-                             <stop offset="60%" stopColor="#312e81" />
-                             <stop offset="100%" stopColor="#1e1b4b" />
-                          </linearGradient>
-                          <linearGradient id="chromeGloss" x1="0%" y1="0%" x2="0%" y2="100%">
-                             <stop offset="0%" stopColor="#f8fafc" />
-                             <stop offset="40%" stopColor="#94a3b8" />
-                             <stop offset="100%" stopColor="#64748b" />
-                          </linearGradient>
-                          <linearGradient id="cabinGlass" x1="0%" y1="0%" x2="100%" y2="100%">
-                             <stop offset="0%" stopColor="#38bdf8" />
-                             <stop offset="50%" stopColor="#0ea5e9" />
-                             <stop offset="100%" stopColor="#0369a1" />
-                          </linearGradient>
-                       </defs>
-
-                       {/* CARGO CONTAINER (3D Perspective) */}
-                       <g transform="translate(0, 5)">
-                          {/* Main Body */}
-                          <rect x="2" y="10" width="70" height="56" rx="16" fill="url(#masterBody)" />
-                          <rect x="3" y="11" width="68" height="2" rx="1" fill="white" opacity="0.1" />
-                          
-                          {/* Side Ribs (Industrial Look) */}
-                          <rect x="15" y="10" width="1" height="56" fill="black" opacity="0.15" />
-                          <rect x="35" y="10" width="1" height="56" fill="black" opacity="0.15" />
-                          <rect x="55" y="10" width="1" height="56" fill="black" opacity="0.15" />
-
-                          {/* BM EMBLEM (Metallic Gold) */}
-                          <g transform="translate(37, 38)">
-                             <text className="text-[25px] font-black italic fill-white" textAnchor="middle" style={{ filter: 'drop-shadow(2px 2px 4px rgba(0,0,0,0.4))' }}>BM</text>
-                             <text y="14" className="text-[5px] font-bold fill-emerald-400" textAnchor="middle" style={{ letterSpacing: '0.4em' }}>BAHÍA ELITE</text>
-                          </g>
-
-                          {/* REAR CHROME STRIP */}
-                          <rect x="2" y="62" width="70" height="4" rx="2" fill="url(#chromeGloss)" />
-                       </g>
+                       {/* THE CABIN (BLUE) */}
+                       <path d="M100 80 L140 80 C146 80 150 76 150 70 L150 45 C150 35 140 30 125 30 L100 30 Z" fill="#2563eb" />
                        
-                       {/* CABIN 5.0 (High Detail Cinematic) */}
-                       <g transform="translate(0, 5)">
-                          {/* Cabin Structure */}
-                          <path d="M72 66 L100 66 C105 66 108 63 108 58 L108 34 C108 22 92 18 78 18 L72 18 Z" fill="#1e1b4b" />
-                          
-                          {/* Main Mirror */}
-                          <rect x="70" y="30" width="6" height="12" rx="1" fill="url(#chromeGloss)" />
-                          
-                          {/* Front Grill (Mega Detail) */}
-                          <rect x="98" y="42" width="10" height="20" rx="3" fill="url(#chromeGloss)" />
-                          <rect x="100" y="45" width="6" height="1" fill="black" opacity="0.2" />
-                          <rect x="100" y="48" width="6" height="1" fill="black" opacity="0.2" />
-                          <rect x="100" y="51" width="6" height="1" fill="black" opacity="0.2" />
-                          
-                          {/* Glass Windshield + Realistic Reflection */}
-                          <path d="M82 22 L98 22 C101 22 103 24 102 28 L90 62 C89 64 86 65 83 65 L72 65 L72 22 Z" fill="url(#cabinGlass)" opacity="0.7" />
-                          <motion.path 
-                             d="M84 26 Q92 26 95 35 L88 56 Q85 58 83 52 Z" 
-                             fill="white" 
-                             animate={{ opacity: [0.1, 0.4, 0.1], x: [-1, 1, -1] }}
-                             transition={{ repeat: Infinity, duration: 4 }}
-                          />
-
-                          {/* Active Headlight + Volumetric Beam */}
-                          <g transform="translate(104, 52)">
-                             <circle r="6" fill="#fbbf24" style={{ filter: 'blur(2px)' }} />
-                             <circle r="2" fill="white" />
-                             <motion.path 
-                               d="M0 0 L40 -15 L40 15 Z" 
-                               fill="url(#headlightBeam)" 
-                               animate={{ opacity: [0.1, 0.2, 0.1] }}
-                               transition={{ repeat: Infinity, duration: 2 }}
-                             />
-                          </g>
+                       {/* Windshield + Driver Placeholder */}
+                       <path d="M105 35 L125 35 Q135 35 138 45 L130 75 L105 75 Z" fill="#93c5fd" opacity="0.4" />
+                       {/* Driver Silhuette (Ref: Red Cap) */}
+                       <circle cx="115" cy="50" r="5" fill="#ef4444" />
+                       <rect x="110" y="55" width="10" height="12" rx="2" fill="#ef4444" />
+                       
+                       {/* THE CARGO (GREY) */}
+                       <rect x="10" y="15" width="95" height="65" rx="8" fill="#e2e8f0" />
+                       {/* Cargo texture lines */}
+                       <path d="M15 25 L100 25 M15 35 L100 35 M15 45 L100 45 M15 55 L100 55 M15 65 L100 65" stroke="#cbd5e1" strokeWidth="1" />
+                       
+                       {/* LOCATION PIN + BM LOGO (From Ref) */}
+                       <g transform="translate(50, 45)">
+                          <circle r="18" fill="white" opacity="0.3" />
+                          <path d="M0 -12 C-6 -12 -12 -6 -12 0 C-12 12 0 24 0 24 C0 24 12 12 12 0 C12 -6 6 -12 0 -12 Z" fill="#94a3b8" opacity="0.5" />
+                          <text y="5" className="text-[12px] font-black italic fill-slate-400" textAnchor="middle">BM</text>
                        </g>
 
-                       <defs>
-                          <linearGradient id="headlightBeam" x1="0%" y1="0%" x2="100%" y2="0%">
-                             <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.5" />
-                             <stop offset="100%" stopColor="#fbbf24" stopOpacity="0" />
-                          </linearGradient>
-                       </defs>
-
-                       {/* PRO WHEELS 5.0 (Realistic Motion) */}
-                       <g transform="translate(0, 5)">
-                          {/* Front */}
-                          <motion.g animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 0.25, ease: "linear" }}>
-                             <circle cx="90" cy="74" r="14" fill="#020617" />
-                             <circle cx="90" cy="74" r="9" fill="url(#chromeGloss)" />
-                             <circle cx="90" cy="74" r="3" fill="#1e1b4b" />
-                          </motion.g>
+                       {/* WHEELS (Professional) */}
+                       <g>
                           {/* Back */}
-                          <motion.g animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 0.25, ease: "linear" }}>
-                             <circle cx="28" cy="74" r="14" fill="#020617" />
-                             <circle cx="28" cy="74" r="9" fill="url(#chromeGloss)" />
-                             <circle cx="28" cy="74" r="3" fill="#1e1b4b" />
-                          </motion.g>
+                          <circle cx="35" cy="82" r="14" fill="#1e293b" />
+                          <circle cx="35" cy="82" r="8" fill="#cbd5e1" />
+                          <circle cx="35" cy="82" r="3" fill="#1e293b" />
+                          {/* Front */}
+                          <circle cx="125" cy="82" r="14" fill="#1e293b" />
+                          <circle cx="125" cy="82" r="8" fill="#cbd5e1" />
+                          <circle cx="125" cy="82" r="3" fill="#1e293b" />
                        </g>
                     </motion.svg>
+                  </div>
+                </motion.div>
 
                     {/* Headlight Glow */}
                     <motion.div 
