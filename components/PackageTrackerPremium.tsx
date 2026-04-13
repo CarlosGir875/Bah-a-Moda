@@ -98,15 +98,17 @@ export function PackageTrackerPremium() {
                               )}
                            </motion.div>
                            
-                           {/* SMART TYPOGRAPHY (Bugfix) */}
+                           {/* SMART TYPOGRAPHY (Bugfix Final) */}
                            <div className="absolute top-12 flex flex-col items-center pointer-events-none">
-                              <span className={`text-[10px] font-black uppercase tracking-[0.2em] whitespace-nowrap transition-all duration-500 ${isCompleted ? 'text-emerald-600 scale-105' : 'text-slate-300 scale-100'} ${isCurrent ? 'opacity-100' : 'opacity-40 md:opacity-100'}`}>
+                              <span className={`text-[11px] font-black uppercase tracking-[0.3em] whitespace-nowrap transition-all duration-700 ${
+                                isCurrent ? 'text-emerald-500 scale-110 opacity-100' : 'text-slate-300 scale-90 opacity-0 md:opacity-40'
+                              }`}>
                                 {step.label}
                               </span>
                               {isCurrent && (
                                 <motion.div 
                                   layoutId="activeStepIndicator"
-                                  className="w-1 h-1 bg-emerald-500 rounded-full mt-1"
+                                  className="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-2 shadow-[0_0_10px_#10b981]"
                                 />
                               )}
                            </div>
@@ -114,55 +116,68 @@ export function PackageTrackerPremium() {
                      );
                    })}
                 </div>
+                 {/* DYNAMIC ATMOSPHERE (5.0) */}
+                 <div className="absolute top-1/2 left-0 right-0 h-80 flex flex-col items-center justify-center -translate-y-1/2 overflow-hidden pointer-events-none">
+                     
+                     {/* LUXURY CLOUDS */}
+                     <div className="absolute top-4 w-[200%] flex justify-around opacity-20">
+                        <motion.div 
+                          animate={{ x: [0, -200] }}
+                          transition={{ repeat: Infinity, duration: 40, ease: "linear" }}
+                          className="flex gap-64"
+                        >
+                           {[...Array(6)].map((_, i) => (
+                             <div key={i} className="w-48 h-8 bg-indigo-200/40 rounded-full blur-3xl shrink-0" />
+                           ))}
+                        </motion.div>
+                     </div>
 
-                {/* DYNAMIC CINEMATIC ENVIRONMENT (Parallax) */}
-                <div className="absolute top-1/2 left-0 right-0 h-64 flex flex-col items-center justify-center -translate-y-1/2 overflow-hidden pointer-events-none">
-                    
-                    {/* FAR MOUNTAINS (Slow Parallax) */}
-                    <div className="absolute bottom-20 w-[150%] left-[-25%] flex justify-around opacity-30">
-                       <motion.div 
-                         animate={{ x: [0, -100] }}
-                         transition={{ repeat: Infinity, duration: 25, ease: "linear" }}
-                         className="flex gap-40"
-                       >
-                          {[...Array(6)].map((_, i) => (
-                            <svg key={i} width="300" height="150" viewBox="0 0 300 150" fill="none">
-                              <path d="M0 150 L150 0 L300 150 Z" fill="#94a3b8" />
-                              <path d="M100 150 L200 50 L300 150 Z" fill="#64748b" opacity="0.5" />
-                            </svg>
+                     {/* FAR MOUNTAINS (Slow Parallax) */}
+                     <div className="absolute bottom-24 w-[150%] left-[-25%] flex justify-around opacity-25">
+                        <motion.div 
+                          animate={{ x: [0, -100] }}
+                          transition={{ repeat: Infinity, duration: 30, ease: "linear" }}
+                          className="flex gap-40"
+                        >
+                           {[...Array(6)].map((_, i) => (
+                             <svg key={i} width="400" height="200" viewBox="0 0 300 150" fill="none">
+                               <path d="M0 150 L150 0 L300 150 Z" fill="#94a3b8" />
+                               <path d="M120 150 L220 50 L300 150 Z" fill="#64748b" opacity="0.4" />
+                             </svg>
+                           ))}
+                        </motion.div>
+                     </div>
+
+                     {/* NEAR FOREST (Fast Parallax) */}
+                     <div className="absolute bottom-14 w-[250%] left-[-75%] flex justify-around opacity-40">
+                        <motion.div 
+                          animate={{ x: [0, -300] }}
+                          transition={{ repeat: Infinity, duration: 12, ease: "linear" }}
+                          className="flex gap-24"
+                        >
+                           {[...Array(15)].map((_, i) => (
+                             <svg key={i} width="50" height="100" viewBox="0 0 40 80" fill="none">
+                               <path d="M20 0 L40 60 L0 60 Z" fill="#064e3b" />
+                               <rect x="18" y="60" width="4" height="20" fill="#451a03" />
+                             </svg>
+                           ))}
+                        </motion.div>
+                     </div>
+
+                     {/* The Ultra Asphalt 5.0 (Speed Blur) */}
+                     <div className="w-[120%] h-5 bg-slate-900 rounded-full flex items-center overflow-hidden shadow-2xl border-y-2 border-white/5 relative">
+                        <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-transparent to-slate-900 z-10" />
+                        <motion.div 
+                          animate={{ x: [0, -80] }}
+                          transition={{ repeat: Infinity, duration: 0.25, ease: "linear" }}
+                          className="flex gap-16 px-8"
+                        >
+                          {[...Array(20)].map((_, i) => (
+                            <div key={i} className="w-12 h-1.5 bg-yellow-400/90 rounded-full shrink-0 shadow-[0_0_15px_#facc15]" />
                           ))}
-                       </motion.div>
-                    </div>
-
-                    {/* NEAR FOREST (Fast Parallax) */}
-                    <div className="absolute bottom-12 w-[200%] left-[-50%] flex justify-around opacity-40">
-                       <motion.div 
-                         animate={{ x: [0, -200] }}
-                         transition={{ repeat: Infinity, duration: 10, ease: "linear" }}
-                         className="flex gap-24"
-                       >
-                          {[...Array(12)].map((_, i) => (
-                            <svg key={i} width="40" height="80" viewBox="0 0 40 80" fill="none">
-                              <path d="M20 0 L40 60 L0 60 Z" fill="#064e3b" />
-                              <rect x="15" y="60" width="10" height="20" fill="#451a03" />
-                            </svg>
-                          ))}
-                       </motion.div>
-                    </div>
-
-                    {/* The Asphalt Strip (Ultra Texture) */}
-                    <div className="w-[120%] h-4 bg-slate-900 rounded-full flex items-center overflow-hidden shadow-inner border-y border-white/5">
-                       <motion.div 
-                         animate={{ x: [0, -60] }}
-                         transition={{ repeat: Infinity, duration: 0.3, ease: "linear" }}
-                         className="flex gap-12 px-6"
-                       >
-                         {[...Array(15)].map((_, i) => (
-                           <div key={i} className="w-10 h-1.5 bg-yellow-400/80 rounded-full shrink-0 shadow-[0_0_10px_rgba(250,204,21,0.4)]" />
-                         ))}
-                       </motion.div>
-                    </div>
-                </div>
+                        </motion.div>
+                     </div>
+                 </div>
 
                 {/* THE ULTRA TRUCK BM ELITE 3D */}
                 <motion.div 
@@ -184,103 +199,117 @@ export function PackageTrackerPremium() {
                       transition={{ repeat: Infinity, duration: 0.4 }}
                     />
 
-                    {/* Truck Entity (Master Realism 4.0) */}
+                    {/* Truck Entity (Masterpiece 5.0 - Professional Cinematic) */}
                     <motion.svg 
-                      width="120" height="110" viewBox="0 0 100 90" 
-                      className="drop-shadow-[0_30px_60px_rgba(0,0,0,0.35)] overflow-visible"
+                      width="140" height="120" viewBox="0 0 100 90" 
+                      className="drop-shadow-[0_40px_80px_rgba(0,0,0,0.5)] overflow-visible"
                       animate={{ 
-                        y: [0, -8, 0],
-                        rotateX: [0, 2, -2, 0], // True 3D feel
-                        scaleY: [1, 0.97, 1.03, 1]
+                        y: [0, -10, 0],
+                        rotateX: [0, 4, -4, 0], // Advanced 3D Tilt
+                        rotateY: [0, 1, -1, 0],
+                        scaleY: [1, 0.96, 1.04, 1]
                       }}
                       transition={{ 
                         repeat: Infinity, 
-                        duration: 0.4,
+                        duration: 0.35,
                         ease: "easeInOut"
                       }}
                     >
                        <defs>
                           <linearGradient id="masterBody" x1="0%" y1="0%" x2="100%" y2="100%">
                              <stop offset="0%" stopColor="#4f46e5" />
-                             <stop offset="70%" stopColor="#312e81" />
+                             <stop offset="60%" stopColor="#312e81" />
                              <stop offset="100%" stopColor="#1e1b4b" />
                           </linearGradient>
-                          <linearGradient id="chrome" x1="0%" y1="0%" x2="100%" y2="0%">
-                             <stop offset="0%" stopColor="#94a3b8" />
-                             <stop offset="50%" stopColor="#f8fafc" />
-                             <stop offset="100%" stopColor="#94a3b8" />
+                          <linearGradient id="chromeGloss" x1="0%" y1="0%" x2="0%" y2="100%">
+                             <stop offset="0%" stopColor="#f8fafc" />
+                             <stop offset="40%" stopColor="#94a3b8" />
+                             <stop offset="100%" stopColor="#64748b" />
                           </linearGradient>
-                          <linearGradient id="sunHeighlight" x1="0%" y1="0%" x2="0%" y2="100%">
-                             <stop offset="0%" stopColor="white" stopOpacity="0.3" />
-                             <stop offset="40%" stopColor="white" stopOpacity="0" />
+                          <linearGradient id="cabinGlass" x1="0%" y1="0%" x2="100%" y2="100%">
+                             <stop offset="0%" stopColor="#38bdf8" />
+                             <stop offset="50%" stopColor="#0ea5e9" />
+                             <stop offset="100%" stopColor="#0369a1" />
                           </linearGradient>
                        </defs>
 
-                       {/* TRUCK CONTAINER 4.0 */}
+                       {/* CARGO CONTAINER (3D Perspective) */}
                        <g transform="translate(0, 5)">
-                          <rect x="2" y="10" width="70" height="54" rx="16" fill="url(#masterBody)" />
+                          {/* Main Body */}
+                          <rect x="2" y="10" width="70" height="56" rx="16" fill="url(#masterBody)" />
+                          <rect x="3" y="11" width="68" height="2" rx="1" fill="white" opacity="0.1" />
                           
-                          {/* Sun Highlight Reflection */}
-                          <rect x="2" y="10" width="70" height="20" rx="14" fill="url(#sunHeighlight)" />
-                          
-                          {/* Side Guardbars */}
-                          <rect x="5" y="15" width="64" height="2" rx="1" fill="white" opacity="0.1" />
-                          <rect x="2" y="60" width="70" height="4" rx="2" fill="black" opacity="0.4" />
+                          {/* Side Ribs (Industrial Look) */}
+                          <rect x="15" y="10" width="1" height="56" fill="black" opacity="0.15" />
+                          <rect x="35" y="10" width="1" height="56" fill="black" opacity="0.15" />
+                          <rect x="55" y="10" width="1" height="56" fill="black" opacity="0.15" />
 
-                          {/* BM BRANDING - LUXURY GOLD/WHITE */}
-                          <g filter="drop-shadow(0 4px 8px rgba(0,0,0,0.5))">
-                             <text x="37" y="44" className="text-[22px] font-black italic fill-white" textAnchor="middle" style={{ letterSpacing: '0.05em' }}>BM</text>
-                             <text x="37" y="56" className="text-[4px] font-black uppercase fill-emerald-400" textAnchor="middle" style={{ letterSpacing: '0.5em' }}>PREMIUM DELIVERY</text>
+                          {/* BM EMBLEM (Metallic Gold) */}
+                          <g transform="translate(37, 38)">
+                             <text className="text-[25px] font-black italic fill-white" textAnchor="middle" style={{ filter: 'drop-shadow(2px 2px 4px rgba(0,0,0,0.4))' }}>BM</text>
+                             <text y="14" className="text-[5px] font-bold fill-emerald-400" textAnchor="middle" style={{ letterSpacing: '0.4em' }}>BAHÍA ELITE</text>
                           </g>
 
-                          {/* REAR PLATE */}
-                          <rect x="2" y="55" width="12" height="6" rx="1" fill="#fde047" opacity="0.8" />
-                          <text x="8" y="59.5" className="text-[3px] font-bold fill-black" textAnchor="middle">ELITE</text>
+                          {/* REAR CHROME STRIP */}
+                          <rect x="2" y="62" width="70" height="4" rx="2" fill="url(#chromeGloss)" />
                        </g>
                        
-                       {/* CABIN 4.0 (Enhanced Geometry and Reflections) */}
+                       {/* CABIN 5.0 (High Detail Cinematic) */}
                        <g transform="translate(0, 5)">
-                          <path d="M72 64 L98 64 C102 64 104 62 104 59 L104 36 C104 26 92 20 78 20 L72 20 Z" fill="#1e1b4b" />
+                          {/* Cabin Structure */}
+                          <path d="M72 66 L100 66 C105 66 108 63 108 58 L108 34 C108 22 92 18 78 18 L72 18 Z" fill="#1e1b4b" />
                           
-                          {/* Chrome Grill Detail */}
-                          <rect x="96" y="44" width="8" height="14" rx="2" fill="url(#chrome)" />
-                          <rect x="97" y="46" width="6" height="1" fill="black" opacity="0.1" />
-                          <rect x="97" y="49" width="6" height="1" fill="black" opacity="0.1" />
+                          {/* Main Mirror */}
+                          <rect x="70" y="30" width="6" height="12" rx="1" fill="url(#chromeGloss)" />
                           
-                          {/* Window + Reflections 4.0 */}
-                          <path d="M80 24 L96 24 C99 24 101 26 100 29 L88 58 C87 60 85 61 82 61 L72 61 L72 24 Z" fill="#0ea5e9" opacity="0.6" />
+                          {/* Front Grill (Mega Detail) */}
+                          <rect x="98" y="42" width="10" height="20" rx="3" fill="url(#chromeGloss)" />
+                          <rect x="100" y="45" width="6" height="1" fill="black" opacity="0.2" />
+                          <rect x="100" y="48" width="6" height="1" fill="black" opacity="0.2" />
+                          <rect x="100" y="51" width="6" height="1" fill="black" opacity="0.2" />
+                          
+                          {/* Glass Windshield + Realistic Reflection */}
+                          <path d="M82 22 L98 22 C101 22 103 24 102 28 L90 62 C89 64 86 65 83 65 L72 65 L72 22 Z" fill="url(#cabinGlass)" opacity="0.7" />
                           <motion.path 
-                            d="M82 28 Q90 28 94 36 L86 54 Q82 56 80 50 Z" 
-                            fill="white" 
-                            animate={{ opacity: [0.1, 0.3, 0.1], x: [-2, 2, -2] }}
-                            transition={{ repeat: Infinity, duration: 3 }}
+                             d="M84 26 Q92 26 95 35 L88 56 Q85 58 83 52 Z" 
+                             fill="white" 
+                             animate={{ opacity: [0.1, 0.4, 0.1], x: [-1, 1, -1] }}
+                             transition={{ repeat: Infinity, duration: 4 }}
                           />
-                          
-                          {/* Headlight Flare 4.0 */}
-                          <motion.circle 
-                            cx="102" cy="56" r="6" 
-                            fill="#fbbf24"
-                            animate={{ opacity: [0.6, 1, 0.6], scale: [1, 1.3, 1] }}
-                            transition={{ repeat: Infinity, duration: 0.8 }}
-                          />
-                          <circle cx="102" cy="56" r="2" fill="white" />
+
+                          {/* Active Headlight + Volumetric Beam */}
+                          <g transform="translate(104, 52)">
+                             <circle r="6" fill="#fbbf24" style={{ filter: 'blur(2px)' }} />
+                             <circle r="2" fill="white" />
+                             <motion.path 
+                               d="M0 0 L40 -15 L40 15 Z" 
+                               fill="url(#headlightBeam)" 
+                               animate={{ opacity: [0.1, 0.2, 0.1] }}
+                               transition={{ repeat: Infinity, duration: 2 }}
+                             />
+                          </g>
                        </g>
 
-                       {/* PRO WHEELS (Enhanced Spinning) */}
+                       <defs>
+                          <linearGradient id="headlightBeam" x1="0%" y1="0%" x2="100%" y2="0%">
+                             <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.5" />
+                             <stop offset="100%" stopColor="#fbbf24" stopOpacity="0" />
+                          </linearGradient>
+                       </defs>
+
+                       {/* PRO WHEELS 5.0 (Realistic Motion) */}
                        <g transform="translate(0, 5)">
                           {/* Front */}
-                          <motion.g animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 0.3, ease: "linear" }}>
-                             <circle cx="88" cy="72" r="13" fill="#020617" />
-                             <circle cx="88" cy="72" r="9" fill="url(#chrome)" />
-                             <circle cx="88" cy="72" r="4" fill="#1e293b" />
-                             <rect x="87" y="59" width="2" height="26" fill="#1e293b" opacity="0.3" />
+                          <motion.g animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 0.25, ease: "linear" }}>
+                             <circle cx="90" cy="74" r="14" fill="#020617" />
+                             <circle cx="90" cy="74" r="9" fill="url(#chromeGloss)" />
+                             <circle cx="90" cy="74" r="3" fill="#1e1b4b" />
                           </motion.g>
                           {/* Back */}
-                          <motion.g animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 0.3, ease: "linear" }}>
-                             <circle cx="28" cy="72" r="13" fill="#020617" />
-                             <circle cx="28" cy="72" r="9" fill="url(#chrome)" />
-                             <circle cx="28" cy="72" r="4" fill="#1e293b" />
-                             <rect x="27" y="59" width="2" height="26" fill="#1e293b" opacity="0.3" />
+                          <motion.g animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 0.25, ease: "linear" }}>
+                             <circle cx="28" cy="74" r="14" fill="#020617" />
+                             <circle cx="28" cy="74" r="9" fill="url(#chromeGloss)" />
+                             <circle cx="28" cy="74" r="3" fill="#1e1b4b" />
                           </motion.g>
                        </g>
                     </motion.svg>
