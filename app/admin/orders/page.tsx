@@ -37,7 +37,8 @@ export default function AdminOrdersPage() {
     : adminOrders.filter(o => o.estado === filter);
 
   // Separar Pedidos Activos de Entregados para la vista general
-  const activeOrders = filteredOrders.filter(o => o.estado !== 'listo_entrega' && o.estado !== 'cancelado');
+  const pendingConfirmation = filteredOrders.filter(o => o.estado === 'pendiente');
+  const inProgressOrders = filteredOrders.filter(o => o.estado !== 'pendiente' && o.estado !== 'listo_entrega' && o.estado !== 'cancelado');
   const finishedOrders = filteredOrders.filter(o => o.estado === 'listo_entrega' || o.estado === 'cancelado');
 
   const renderOrderList = (orders: any[], title: string, showEmpty = true) => {
@@ -298,8 +299,20 @@ export default function AdminOrdersPage() {
           ))}
         </div>
 
-        {/* Sección de Pedidos Activos */}
-        {renderOrderList(activeOrders, "Pedidos Activos (Pendiente de Operación)")}
+        {/* SECCIÓN 1: PEDIDOS PENDIENTES DE CONFIRMACIÓN (PRIORIDAD ALTA) */}
+        {pendingConfirmation.length > 0 && (
+          <div className="mb-20">
+            <div className="flex items-center gap-4 mb-8">
+               <div className="bg-red-500 w-3 h-3 rounded-full animate-ping" />
+               <h2 className="text-2xl font-black uppercase tracking-tighter text-red-600">Por Confirmar (Prioridad Alta)</h2>
+               <div className="h-px flex-1 bg-red-100" />
+            </div>
+            {renderOrderList(pendingConfirmation, "", false)}
+          </div>
+        )}
+
+        {/* SECCIÓN 2: LOGÍSTICA EN CURSO */}
+        {renderOrderList(inProgressOrders, "Logística en Curso (En Preparación / Ruta)")}
 
         {/* Sección de Historial de Entregas */}
         {renderOrderList(finishedOrders, "Historial de Entregas & Pedidos Finalizados", false)}

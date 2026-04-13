@@ -68,20 +68,22 @@ export function PackageTrackerPremium() {
                      className="absolute h-full bg-gradient-to-r from-emerald-400 to-indigo-600 rounded-full"
                    />
                 </div>
-                                 {/* SMART STATUS INDICATORS (Top Aligned - Clean UI) */}
+                                 {/* SMART STATUS INDICATORS (Control Center Logic - Only Active is Green) */}
                  <div className="absolute top-8 left-12 right-12 flex justify-between z-20">
                     {steps.map((step, idx) => {
                       const isCurrent = idx === currentStepIndex;
-                      const isCompleted = idx <= currentStepIndex;
+                      // En esta versión 9.0, solo el paso actual tiene la luz verde brillante
                       return (
                         <div key={idx} className="flex flex-col items-center">
                            <div className={`w-3 h-3 rounded-full border-2 transition-all duration-700 ${
-                             isCompleted ? 'bg-emerald-500 border-white shadow-[0_0_15px_#10b981]' : 'bg-slate-200 border-transparent'
+                             isCurrent 
+                               ? 'bg-emerald-500 border-white shadow-[0_0_15px_#10b981] scale-125' 
+                               : 'bg-slate-300 border-transparent opacity-40'
                            }`} />
                            <motion.span 
                              animate={{ 
-                               opacity: isCurrent ? 1 : 0.4, 
-                               scale: isCurrent ? 1.1 : 0.9,
+                               opacity: isCurrent ? 1 : 0.3, 
+                               scale: isCurrent ? 1.2 : 0.9,
                                y: isCurrent ? 5 : 0 
                              }}
                              className={`mt-2 text-[9px] font-black uppercase tracking-[0.2em] whitespace-nowrap ${isCurrent ? 'text-emerald-600' : 'text-slate-400'}`}
@@ -129,55 +131,81 @@ export function PackageTrackerPremium() {
                           ))}
                        </g>
 
-                       {/* THE MASTERPIECE TRUCK (Agency Style - Perfectly Positioned) */}
+                       {/* THE PIXEL PERFECT TRUCK 9.0 (Agency Illustration) */}
                        <motion.g 
                           animate={{ x: `${progressPercent}%` }}
                           initial={{ x: "0%" }}
                           transition={{ duration: 1.5, ease: "easeInOut" }}
                        >
                           <g transform="translate(-80, 75)">
-                             {/* THE TRUCK BODY (Ref Based) */}
-                             {/* Cargo (Grey) */}
-                             <rect x="5" y="10" width="100" height="70" rx="8" fill="#e2e8f0" />
-                             <path d="M10 25 L105 25 M10 40 L105 40 M10 55 L105 55" stroke="#cbd5e1" strokeWidth="1" />
-                             
-                             {/* BM LOGO + PIN */}
-                             <circle cx="55" cy="45" r="20" fill="white" opacity="0.4" />
-                             <path d="M55 33 C49 33 44 38 44 44 C44 54 55 64 55 64 C55 64 66 54 66 44 C66 38 61 33 55 33 Z" fill="#94a3b8" />
-                             <text x="55" y="49" className="text-[12px] font-black italic fill-white" textAnchor="middle">BM</text>
-
-                             {/* THE CABIN (BLUE) */}
-                             <path d="M105 80 L145 80 C152 80 155 76 155 70 L155 45 C155 35 145 30 130 30 L105 30 Z" fill="#2563eb" />
-                             {/* Windshield */}
-                             <path d="M110 35 L130 35 Q140 35 142 45 L135 75 L110 75 Z" fill="#93c5fd" opacity="0.6" />
-                             
-                             {/* DRIVER (Red Cap/Shirt) */}
-                             <g transform="translate(120, 50)">
-                                <circle r="5" fill="#ef4444" />
-                                <rect x="-5" y="5" width="10" height="12" rx="2" fill="#ef4444" />
+                             {/* THE CARGO CONTAINER (Grey with Texture) */}
+                             <rect x="5" y="10" width="105" height="70" rx="4" fill="#E8E8E8" />
+                             {/* Vertical Texture Lines from Ref */}
+                             <g opacity="0.1">
+                                {[...Array(20)].map((_, i) => (
+                                   <line key={i} x1={10 + i*5} y1="15" x2={10 + i*5} y2="75" stroke="black" strokeWidth="0.5" />
+                                ))}
                              </g>
+                             
+                             {/* BIG LOCATION PIN (Grounded inside container) */}
+                             <g opacity="0.3" transform="translate(57, 45) scale(0.8)">
+                                <path d="M0 -30 C-15 -30 -30 -15 -30 0 C-30 25 0 50 0 50 C0 50 30 25 30 0 C30 -15 15 -30 0 -30 Z" fill="#9CA3AF" />
+                                <circle r="10" fill="white" />
+                             </g>
+                             
+                             {/* REAR LIGHTS (Red/Yellow from Image) */}
+                             <rect x="5" y="15" width="4" height="15" fill="#EF4444" rx="1" />
+                             <rect x="5" y="32" width="4" height="10" fill="#FBBF24" rx="1" />
+                             
+                             {/* THE CABIN (BLUE - PROFESSIONAL CURVES) */}
+                             <path d="M110 80 L160 80 L160 70 L160 30 C160 30 115 30 110 30 Z" fill="#1D60B6" />
+                             
+                             {/* Windshield */}
+                             <path d="M115 35 L145 35 L145 55 L115 55 Z" fill="#93C5FD" opacity="0.5" />
+                             
+                             {/* THE DRIVER (Red Cap & Shirt - Exact Ref) */}
+                             <g transform="translate(132, 48)">
+                                {/* Arm on wheel */}
+                                <path d="M-5 10 Q5 10 12 5" stroke="#FDE047" strokeWidth="3" fill="none" />
+                                {/* Head & Cap */}
+                                <circle r="6" fill="#FDE047" />
+                                <path d="M-6 -4 Q0 -10 8 -4 L8 2 L-6 2 Z" fill="#EF4444" /> {/* Red Cap */}
+                                <rect x="5" y="-3" width="6" height="3" fill="#EF4444" rx="1" /> {/* Cap Visor */}
+                                {/* Body */}
+                                <rect x="-6" y="5" width="12" height="15" rx="3" fill="#EF4444" />
+                             </g>
+                             
+                             {/* FRONT HEADLIGHT (White) */}
+                             <rect x="155" y="55" width="5" height="12" fill="white" rx="1" />
 
-                             {/* WHEELS (Touching the Road at 160) */}
-                             {/* Road starts at y=160. Truck at y=75. Wheels are at y=85 within truck group. Total y = 160. PERFECT. */}
+                             {/* THE BLACK BUMPER */}
+                             <rect x="3" y="75" width="158" height="6" fill="#1A1A1A" rx="2" />
+
+                             {/* WHEELS (Touching the Road exactly at 160) */}
                              <g>
                                 {/* Back Wheel */}
-                                <circle cx="35" cy="85" r="15" fill="#1e293b" />
-                                <circle cx="35" cy="85" r="9" fill="#94a3b8" />
-                                <circle cx="35" cy="85" r="3" fill="#0f172a" />
+                                <circle cx="35" cy="85" r="18" fill="#1A1A1A" />
+                                <circle cx="35" cy="85" r="10" fill="#D1D5DB" />
+                                <circle cx="35" cy="85" r="4" fill="#1A1A1A" />
                                 {/* Front Wheel */}
-                                <circle cx="125" cy="85" r="15" fill="#1e293b" />
-                                <circle cx="125" cy="85" r="9" fill="#94a3b8" />
-                                <circle cx="125" cy="85" r="3" fill="#0f172a" />
+                                <circle cx="125" cy="85" r="18" fill="#1A1A1A" />
+                                <circle cx="125" cy="85" r="10" fill="#D1D5DB" />
+                                <circle cx="125" cy="85" r="4" fill="#1A1A1A" />
                              </g>
 
-                             {/* CONTACT SHREDS (Speed smoke) */}
-                             <motion.g opacity="0.4">
+                             {/* ANIMATED SMOKE (Exhaust) */}
+                             <motion.g opacity="0.3">
                                 {[0, 1, 2].map((i) => (
                                   <motion.circle 
                                     key={i}
-                                    cx="-10" cy="80" r="3" fill="#94a3b8"
-                                    animate={{ opacity: [0, 1, 0], x: [-10, -40], y: [80, 70] }}
-                                    transition={{ repeat: Infinity, duration: 0.8, delay: i * 0.2 }}
+                                    cx="-5" cy="78" r="4" fill="#94a3b8"
+                                    animate={{ 
+                                      opacity: [0, 1, 0], 
+                                      x: [-5, -60], 
+                                      y: [78, 60],
+                                      scale: [1, 2.5] 
+                                    }}
+                                    transition={{ repeat: Infinity, duration: 1, delay: i * 0.3 }}
                                   />
                                 ))}
                              </motion.g>
