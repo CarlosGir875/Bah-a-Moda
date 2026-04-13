@@ -16,7 +16,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export function FloatingStatus() {
-  const { isAdmin, orderRequests, user, setIsProfileModalOpen, markRequestAsSeen } = useStore();
+  const { isAdmin, orderRequests, user, setIsProfileModalOpen, setIsTrackingOpen, markRequestAsSeen } = useStore();
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
 
@@ -118,7 +118,7 @@ export function FloatingStatus() {
                          </p>
                        </div>
                        <button 
-                         onClick={() => { setIsProfileModalOpen(true); setIsOpen(false); }}
+                         onClick={() => { setIsTrackingOpen(true); setIsOpen(false); }}
                          className="w-full bg-[#10b981] text-white py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.2em] shadow-xl hover:shadow-green-200 transition-all flex items-center justify-center gap-3 active:scale-95"
                        >
                          <Truck className="w-4 h-4" /> Seguir Mi Paquete

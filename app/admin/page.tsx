@@ -11,7 +11,7 @@ import { registerPush, subscribeUser } from "@/lib/push";
 import { supabase } from "@/lib/supabase";
 
 export default function AdminDashboard() {
-  const { user, isAdmin, authLoading, addProduct, uploadProductImages, products, deleteProduct, orderRequests, addToast } = useStore();
+  const { user, isAdmin, authLoading, addProduct, uploadProductImages, products, deleteProduct, orderRequests, addToast, finanzas, fetchFinanzas, addFinanza, fetchProducts } = useStore();
   const router = useRouter();
 
   // Notification State
@@ -23,7 +23,11 @@ export default function AdminDashboard() {
     // Register SW on load
     registerPush();
     fetchResetRequests();
-  }, []);
+    if (isAdmin) {
+      fetchFinanzas();
+      fetchProducts();
+    }
+  }, [isAdmin, fetchFinanzas, fetchProducts]);
 
   const fetchResetRequests = async () => {
     setLoadingResets(true);
@@ -110,15 +114,20 @@ export default function AdminDashboard() {
     supplier: "",
     delivery_date: "",
     description: "",
-    sizes: ""
+    sizes: "",
+    cost: "",
+    stock: ""
   });
 
   // NEW INVENTORY STATE
   const [activeTab, setActiveTab] = useState<'upload' | 'inventory' | 'resets'>('upload');
   const [searchTerm, setSearchTerm] = useState("");
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [resetRequests, setResetRequests] = useState<any[]>([]);
   const [loadingResets, setLoadingResets] = useState(false);
+
+  // ERP State
+  const [expenseForm, setExpenseForm] = useState({ monto: "", concepto: "" });
+  const [showExpenseForm, setShowExpenseForm] = useState(false);
 
   // 1. loading state while Supabase checks the session
   if (authLoading) {
@@ -186,6 +195,8 @@ export default function AdminDashboard() {
       await addProduct({
         name: formData.name,
         price: parseFloat(formData.price),
+        cost: formData.cost ? parseFloat(formData.cost) : 0,
+        stock: formData.stock === "-1" ? -1 : (formData.stock ? parseInt(formData.stock) : 1),
         images: imageUrls,
         category: formData.category,
         subCategory: formData.subCategory,
@@ -199,6 +210,8 @@ export default function AdminDashboard() {
       setFormData({
         name: "",
         price: "",
+        cost: "",
+        stock: "",
         category: "",
         subCategory: "",
         filterTag: "Ninguno (Predeterminado)",
@@ -288,11 +301,11 @@ export default function AdminDashboard() {
                  <Plus className="w-3 h-3 sm:hidden" /> <span className="hidden sm:inline">Subir Producto</span><span className="sm:hidden">Subir</span>
               </button>
               <button
-                 onClick={() => setActiveTab('inventory')}
-                 className={`flex-1 py-2.5 rounded-lg text-[9px] sm:text-xs font-black uppercase tracking-[0.1em] transition-all flex items-center justify-center gap-1 ${activeTab === 'inventory' ? 'bg-white shadow-sm text-black' : 'text-gray-500 hover:text-black'}`}
-              >
-                 <Package className="w-3 h-3 sm:hidden" /> <span className="hidden sm:inline">Mi Inventario</span><span className="sm:hidden">Stock</span>
-              </button>
+                  onClick={() => setActiveTab('inventory')}
+                  className={`flex-1 py-2.5 rounded-lg text-[9px] sm:text-xs font-black uppercase tracking-[0.1em] transition-all flex items-center justify-center gap-1 ${activeTab === 'inventory' ? 'bg-white shadow-sm text-black' : 'text-gray-500 hover:text-black'}`}
+               >
+                  <Package className="w-3 h-3 sm:hidden" /> <span className="hidden sm:inline">Inventario y Finanzas</span><span className="sm:hidden">ERP</span>
+               </button>
               <button
                  onClick={() => setActiveTab('resets')}
                  className={`flex-1 py-2.5 rounded-lg text-[9px] sm:text-xs font-black uppercase tracking-[0.1em] transition-all flex items-center justify-center gap-1 relative ${activeTab === 'resets' ? 'bg-white shadow-sm text-indigo-600' : 'text-gray-500 hover:text-black'}`}
@@ -390,18 +403,43 @@ export default function AdminDashboard() {
                   />
                </div>
                <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 flex items-center gap-1">Precio de Venta (Quetzales)</label>
-                  <div className="relative">
-                    <span className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold flex items-center justify-center text-xs">Q</span>
-                    <input 
-                      type="number" 
-                      value={formData.price}
-                      onChange={(e) => setFormData({...formData, price: e.target.value})}
-                      placeholder="0.00" 
-                      className="w-full border border-gray-300 bg-white pl-10 pr-4 py-3.5 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-black transition-shadow shadow-sm" 
-                    />
-                  </div>
-               </div>
+                   <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 flex items-center gap-1">Precio de Venta (Público)</label>
+                   <div className="relative">
+                     <span className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold flex items-center justify-center text-xs">Q</span>
+                     <input 
+                       type="number" 
+                       value={formData.price}
+                       onChange={(e) => setFormData({...formData, price: e.target.value})}
+                       placeholder="0.00" 
+                       className="w-full border border-gray-300 bg-white pl-10 pr-4 py-3.5 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-black transition-shadow shadow-sm" 
+                     />
+                   </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                   <div>
+                      <label className="block text-[10px] font-black text-red-500 uppercase tracking-widest mb-2 flex items-center gap-1">Inversión (Costo)</label>
+                      <div className="relative">
+                        <span className="w-3 h-3 absolute left-4 top-1/2 -translate-y-1/2 text-red-300 font-bold flex items-center justify-center text-[10px]">Q</span>
+                        <input 
+                          type="number" 
+                          value={formData.cost}
+                          onChange={(e) => setFormData({...formData, cost: e.target.value})}
+                          placeholder="0.00"
+                          className="w-full border border-red-100 bg-red-50/30 pl-10 pr-4 py-3 rounded-xl text-sm font-bold text-red-900 focus:outline-none focus:ring-2 focus:ring-red-200 transition-shadow shadow-sm" 
+                        />
+                      </div>
+                   </div>
+                   <div>
+                      <label className="block text-[10px] font-black text-green-600 uppercase tracking-widest mb-2 flex items-center gap-1">Stock Inicial</label>
+                      <input 
+                        type="number" 
+                        value={formData.stock}
+                        onChange={(e) => setFormData({...formData, stock: e.target.value})}
+                        placeholder="1" 
+                        className="w-full border border-green-100 bg-green-50/30 px-4 py-3 rounded-xl text-sm font-bold text-green-900 focus:outline-none focus:ring-2 focus:ring-green-200 transition-shadow shadow-sm" 
+                      />
+                   </div>
+                </div>
                <div>
                   <label className="block text-xs font-black text-indigo-600 uppercase tracking-widest mb-2 flex items-center gap-1">Marca / Colección</label>
                   <select 
@@ -596,13 +634,145 @@ export default function AdminDashboard() {
         </form>
         )}
 
-        {/* ── MI INVENTARIO TAB ── */}
+        {/* ── MI INVENTARIO Y FINANZAS TAB ── */}
         {activeTab === 'inventory' && (
-          <div className="p-6 sm:p-10 space-y-6">
+          <div className="p-6 sm:p-10 space-y-10 animate-in fade-in slide-in-from-right-4 duration-500">
+            
+            {/* DASHBOARD FINANCIERO ERP */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+               {/* 1. Ingresos Brutos */}
+               <div className="bg-white border-2 border-green-100 p-6 rounded-[2rem] shadow-sm relative overflow-hidden group">
+                  <div className="absolute right-0 top-0 p-3 bg-green-50 text-green-500 rounded-bl-2xl">
+                    <ArrowUpRight className="w-5 h-5" />
+                  </div>
+                  <p className="text-[10px] font-black text-green-600 uppercase tracking-widest mb-1">Ingresos Totales</p>
+                  <h3 className="text-2xl font-black text-black">
+                     Q {finanzas.filter(f => f.tipo === 'ingreso').reduce((s, f) => s + f.monto, 0).toLocaleString()}
+                  </h3>
+                  <div className="mt-4 flex items-center gap-2">
+                     <div className="w-full h-1 bg-green-100 rounded-full overflow-hidden">
+                        <div className="h-full bg-green-500 w-[70%]" />
+                     </div>
+                  </div>
+               </div>
+
+               {/* 2. Inversión en Bodega (Activos) */}
+               <div className="bg-white border-2 border-indigo-100 p-6 rounded-[2rem] shadow-sm relative overflow-hidden group">
+                  <div className="absolute right-0 top-0 p-3 bg-indigo-50 text-indigo-500 rounded-bl-2xl">
+                    <Package className="w-5 h-5" />
+                  </div>
+                  <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-1">Valor en Inventario</p>
+                  <h3 className="text-2xl font-black text-black">
+                     Q {products.reduce((s, p) => s + ((p.cost || 0) * (p.stock && p.stock !== -1 ? p.stock : 0)), 0).toLocaleString()}
+                  </h3>
+                  <p className="text-[9px] text-gray-400 mt-2 font-bold uppercase tracking-tighter">Inversión dormida en fotos/productos</p>
+               </div>
+
+               {/* 3. Ganancia NETA Real */}
+               <div className="bg-black p-6 rounded-[2rem] shadow-2xl relative overflow-hidden group">
+                  <div className="absolute right-0 top-0 p-3 bg-white/10 text-white rounded-bl-2xl">
+                    <Sparkles className="w-5 h-5 animate-pulse" />
+                  </div>
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Ganancia Neta</p>
+                  <h3 className="text-2xl font-black text-white">
+                     Q {(
+                       finanzas.filter(f => f.tipo === 'ingreso').reduce((s, f) => s + f.monto, 0) - 
+                       finanzas.filter(f => f.tipo === 'egreso').reduce((s, f) => s + f.monto, 0) -
+                       orderRequests.filter(r => r.estado === 'aprobado').reduce((s, r) => s + r.items.reduce((ss, i) => ss + ((i.product?.cost || 0) * (i.quantity || 1)), 0), 0)
+                     ).toLocaleString()}
+                  </h3>
+                  <p className="text-[9px] text-green-400 mt-2 font-bold uppercase tracking-tighter">¡Dinerito libre directo al bolsillo! 🚀</p>
+               </div>
+            </div>
+
+            {/* SECCIÓN DE EGRESOS (GASTOS) */}
+            <div className="bg-gray-50 border border-gray-200 rounded-[2.5rem] p-6 sm:p-8">
+               <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h4 className="text-sm font-black text-black uppercase tracking-tight">Control de Gastos y Movimientos</h4>
+                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Registra envíos, gasolina o compras extras</p>
+                  </div>
+                  <button 
+                    onClick={() => setShowExpenseForm(!showExpenseForm)}
+                    className="px-4 py-2 bg-red-50 text-red-600 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-100 transition-all flex items-center gap-2"
+                  >
+                     <Plus className={`w-3 h-3 transition-transform ${showExpenseForm ? 'rotate-45' : ''}`} />
+                     {showExpenseForm ? 'Cancelar' : 'Registrar Gasto'}
+                  </button>
+               </div>
+
+               {showExpenseForm && (
+                 <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 mb-8 p-6 bg-white border border-red-100 rounded-3xl animate-in zoom-in-95 duration-200">
+                    <div className="sm:col-span-4">
+                       <label className="block text-[9px] font-black text-gray-400 uppercase mb-2">Monto (Q)</label>
+                       <input 
+                         type="number"
+                         value={expenseForm.monto}
+                         onChange={e => setExpenseForm({...expenseForm, monto: e.target.value})}
+                         placeholder="Ej: 50.00"
+                         className="w-full px-4 py-3 bg-red-50/50 border border-red-100 rounded-xl text-sm font-bold text-red-900" 
+                       />
+                    </div>
+                    <div className="sm:col-span-6">
+                       <label className="block text-[9px] font-black text-gray-400 uppercase mb-2">Concepto del Gasto</label>
+                       <input 
+                         type="text"
+                         value={expenseForm.concepto}
+                         onChange={e => setExpenseForm({...expenseForm, concepto: e.target.value})}
+                         placeholder="Ej: Pago de envío Moto Express..."
+                         className="w-full px-4 py-3 bg-red-50/50 border border-red-100 rounded-xl text-sm font-bold text-red-900" 
+                       />
+                    </div>
+                    <div className="sm:col-span-2 flex items-end">
+                       <button 
+                         onClick={async () => {
+                            if (!expenseForm.monto || !expenseForm.concepto) return;
+                            await addFinanza({ 
+                              tipo: 'egreso', 
+                              monto: parseFloat(expenseForm.monto), 
+                              concepto: expenseForm.concepto,
+                              pedido_id: null
+                            });
+                            setExpenseForm({ monto: "", concepto: "" });
+                            setShowExpenseForm(false);
+                            addToast("¡Gasto registrado en el libro contable!", "success");
+                         }}
+                         className="w-full py-3.5 bg-red-600 text-white rounded-xl shadow-lg hover:bg-black transition-all"
+                       >
+                          <CheckSquare className="w-5 h-5 mx-auto" />
+                       </button>
+                    </div>
+                 </div>
+               )}
+
+               <div className="max-h-[300px] overflow-y-auto pr-2 space-y-2 hide-scrollbar">
+                  {finanzas.map(f => (
+                    <div key={f.id} className="bg-white p-4 rounded-2xl border border-gray-100 flex items-center justify-between group hover:border-indigo-200 transition-all">
+                       <div className="flex items-center gap-4">
+                          <div className={`p-2 rounded-xl ${f.tipo === 'ingreso' ? 'bg-green-50 text-green-500' : 'bg-red-50 text-red-500'}`}>
+                             {f.tipo === 'ingreso' ? <ArrowUpRight className="w-4 h-4" /> : <Trash2 className="w-4 h-4" />}
+                          </div>
+                          <div>
+                             <p className="text-xs font-black text-black uppercase tracking-tight truncate max-w-[200px] sm:max-w-none">{f.concepto}</p>
+                             <p className="text-[9px] text-gray-400 font-bold">{new Date(f.created_at).toLocaleDateString()} · {new Date(f.created_at).toLocaleTimeString()}</p>
+                          </div>
+                       </div>
+                       <span className={`text-sm font-black ${f.tipo === 'ingreso' ? 'text-green-600' : 'text-red-600'}`}>
+                          {f.tipo === 'ingreso' ? '+' : '-'} Q {f.monto.toFixed(2)}
+                       </span>
+                    </div>
+                  ))}
+                  {finanzas.length === 0 && <p className="text-center py-6 text-xs text-gray-400 font-bold uppercase tracking-widest italic">Aún no hay movimientos contables hoy.</p>}
+               </div>
+            </div>
+
             <div className="flex items-center justify-between bg-gray-50 p-4 rounded-2xl border border-gray-100">
-              <span className="text-sm font-black text-black">
-                {products.length} PRODUCTOS
-              </span>
+               <div className="flex flex-col">
+                  <span className="text-sm font-black text-black">
+                     ESTADO DE STOCK ({products.length})
+                  </span>
+                  <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Control de Bodega Digital</span>
+               </div>
               <div className="relative w-64">
                 <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input 
@@ -629,11 +799,28 @@ export default function AdminDashboard() {
                              <div className="w-full h-full flex items-center justify-center bg-gray-100"><Package className="w-6 h-6 text-gray-300"/></div>
                           )}
                        </div>
-                       <div className="flex-1 flex flex-col justify-center min-w-0 pr-16">
-                          <h3 className="text-sm font-bold text-gray-900 truncate leading-tight">{product.name}</h3>
-                          <span className="text-[10px] font-black uppercase text-indigo-500 tracking-widest mt-1 mb-2 block truncate">{product.category} {product.supplier ? `· ${product.supplier}` : ''}</span>
-                          <span className="text-lg font-black text-black tracking-tighter">Q {product.price.toFixed(2)}</span>
-                       </div>
+                       <div className="flex-1 flex flex-col justify-center min-w-0 pr-16 relative">
+                           <h3 className="text-sm font-bold text-gray-900 truncate leading-tight">{product.name}</h3>
+                           <span className="text-[10px] font-black uppercase text-indigo-500 tracking-widest mt-1 mb-2 block truncate">{product.category} {product.supplier ? `· ${product.supplier}` : ''}</span>
+                           <div className="flex items-center gap-4">
+                              <span className="text-lg font-black text-black tracking-tighter">Q {product.price.toFixed(2)}</span>
+                              
+                              {/* STOCK BADGE */}
+                              {product.stock !== undefined && (
+                                <div className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-tighter border ${
+                                  product.stock === -1 ? 'bg-indigo-50 text-indigo-600 border-indigo-200' :
+                                  product.stock === 0 ? 'bg-red-50 text-red-600 border-red-200' :
+                                  product.stock < 5 ? 'bg-amber-50 text-amber-600 border-amber-200 animate-pulse' :
+                                  'bg-green-50 text-green-600 border-green-200'
+                                }`}>
+                                  {product.stock === -1 ? '∞ Stock' : `Bodega: ${product.stock}`}
+                                </div>
+                              )}
+                           </div>
+                           
+                           {/* COST DISPLAY (ERP ONLY) */}
+                           <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mt-2">Inversión: Q {(product.cost || 0).toFixed(2)}</p>
+                        </div>
                        
                        <div className="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
                          <button 

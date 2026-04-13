@@ -11,6 +11,7 @@ import { AuthModal } from "@/components/AuthModal";
 import { ProfileModal } from "@/components/ProfileModal";
 import { FloatingStatus } from "@/components/FloatingStatus";
 import { Toaster } from "@/components/Toaster";
+import { PackageTrackerPremium } from "@/components/PackageTrackerPremium";
 import type { Viewport } from 'next';
 
 const inter = Inter({ subsets: ["latin"] });
@@ -55,6 +56,7 @@ export default function RootLayout({
           <Navbar />
           <FloatingStatus />
           <Toaster />
+          <PackageTrackerPremium />
           <main className="flex-1 flex flex-col">
             {children}
           </main>

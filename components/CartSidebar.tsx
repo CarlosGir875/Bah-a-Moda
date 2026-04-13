@@ -19,11 +19,21 @@ export function CartSidebar() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [deliveryType, setDeliveryType] = useState<"domicilio" | "punto">("domicilio");
   
-  // Agendamiento Inteligente
-  const diasDisponibles = [
-    { val: new Date().toISOString().split('T')[0], label: "Hoy" },
-    { val: new Date(Date.now() + 86400000).toISOString().split('T')[0], label: "Mañana" }
-  ];
+  // Agendamiento Inteligente (Extendido a 7 días para Pedidos Anticipados)
+  const generateDays = () => {
+    const days = [];
+    const options: Intl.DateTimeFormatOptions = { weekday: 'long', day: 'numeric', month: 'short' };
+    for (let i = 0; i < 7; i++) {
+      const d = new Date();
+      d.setDate(d.getDate() + i);
+      const val = d.toISOString().split('T')[0];
+      const label = i === 0 ? "Hoy" : i === 1 ? "Mañana" : d.toLocaleDateString('es-ES', options);
+      days.push({ val, label });
+    }
+    return days;
+  };
+
+  const [diasDisponibles] = useState(generateDays());
   const [selectedDate, setSelectedDate] = useState(diasDisponibles[0].val);
   const timeSlots = generateTimeSlots(9, 18); // 9 AM a 6 PM
 
@@ -193,6 +203,16 @@ export function CartSidebar() {
                     </li>
                   ))}
                 </ul>
+              )}
+              
+              {/* ALERTA DE STOCK EN CARRITO */}
+              {cart.some(item => (item.product.stock !== undefined && item.product.stock !== -1 && item.product.stock < item.quantity)) && (
+                <div className="mt-4 p-3 bg-red-50 border border-red-100 rounded-xl flex items-start gap-2 animate-pulse">
+                   <div className="text-red-500 text-sm mt-0.5">⚠️</div>
+                   <p className="text-[10px] font-bold text-red-600 uppercase tracking-tight">
+                     Uno o más artículos en tu bolsa superan el stock disponible. Por favor ajusta las cantidades.
+                   </p>
+                </div>
               )}
             </div>
 

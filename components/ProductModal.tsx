@@ -222,10 +222,26 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
         {/* ═══ PRODUCT INFO ═══ */}
         <div className="px-6 pt-6 pb-8 flex flex-col gap-4">
 
-          {/* Category */}
-          <span className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.2em] bg-indigo-50 px-3 py-1 rounded-lg w-fit">
-            {product.category}
-          </span>
+          {/* Category & Stock */}
+          <div className="flex items-center gap-3">
+            <span className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.2em] bg-indigo-50 px-3 py-1 rounded-lg w-fit">
+              {product.category}
+            </span>
+            {product.stock !== undefined && product.stock !== -1 && (
+              <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-lg border ${
+                product.stock === 0 ? 'bg-red-50 text-red-600 border-red-100' :
+                product.stock < 10 ? 'bg-amber-50 text-amber-600 border-amber-100' :
+                'bg-green-50 text-green-600 border-green-100'
+              }`}>
+                {product.stock === 0 ? 'Sin existencias' : `Últimos ${product.stock} disponibles`}
+              </span>
+            )}
+            {product.stock === -1 && (
+              <span className="text-[9px] font-black text-indigo-500 uppercase tracking-widest bg-indigo-50/50 px-2 py-1 rounded-lg border border-indigo-100">
+                Stock Permanente
+              </span>
+            )}
+          </div>
 
           {/* Name & Price */}
           <div className="flex items-start justify-between gap-4">
@@ -281,9 +297,14 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
           {/* CTA */}
           <button
             onClick={handleAdd}
-            className="w-full bg-black text-white h-14 rounded-full shadow-xl font-black tracking-widest uppercase text-sm hover:bg-gray-900 active:scale-95 transition-all mt-2"
+            disabled={product.stock === 0}
+            className={`w-full h-14 rounded-full shadow-xl font-black tracking-widest uppercase text-sm active:scale-95 transition-all mt-2 ${
+              product.stock === 0 
+              ? 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none' 
+              : 'bg-black text-white hover:bg-gray-900'
+            }`}
           >
-            Añadir al Carrito
+            {product.stock === 0 ? 'Producto Agotado' : 'Añadir al Carrito'}
           </button>
 
           {/* Trust Badges */}

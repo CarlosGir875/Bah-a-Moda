@@ -28,7 +28,9 @@ export function EditProductModal({ product, onClose }: EditProductModalProps) {
     supplier: product.supplier || "",
     delivery_date: product.delivery_date || "",
     description: product.description || "",
-    sizes: product.sizes ? product.sizes.join(", ") : ""
+    sizes: product.sizes ? product.sizes.join(", ") : "",
+    cost: product.cost ? product.cost.toString() : "0",
+    stock: product.stock !== undefined ? product.stock.toString() : "1"
   });
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -90,6 +92,8 @@ export function EditProductModal({ product, onClose }: EditProductModalProps) {
       await updateProduct(product.id, {
         name: formData.name,
         price: parseFloat(formData.price),
+        cost: parseFloat(formData.cost),
+        stock: formData.stock === "-1" ? -1 : parseInt(formData.stock),
         images: finalImages,
         category: formData.category,
         subCategory: formData.subCategory,
@@ -187,7 +191,7 @@ export function EditProductModal({ product, onClose }: EditProductModalProps) {
                     />
                 </div>
                 <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 flex items-center gap-1">Precio de Venta (Quetzales)</label>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 flex items-center gap-1">Precio de Venta (Público)</label>
                     <div className="relative">
                         <span className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold flex items-center justify-center text-xs">Q</span>
                         <input 
@@ -195,6 +199,30 @@ export function EditProductModal({ product, onClose }: EditProductModalProps) {
                         value={formData.price}
                         onChange={(e) => setFormData({...formData, price: e.target.value})}
                         className="w-full border border-gray-300 bg-white pl-10 pr-4 py-3.5 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-black transition-shadow shadow-sm" 
+                        />
+                    </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                    <div>
+                        <label className="block text-[10px] font-black text-red-500 uppercase tracking-widest mb-2 flex items-center gap-1">Inversión (Costo)</label>
+                        <div className="relative">
+                            <span className="w-3 h-3 absolute left-4 top-1/2 -translate-y-1/2 text-red-300 font-bold flex items-center justify-center text-[10px]">Q</span>
+                            <input 
+                            type="number" 
+                            value={formData.cost}
+                            onChange={(e) => setFormData({...formData, cost: e.target.value})}
+                            className="w-full border border-red-100 bg-red-50/30 pl-10 pr-4 py-3 rounded-xl text-sm font-bold text-red-900 focus:outline-none focus:ring-2 focus:ring-red-200 transition-shadow shadow-sm" 
+                            />
+                        </div>
+                    </div>
+                    <div>
+                        <label className="block text-[10px] font-black text-green-600 uppercase tracking-widest mb-2 flex items-center gap-1">Stock Actual</label>
+                        <input 
+                            type="number" 
+                            value={formData.stock}
+                            onChange={(e) => setFormData({...formData, stock: e.target.value})}
+                            placeholder="-1 para infinito"
+                            className="w-full border border-green-100 bg-green-50/30 px-4 py-3 rounded-xl text-sm font-bold text-green-900 focus:outline-none focus:ring-2 focus:ring-green-200 transition-shadow shadow-sm" 
                         />
                     </div>
                 </div>

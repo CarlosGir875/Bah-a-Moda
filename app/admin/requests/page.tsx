@@ -26,7 +26,8 @@ export default function AdminRequestsPage() {
     approveOrderRequest, 
     rejectOrderRequest,
     markRequestAsSeen,
-    authLoading 
+    authLoading,
+    addToast
   } = useStore();
   const router = useRouter();
   const [processingId, setProcessingId] = useState<string | null>(null);
@@ -69,6 +70,10 @@ export default function AdminRequestsPage() {
     setProcessingId(id);
     try {
       await approveOrderRequest(id);
+      addToast("✅ Pedido procesado exitosamente", "success");
+    } catch (err: any) {
+      console.error("Error approving order:", err);
+      addToast(`❌ Error: ${err.message || "Fallo en el servidor"}`, "error");
     } finally {
       setProcessingId(null);
     }

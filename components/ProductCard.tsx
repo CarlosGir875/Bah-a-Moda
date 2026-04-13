@@ -9,12 +9,27 @@ interface ProductCardProps {
 export function ProductCard({ product, onClick }: ProductCardProps) {
   return (
     <div 
-      className="group flex flex-col cursor-pointer"
+      className={`group flex flex-col cursor-pointer ${product.stock === 0 ? 'grayscale pointer-events-none' : ''}`}
       onClick={() => onClick(product)}
     >
       {/* ── CONTENEDOR DE IMAGEN (El "Lienzo" Gris) ── */}
       <div className="relative aspect-[4/5] w-full overflow-hidden bg-[#F3F4F4] rounded-xl sm:rounded-[1.5rem] flex items-center justify-center transition-all duration-500 ease-out shadow-[0_0_0_transparent] group-hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.12)] group-hover:-translate-y-1">
         
+        {/* BADGES ESPECIALES */}
+        <div className="absolute top-2 left-2 sm:top-3 sm:left-3 z-10 flex flex-col gap-1.5">
+           {product.stock === 0 && (
+             <div className="bg-red-600 text-white text-[8px] sm:text-[10px] font-black uppercase tracking-widest px-2 sm:px-3 py-1 rounded-full shadow-lg border border-red-500/20">
+               Agotado
+             </div>
+           )}
+           {/* Si es comida o tiene tag de combo, marcar como pedido anticipado */}
+           {(product.category?.includes("Comida") || product.filterTag?.includes("Combos")) && (
+             <div className="bg-indigo-600 text-white text-[8px] sm:text-[9px] font-black uppercase tracking-widest px-2 sm:px-3 py-1 rounded-full shadow-lg border border-indigo-500/20">
+               Pedido Anticipado
+             </div>
+           )}
+        </div>
+
         {product.images && product.images.length > 0 ? (
           <img 
             src={product.images[0]} 

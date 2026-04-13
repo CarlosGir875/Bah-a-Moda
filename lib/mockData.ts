@@ -2,6 +2,8 @@ export interface Product {
   id: string;
   name: string;
   price: number;
+  cost?: number; // Costo de Inversión
+  stock?: number; // Inventario disponible
   category: string;
   subCategory?: string;
   images: string[];

@@ -131,7 +131,7 @@ export function ProfileModal() {
       <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => setIsProfileModalOpen(false)} />
 
       <div 
-        className={`relative w-full max-w-[95%] md:max-w-3xl max-h-[92vh] bg-slate-50 rounded-[3rem] md:rounded-[4rem] shadow-[0_50px_150px_rgba(0,0,0,0.8)] overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] transform flex flex-col ${
+        className={`relative w-full max-w-[95%] md:max-w-xl max-h-[92vh] bg-slate-50 rounded-[3rem] md:rounded-[4rem] shadow-[0_50px_150px_rgba(0,0,0,0.8)] overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] transform flex flex-col ${
           isProfileModalOpen ? "translate-y-0 scale-100 opacity-100" : "translate-y-20 scale-95 opacity-0"
         }`}
       >
@@ -139,7 +139,7 @@ export function ProfileModal() {
 
         <div className="flex-1 overflow-y-auto custom-scrollbar relative">
           {/* Header move inside scroll */}
-          <div className="h-36 md:h-40 bg-slate-900 flex-shrink-0 relative">
+          <div className="h-24 md:h-28 bg-slate-900 flex-shrink-0 relative">
             <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
             <button 
               onClick={() => setIsProfileModalOpen(false)}
@@ -150,8 +150,8 @@ export function ProfileModal() {
           </div>
 
           {/* Avatar move inside scroll */}
-          <div className="relative -mt-16 md:-mt-20 mb-6 flex justify-center z-10">
-            <div className="inline-flex items-center justify-center w-32 h-32 md:w-40 md:h-40 bg-slate-50 rounded-full border-[8px] border-slate-50 shadow-2xl overflow-hidden group relative">
+          <div className="relative -mt-12 md:-mt-14 mb-4 flex justify-center z-10">
+            <div className="inline-flex items-center justify-center w-24 h-24 md:w-28 md:h-28 bg-slate-50 rounded-full border-[6px] border-slate-50 shadow-2xl overflow-hidden group relative">
               <div className="w-full h-full bg-slate-100 flex items-center justify-center text-black">
                 {isUploading && (
                   <div className="absolute inset-0 bg-white/60 backdrop-blur-sm flex items-center justify-center z-20">
@@ -174,7 +174,7 @@ export function ProfileModal() {
               </button>
             </div>
           </div>
-          <div className="px-5 md:px-12 pb-12 pt-4 text-center">
+          <div className="px-5 md:px-12 pb-6 pt-2 text-center">
             
             {view === "overview" ? (
               <div className="animate-in fade-in slide-in-from-bottom-6 duration-700 max-w-5xl mx-auto">
@@ -199,49 +199,49 @@ export function ProfileModal() {
                 </div>
 
                 {isAdmin && (
-                  <div className="flex justify-center mb-16">
-                    <span className="flex items-center gap-4 px-10 py-4 bg-slate-900 text-white rounded-full text-[12px] font-black uppercase tracking-[0.4em] shadow-2xl border-t border-white/10 group cursor-pointer hover:bg-emerald-600 transition-colors" onClick={() => window.location.href='/admin'}>
-                      <ShieldCheck className="w-5 h-5 text-emerald-400 group-hover:text-white" /> ADMINISTRADOR JEFE
+                  <div className="flex justify-center mb-6">
+                    <span className="flex items-center gap-3 px-6 py-2 bg-slate-900 text-white rounded-full text-[10px] font-black uppercase tracking-[0.3em] shadow-lg border-t border-white/10 group cursor-pointer hover:bg-emerald-600 transition-colors" onClick={() => window.location.href='/admin'}>
+                      <ShieldCheck className="w-4 h-4 text-emerald-400 group-hover:text-white" /> ADMIN V.I.P
                     </span>
                   </div>
                 )}
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 text-left">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6 text-left">
                   {[
-                    { label: "WhatsApp Contacto", icon: Phone, value: profile?.celular, edit: () => setIsEditingPhone(true), cancel: () => setIsEditingPhone(false), isEditing: isEditingPhone, val: newCelular, setVal: setNewCelular, save: async () => { await updateProfile({ celular: newCelular }); setIsEditingPhone(false); } },
-                    { label: "Dirección de Entrega", icon: MapPin, value: profile?.direccion, edit: () => setIsEditingAddress(true), cancel: () => setIsEditingAddress(false), isEditing: isEditingAddress, val: newAddress, setVal: setNewAddress, save: async () => { await updateProfile({ direccion: newAddress }); setIsEditingAddress(false); } },
-                    { label: "Punto de Referencia", icon: Map, value: profile?.punto_encuentro, edit: () => setIsEditingMeetingPoint(true), cancel: () => setIsEditingMeetingPoint(false), isEditing: isEditingMeetingPoint, val: newMeetingPoint, setVal: setNewMeetingPoint, save: async () => { await updateProfile({ punto_encuentro: newMeetingPoint }); setIsEditingMeetingPoint(false); } }
+                    { label: "WhatsApp", icon: Phone, value: profile?.celular, edit: () => setIsEditingPhone(true), cancel: () => setIsEditingPhone(false), isEditing: isEditingPhone, val: newCelular, setVal: setNewCelular, save: async () => { await updateProfile({ celular: newCelular }); setIsEditingPhone(false); } },
+                    { label: "Dirección", icon: MapPin, value: profile?.direccion, edit: () => setIsEditingAddress(true), cancel: () => setIsEditingAddress(false), isEditing: isEditingAddress, val: newAddress, setVal: setNewAddress, save: async () => { await updateProfile({ direccion: newAddress }); setIsEditingAddress(false); } },
+                    { label: "Referencia", icon: Map, value: profile?.punto_encuentro, edit: () => setIsEditingMeetingPoint(true), cancel: () => setIsEditingMeetingPoint(false), isEditing: isEditingMeetingPoint, val: newMeetingPoint, setVal: setNewMeetingPoint, save: async () => { await updateProfile({ punto_encuentro: newMeetingPoint }); setIsEditingMeetingPoint(false); } }
                   ].map((item, i) => (
-                    <div key={i} className="bg-white p-5 md:p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-all group overflow-hidden">
-                      <div className="flex items-center gap-2 mb-4 text-slate-900">
-                         <item.icon className="w-4 h-4 opacity-40 text-indigo-600 shrink-0" />
-                         <span className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-slate-400">{item.label}</span>
+                    <div key={i} className="bg-white p-4 rounded-[2rem] border border-slate-100 shadow-sm transition-all group overflow-hidden">
+                      <div className="flex items-center gap-2 mb-2 text-slate-900">
+                         <item.icon className="w-3.5 h-3.5 opacity-40 text-indigo-600 shrink-0" />
+                         <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">{item.label}</span>
                       </div>
                       {item.isEditing ? (
-                        <div className="flex gap-2">
-                          <input value={item.val} onChange={e => item.setVal(e.target.value)} className="w-full text-xs font-bold bg-slate-50 p-2.5 rounded-xl border-2 border-slate-900 outline-none" />
-                          <button onClick={item.save} className="p-2.5 bg-slate-900 text-white rounded-xl active:scale-90"><Check className="w-4 h-4" /></button>
-                          <button onClick={item.cancel} className="p-2.5 bg-slate-50 text-slate-400 rounded-xl active:scale-90"><X className="w-4 h-4" /></button>
+                        <div className="flex gap-1.5">
+                          <input value={item.val} onChange={e => item.setVal(e.target.value)} className="w-full text-[10px] font-bold bg-slate-50 p-2 rounded-xl border-2 border-slate-900 outline-none" />
+                          <button onClick={item.save} className="p-2 bg-slate-900 text-white rounded-xl active:scale-90"><Check className="w-3.5 h-3.5" /></button>
+                          <button onClick={item.cancel} className="p-2 bg-slate-50 text-slate-400 rounded-xl active:scale-90"><X className="w-3.5 h-3.5" /></button>
                         </div>
                       ) : (
-                        <div className="flex items-center justify-between gap-2 border-t border-slate-50 pt-2">
-                          <p className="text-sm font-black text-slate-900 truncate">{item.value || "Pendiente"}</p>
-                          <button onClick={item.edit} className="text-[9px] font-black text-white bg-slate-900 px-3 py-1.5 rounded-full opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all shrink-0">EDITAR</button>
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="text-[11px] font-black text-slate-900 truncate">{item.value || "Pendiente"}</p>
+                          <button onClick={item.edit} className="text-[8px] font-black text-indigo-600 bg-indigo-50 px-2 py-1 rounded-full opacity-100 transition-all shrink-0 hover:bg-indigo-600 hover:text-white">EDITAR</button>
                         </div>
                       )}
                     </div>
                   ))}
                 </div>
 
-                <div className="bg-slate-100/50 p-5 md:p-8 rounded-3xl border border-slate-200 text-left mb-6">
-                   <div className="flex flex-col md:flex-row md:items-center justify-between mb-5 border-b border-slate-200 pb-4 gap-3">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2.5 bg-white rounded-xl shadow-sm text-slate-900">
-                          <Package className="w-5 h-5" />
+                <div className="bg-slate-100/50 p-4 md:p-6 rounded-[2.5rem] border border-slate-200 text-left mb-4">
+                   <div className="flex items-center justify-between mb-4 border-b border-slate-200 pb-3">
+                      <div className="flex items-center gap-2.5">
+                        <div className="p-2 bg-white rounded-xl shadow-sm text-slate-900">
+                          <Package className="w-4 h-4" />
                         </div>
-                        <h4 className="text-base font-black uppercase tracking-tight text-slate-900">Mis Pedidos</h4>
+                        <h4 className="text-sm font-black uppercase tracking-tight text-slate-900">Mis Pedidos</h4>
                       </div>
-                      <button onClick={() => setView("orders")} className="text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-slate-900 w-max bg-white md:bg-transparent px-3 py-1.5 md:p-0 rounded-full border border-slate-200 md:border-none shadow-sm md:shadow-none">Historial Completo →</button>
+                      <button onClick={() => setView("orders")} className="text-[9px] font-black uppercase tracking-widest text-indigo-600 hover:underline">Historial →</button>
                    </div>
                    
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

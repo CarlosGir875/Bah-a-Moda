@@ -1,9 +1,5 @@
-"use client";
-import { useState } from "react";
-import { X, ShieldCheck, Package, Users } from "lucide-react";
-import { useStore } from "@/lib/store";
-import { MAIN_CATEGORIES } from "@/lib/mockData";
 import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 
 export function SidebarLeft() {
   const { isLeftSidebarOpen, setIsLeftSidebarOpen, selectedCategory, setSelectedCategory, setSelectedFilter, user, profile, isAdmin, signOut } = useStore();
@@ -35,115 +31,130 @@ export function SidebarLeft() {
   };
 
   return (
-    <>
-      {isLeftSidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/60 z-50 transition-opacity"
-          onClick={() => setIsLeftSidebarOpen(false)}
-        />
-      )}
-      <div
-        className={`fixed inset-y-0 left-0 z-50 w-72 sm:w-80 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out ${
-          isLeftSidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
-        <div className="h-full flex flex-col p-6 overflow-y-auto">
-          <div className="mb-8 flex items-center justify-between">
-            <div className="flex-1">
-              <div className="flex flex-col gap-1">
-                <h2 className="text-xl font-black uppercase tracking-[0.2em] text-black">Bahía Moda</h2>
-                <p className="text-[10px] font-bold text-gray-400 uppercase">Tienda Exclusiva</p>
-              </div>
-            </div>
-            <button
+      <AnimatePresence>
+        {isLeftSidebarOpen && (
+          <>
+            {/* Backdrop con Blur */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/40 backdrop-blur-[2px] z-50"
               onClick={() => setIsLeftSidebarOpen(false)}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0 ml-2"
+            />
+
+            {/* Sidebar Container */}
+            <motion.div
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="fixed inset-y-0 left-0 z-50 w-[85vw] sm:w-80 bg-white/95 backdrop-blur-xl shadow-[20px_0_60px_-15px_rgba(0,0,0,0.1)] flex flex-col border-r border-white/20"
             >
-              <X className="h-5 w-5 text-black" />
-            </button>
-          </div>
-          
-          <ul className="space-y-2 mb-6 border-b border-gray-200 pb-4">
-            <li>
-              <button
-                onClick={() => handleNavigation('/')}
-                className="w-full text-left px-4 py-3 rounded-lg transition-colors text-sm font-bold bg-white text-black border border-gray-200 hover:border-black"
-              >
-                Inicio (Portada)
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={() => handleNavigation('/catalogo')}
-                className="w-full text-left px-4 py-3 rounded-lg transition-colors text-sm font-bold bg-black text-white shadow-md hover:bg-gray-800"
-              >
-                Catálogo Completo
-              </button>
-            </li>
-          </ul>
+              <div className="h-full flex flex-col p-8 overflow-y-auto hide-scrollbar space-y-10">
+                
+                {/* Branding & Close */}
+                <div className="flex items-center justify-between">
+                  <div className="flex flex-col" onClick={handleSecretClick}>
+                    <h2 className="text-2xl font-[900] uppercase tracking-[0.25em] text-black leading-none">Bahía</h2>
+                    <p className="text-[10px] font-black text-indigo-500 uppercase tracking-[0.3em] mt-2 ml-0.5">Tienda Exclusiva</p>
+                  </div>
+                  <button
+                    onClick={() => setIsLeftSidebarOpen(false)}
+                    className="p-3 bg-gray-50 hover:bg-black hover:text-white rounded-2xl transition-all active:scale-90"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
 
-          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3 px-2">Líneas de Producto</h3>
-          <ul className="space-y-2 mb-8">
-            {MAIN_CATEGORIES.map((cat) => (
-              <li key={cat}>
-                <button
-                  onClick={() => handleNavigation('/catalogo', cat)}
-                  className={`w-full text-left px-4 py-3 rounded-lg transition-colors text-sm font-medium border ${
-                    selectedCategory === cat
-                      ? "bg-gray-200 text-black border-gray-300 shadow-sm"
-                      : "bg-white text-gray-700 border-gray-100 hover:border-gray-300 hover:shadow-sm"
-                  }`}
-                >
-                  {cat}
-                </button>
-              </li>
-            ))}
-          </ul>
+                {/* Main Discovery */}
+                <div className="space-y-3">
+                   <button
+                    onClick={() => handleNavigation('/catalogo')}
+                    className="w-full group relative h-14 bg-black text-white rounded-[1.2rem] overflow-hidden transition-all hover:shadow-xl hover:shadow-indigo-500/20 active:scale-[0.98]"
+                  >
+                     <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                     <div className="relative flex items-center justify-center gap-3">
+                        <Package className="w-4 h-4 text-indigo-400" />
+                        <span className="text-[11px] font-black uppercase tracking-[0.15em]">Catálogo Completo</span>
+                     </div>
+                  </button>
+                  <button
+                    onClick={() => handleNavigation('/')}
+                    className="w-full h-14 bg-white border-2 border-gray-100 text-black rounded-[1.2rem] text-[11px] font-black uppercase tracking-[0.15em] hover:border-black transition-all"
+                  >
+                    Portada / Inicio
+                  </button>
+                </div>
 
-          {/* SECCIÓN ADMINISTRATIVA (Solo visible para admin) */}
-          {isAdmin && (
-            <div className="mt-auto pt-6 border-t border-gray-100 flex flex-col gap-3">
-              <h3 className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.2em] mb-1 px-2">Herramientas de Control</h3>
-              
-              <button
-                onClick={() => handleNavigation('/admin')}
-                className="w-full flex items-center gap-3 px-4 py-3 bg-indigo-50/50 text-indigo-700 rounded-2xl border border-indigo-100 transition-all hover:bg-indigo-100 group"
-              >
-                <div className="p-2 bg-white rounded-xl shadow-sm group-hover:scale-110 transition-transform">
-                  <ShieldCheck className="h-4 w-4" />
+                {/* Product Lines Section */}
+                <div>
+                   <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-6 px-1 flex items-center gap-2">
+                     <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full" />
+                     Líneas de Producto
+                   </h3>
+                   <ul className="space-y-2">
+                      {MAIN_CATEGORIES.map((cat, idx) => {
+                        const isSelected = selectedCategory === cat;
+                        return (
+                          <motion.li 
+                            key={cat}
+                            initial={{ x: -10, opacity: 0 }}
+                            animate={{ x: 0, opacity: 1 }}
+                            transition={{ delay: idx * 0.05 }}
+                          >
+                            <button
+                              onClick={() => handleNavigation('/catalogo', cat)}
+                              className={`w-full group flex items-center justify-between px-5 py-4 rounded-[1.2rem] transition-all border ${
+                                isSelected
+                                  ? "bg-indigo-50 border-indigo-100 text-indigo-700 shadow-sm"
+                                  : "bg-white border-gray-50 text-gray-600 hover:border-gray-200 hover:bg-gray-50/50"
+                              }`}
+                            >
+                              <span className={`text-xs font-bold transition-all ${isSelected ? "translate-x-1" : "group-hover:translate-x-1"}`}>
+                                {cat}
+                              </span>
+                              {isSelected && <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full shadow-[0_0_10px_rgba(79,70,229,0.5)]" />}
+                            </button>
+                          </motion.li>
+                        );
+                      })}
+                   </ul>
                 </div>
-                <div className="text-left">
-                  <p className="text-[10px] font-black uppercase tracking-widest leading-none">Inventario</p>
-                </div>
-              </button>
 
-              <button
-                onClick={() => handleNavigation('/admin/orders')}
-                className="w-full flex items-center gap-3 px-4 py-3 bg-black text-white rounded-2xl border border-black transition-all hover:bg-gray-900 group shadow-lg"
-              >
-                <div className="p-2 bg-white/10 rounded-xl group-hover:scale-110 transition-transform">
-                  <Package className="h-4 w-4 text-white" />
-                </div>
-                <div className="text-left">
-                  <p className="text-[10px] font-black uppercase tracking-widest leading-none">Control de Pedidos</p>
-                </div>
-              </button>
-
-              <button
-                onClick={() => handleNavigation('/admin/users')}
-                className="w-full flex items-center gap-3 px-4 py-3 bg-gray-50 hover:bg-indigo-50 text-gray-700 hover:text-indigo-700 rounded-2xl border border-gray-100 hover:border-indigo-100 transition-all group"
-              >
-                <div className="p-2 bg-white rounded-xl shadow-sm group-hover:scale-110 transition-transform">
-                  <Users className="h-4 w-4" />
-                </div>
-                <div className="text-left">
-                  <p className="text-[10px] font-black uppercase tracking-widest leading-none">Base de Clientes</p>
-                </div>
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
+                {/* SECCIÓN ADMINISTRATIVA (Tablero Táctico) */}
+                {isAdmin && (
+                  <div className="mt-auto pt-8 border-t border-gray-100 space-y-6">
+                    <div className="bg-zinc-50 rounded-[2.5rem] p-6 border border-zinc-100 shadow-inner">
+                      <h4 className="text-[9px] font-black text-indigo-500 uppercase tracking-[0.25em] mb-4 text-center">Herramientas de Control</h4>
+                      <div className="grid grid-cols-1 gap-2">
+                        {[
+                          { path: '/admin', icon: ShieldCheck, label: 'Inventario', color: 'indigo' },
+                          { path: '/admin/orders', icon: Package, label: 'Pedidos', color: 'black' },
+                          { path: '/admin/users', icon: Users, label: 'Clientes', color: 'gray' }
+                        ].map((item) => (
+                          <button
+                            key={item.path}
+                            onClick={() => handleNavigation(item.path)}
+                            className="flex items-center gap-4 p-4 bg-white rounded-2xl border border-zinc-100 hover:border-indigo-200 hover:shadow-lg transition-all active:scale-95 group"
+                          >
+                            <div className={`p-2 rounded-xl bg-${item.color}-50 text-${item.color}-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors`}>
+                              <item.icon className="h-4 w-4" />
+                            </div>
+                            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-600 group-hover:text-black">
+                              {item.label}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </>
   );
 }

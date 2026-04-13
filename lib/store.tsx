@@ -61,6 +61,15 @@ export interface OrderRequest {
   created_at: string;
 }
 
+export interface Finanza {
+  id: string;
+  tipo: 'ingreso' | 'egreso';
+  monto: number;
+  concepto: string;
+  pedido_id: string | null;
+  created_at: string;
+}
+
 export interface ReservaHorario {
   id: string;
   fecha: string; // YYYY-MM-DD
@@ -95,6 +104,8 @@ type StoreContextType = {
   setIsAuthModalOpen: (val: boolean) => void;
   isProfileModalOpen: boolean;
   setIsProfileModalOpen: (val: boolean) => void;
+  isTrackingOpen: boolean;
+  setIsTrackingOpen: (val: boolean) => void;
   products: Product[];
   fetchProducts: () => Promise<void>;
   addProduct: (product: Omit<Product, 'id'>) => Promise<void>;
@@ -129,6 +140,9 @@ type StoreContextType = {
   rejectOrderRequest: (id: string) => Promise<void>;
   markRequestAsSeen: (id: string) => Promise<void>;
   markOrderAsSeen: (id: string) => Promise<void>;
+  finanzas: Finanza[];
+  fetchFinanzas: () => Promise<void>;
+  addFinanza: (finanza: Omit<Finanza, 'id' | 'created_at'>) => Promise<void>;
   toasts: Toast[];
   addToast: (message: string, type?: 'success' | 'error' | 'info') => void;
   removeToast: (id: string) => void;
@@ -146,9 +160,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isTrackingOpen, setIsTrackingOpen] = useState(false);
 
   // Scheduling State
   const [reservasHorarios, setReservasHorarios] = useState<ReservaHorario[]>([]);
+
+  // Finance State
+  const [finanzas, setFinanzas] = useState<Finanza[]>([]);
 
   // Auth State
   const [user, setUser] = useState<User | null>(null);
@@ -189,11 +207,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
     
     if (data) {
-      // Mapping database naming (snake_case) to frontend naming (camelCase)
       const mappedProducts = data.map((p: any) => ({
         id: p.id,
         name: p.name,
         price: p.price,
+        cost: p.cost || 0,
+        stock: p.stock !== null ? p.stock : 1,
         images: p.image_urls || [],
         category: p.category,
         subCategory: p.sub_category,
@@ -226,6 +245,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       .insert([{
         name: product.name,
         price: product.price,
+        cost: product.cost || 0,
+        stock: product.stock !== undefined ? product.stock : 1,
         image_urls: product.images,
         category: product.category,
         sub_category: product.subCategory,
@@ -245,6 +266,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const dbUpdates: any = {};
     if (updates.name !== undefined) dbUpdates.name = updates.name;
     if (updates.price !== undefined) dbUpdates.price = updates.price;
+    if (updates.cost !== undefined) dbUpdates.cost = updates.cost;
+    if (updates.stock !== undefined) dbUpdates.stock = updates.stock;
     if (updates.images !== undefined) dbUpdates.image_urls = updates.images;
     if (updates.category !== undefined) dbUpdates.category = updates.category;
     if (updates.subCategory !== undefined) dbUpdates.sub_category = updates.subCategory;
@@ -585,6 +608,22 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (!error) setOrderRequests(data || []);
   }, []);
 
+  const fetchFinanzas = useCallback(async () => {
+    const { data, error } = await supabase
+      .from('finanzas')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (!error) setFinanzas(data || []);
+  }, []);
+
+  const addFinanza = useCallback(async (finanza: Omit<Finanza, 'id' | 'created_at'>) => {
+    const { error } = await supabase
+      .from('finanzas')
+      .insert([finanza]);
+    if (error) throw error;
+    await fetchFinanzas();
+  }, [fetchFinanzas]);
+
   const createOrderRequest = useCallback(async (data: Omit<OrderRequest, 'id' | 'created_at' | 'estado' | 'visto'>, reserva?: Omit<ReservaHorario, 'id' | 'created_at' | 'solicitud_id'>) => {
     // Inject custom robust debugging for DB rejections
     const { data: insertedData, error } = await supabase
@@ -621,6 +660,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const request = orderRequests.find(r => r.id === requestId);
     if (!request) return;
 
+    // 1.1 Calcular la inversión base buscando el costo real de cada producto en el inventario actual
+    const inversionTotal = request.items.reduce((sum, item) => {
+      const product = products.find(p => p.id === item.id);
+      const cost = product ? (product.cost || 0) : 0;
+      return sum + (cost * (item.quantity || 1));
+    }, 0);
+
     // 1. Crear el pedido oficial
     const { error: orderError } = await supabase
       .from('pedidos')
@@ -630,22 +676,60 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         items: request.items,
         total: request.total,
         anticipo: request.anticipo,
-        inversion: 0,
+        inversion: inversionTotal,
         estado: 'recibido',
         tipo_entrega: request.tipo_entrega,
         ubicacion_entrega: request.ubicacion,
         visto: false
       }]);
 
-    if (orderError) throw orderError;
+    if (orderError) {
+      console.error("[ERP ERROR] Failed to create order. Check if 'pedidos' table exists and has 'inversion' column.", orderError);
+      throw new Error(`Error al crear pedido base: ${orderError.message}`);
+    }
+
+    // 1.5 Descontar Stock e inyectar Finanza (ERP Logic)
+    try {
+      for (const item of request.items) {
+        // Encontrar el producto real en el estado para actualizar su stock
+        const realProduct = products.find(p => p.id === item.id);
+        if (realProduct && realProduct.id) {
+          if (realProduct.stock !== undefined && realProduct.stock !== -1) {
+             const newStock = Math.max(0, realProduct.stock - (item.quantity || 1));
+             const { error: stockErr } = await supabase.from('products').update({ stock: newStock }).eq('id', realProduct.id);
+             if (stockErr) console.warn("[ERP WARNING] Could not update stock. Is 'stock' column missing?", stockErr);
+          }
+        }
+      }
+    } catch (e) {
+      console.error("[ERP ERROR] Stock update loop failed:", e);
+    }
+
+    try {
+      const { error: finError } = await supabase.from('finanzas').insert([{
+        tipo: 'ingreso',
+        monto: request.total,
+        concepto: `Venta Autorizada Pedido #${requestId.split('-')[0]}`,
+        pedido_id: requestId
+      }]);
+      
+      if (finError) {
+        console.warn("[ERP WARNING] Could not insert finance record. Is 'finanzas' table missing?", finError);
+      } else {
+        await fetchFinanzas();
+      }
+    } catch (e) {
+      console.error("Error inyectando finanza:", e)
+    }
 
     // 2. Marcar solicitud como aprobada
     await supabase.from('solicitudes_pedidos').update({ estado: 'aprobado' }).eq('id', requestId);
     
-    // 3. Actualizar listas
+    // 3. Actualizar listas globales
     await fetchOrderRequests();
     await fetchAllOrders();
-  }, [orderRequests, fetchOrderRequests, fetchAllOrders]);
+    await fetchProducts(); // Refrescar inventario
+  }, [orderRequests, products, fetchOrderRequests, fetchAllOrders, fetchFinanzas, fetchProducts]);
 
   const rejectOrderRequest = useCallback(async (id: string) => {
     const { error } = await supabase
@@ -724,6 +808,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         setIsAuthModalOpen,
         isProfileModalOpen,
         setIsProfileModalOpen,
+        isTrackingOpen,
+        setIsTrackingOpen,
         products,
         fetchProducts,
         addProduct,
@@ -760,6 +846,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         rejectOrderRequest,
         markRequestAsSeen,
         markOrderAsSeen,
+        finanzas,
+        fetchFinanzas,
+        addFinanza,
         toasts,
         addToast,
         removeToast
