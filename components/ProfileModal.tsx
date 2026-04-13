@@ -246,7 +246,7 @@ export function ProfileModal() {
                    
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {userOrders.length > 0 ? userOrders.slice(0, 4).map(o => (
-                        <div key={o.id} className="bg-white p-4 rounded-2xl flex items-center justify-between shadow-sm border border-slate-100 hover:shadow-md transition-all cursor-pointer group" onClick={() => setView("orders")}>
+                        <div key={o.id} className="bg-white p-4 rounded-2xl flex items-center justify-between shadow-sm border border-slate-100 hover:shadow-md transition-all cursor-pointer group" onClick={() => { setIsTrackingOpen(true); setIsProfileModalOpen(false); }}>
                            <div className="flex items-center gap-3">
                              <div className={`p-3 rounded-xl border ${getStatusColor(o.estado)}`}>
                                 <Package className="w-4 h-4" />
@@ -288,7 +288,7 @@ export function ProfileModal() {
                    <div className="absolute inset-0 pointer-events-none opacity-[0.02] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]" />
                    
                    {userOrders.map(o => (
-                     <div key={o.id} className="relative bg-[#fffdfb] p-10 md:p-12 rounded-2xl border-[3px] border-zinc-900 shadow-[8px_8px_0px_#18181b] overflow-hidden transition-all hover:translate-y-1 hover:shadow-[4px_4px_0px_#18181b] group">
+                     <div key={o.id} className="relative bg-[#fffdfb] p-10 md:p-12 rounded-2xl border-[3px] border-zinc-900 shadow-[8px_8px_0px_#18181b] overflow-hidden transition-all hover:translate-y-1 hover:shadow-[4px_4px_0px_#18181b] group cursor-pointer" onClick={() => { setIsTrackingOpen(true); setIsProfileModalOpen(false); }}>
                         
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10 border-b-2 border-dashed border-zinc-300 pb-8">
                            <div>

@@ -59,7 +59,7 @@ export function PackageTrackerPremium() {
              <div className="absolute inset-0 bg-gradient-to-b from-indigo-50/50 to-white" />
              
              {/* The Road / Path */}
-             <div className="relative w-full px-12">
+             <div className="relative w-full px-24">
                 <div className="h-1.5 w-full bg-slate-100 rounded-full relative overflow-hidden">
                    <motion.div 
                      initial={{ width: 0 }}
@@ -69,21 +69,40 @@ export function PackageTrackerPremium() {
                    />
                 </div>
                 
-                {/* Steps Nodes */}
-                <div className="absolute top-1/2 -translate-y-1/2 left-12 right-12 flex justify-between h-0">
-                   {steps.map((step, idx) => (
-                     <div key={idx} className="relative flex flex-col items-center">
-                        <motion.div 
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          transition={{ delay: 0.1 * idx }}
-                          className={`w-6 h-6 rounded-full border-4 ${idx <= currentStepIndex ? 'bg-indigo-600 border-white shadow-lg' : 'bg-white border-slate-100'} z-10`}
-                        />
-                        <span className={`absolute top-8 text-[8px] font-black uppercase tracking-widest whitespace-nowrap transition-colors ${idx <= currentStepIndex ? 'text-indigo-600' : 'text-slate-300'}`}>
-                          {step.label}
-                        </span>
-                     </div>
-                   ))}
+                {/* Steps Nodes (Neon Green Lights) */}
+                <div className="absolute top-1/2 -translate-y-1/2 left-24 right-24 flex justify-between h-0">
+                   {steps.map((step, idx) => {
+                     const isCompleted = idx <= currentStepIndex;
+                     const isCurrent = idx === currentStepIndex;
+                     return (
+                       <div key={idx} className="relative flex flex-col items-center">
+                          {/* THE NEON LIGHT */}
+                          <motion.div 
+                            initial={{ scale: 0 }}
+                            animate={{ 
+                              scale: 1,
+                              boxShadow: isCompleted 
+                                ? "0 0 20px rgba(16, 185, 129, 0.6)" 
+                                : "0 0 0px rgba(0,0,0,0)"
+                            }}
+                            className={`w-8 h-8 rounded-full border-4 flex items-center justify-center transition-all duration-500 ${
+                              isCompleted 
+                                ? "bg-emerald-500 border-white" 
+                                : "bg-white border-slate-100"
+                            }`}
+                          >
+                             {isCompleted ? (
+                               <CheckCircle2 className="w-4 h-4 text-white" />
+                             ) : (
+                               <div className="w-1.5 h-1.5 bg-slate-200 rounded-full" />
+                             )}
+                          </motion.div>
+                          <span className={`absolute top-10 text-[9px] font-black uppercase tracking-[0.2em] whitespace-nowrap transition-colors ${isCompleted ? 'text-emerald-600' : 'text-slate-300'}`}>
+                            {step.label}
+                          </span>
+                       </div>
+                     );
+                   })}
                 </div>
 
                 {/* DYNAMIC ROAD ENVIRONMENT */}
@@ -122,89 +141,91 @@ export function PackageTrackerPremium() {
                       transition={{ repeat: Infinity, duration: 0.4 }}
                     />
 
-                    {/* Truck Entity (Semi-Isometric Design) */}
+                    {/* Truck Entity (BM Master 3.0) */}
                     <motion.svg 
-                      width="100" height="90" viewBox="0 0 100 90" 
-                      className="drop-shadow-[0_20px_40px_rgba(0,0,0,0.15)] overflow-visible"
+                      width="110" height="100" viewBox="0 0 100 90" 
+                      className="drop-shadow-[0_25px_50px_rgba(0,0,0,0.25)] overflow-visible"
                       animate={{ 
-                        y: [0, -5, 0],
-                        rotate: [0, -1.5, 1.5, 0]
+                        y: [0, -6, 0],
+                        rotate: [0, -1, 1, 0],
+                        scaleY: [1, 0.98, 1.02, 1] // Squash & Stretch
                       }}
                       transition={{ 
                         repeat: Infinity, 
-                        duration: 0.45,
-                        ease: "linear"
+                        duration: 0.5,
+                        ease: "easeInOut"
                       }}
                     >
                        <defs>
-                          <linearGradient id="bodyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                             <stop offset="0%" stopColor="#6366f1" />
-                             <stop offset="100%" stopColor="#4338ca" />
-                          </linearGradient>
-                          <linearGradient id="cabinGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                             <stop offset="0%" stopColor="#4338ca" />
+                          <linearGradient id="masterBody" x1="0%" y1="0%" x2="100%" y2="100%">
+                             <stop offset="0%" stopColor="#4f46e5" />
                              <stop offset="100%" stopColor="#312e81" />
+                          </linearGradient>
+                          <linearGradient id="chrome" x1="0%" y1="0%" x2="100%" y2="0%">
+                             <stop offset="0%" stopColor="#94a3b8" />
+                             <stop offset="50%" stopColor="#f8fafc" />
+                             <stop offset="100%" stopColor="#94a3b8" />
                           </linearGradient>
                        </defs>
 
-                       {/* Truck Body (Cargo Container) */}
-                       <g>
-                          <rect x="2" y="10" width="70" height="50" rx="14" fill="url(#bodyGradient)" />
-                          {/* Shading/Highlights */}
-                          <rect x="2" y="10" width="70" height="2" rx="1" fill="white" opacity="0.2" />
-                          <rect x="2" y="58" width="70" height="2" rx="1" fill="black" opacity="0.1" />
+                       {/* Truck Container */}
+                       <g transform="translate(0, 5)">
+                          <rect x="2" y="10" width="70" height="52" rx="16" fill="url(#masterBody)" />
                           
-                          {/* BM BRANDING LOGO */}
+                          {/* Metallic Detail */}
+                          <rect x="5" y="15" width="64" height="2" rx="1" fill="white" opacity="0.15" />
+                          <rect x="2" y="60" width="70" height="3" rx="1" fill="black" opacity="0.2" />
+
+                          {/* BM BRANDING - GOLD STYLE */}
                           <text 
                              x="37" y="42" 
-                             className="text-[18px] font-black italic fill-white selection:bg-transparent"
+                             className="text-[20px] font-black italic fill-white"
                              textAnchor="middle"
-                             style={{ letterSpacing: '0.1em', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }}
+                             style={{ letterSpacing: '0.05em', filter: 'drop-shadow(0 3px 6px rgba(0,0,0,0.4))' }}
                           >
                              BM
                           </text>
                           <text 
-                             x="37" y="52" 
-                             className="text-[6px] font-black uppercase fill-white/60"
+                             x="37" y="54" 
+                             className="text-[5px] font-black uppercase fill-white/50"
                              textAnchor="middle"
-                             style={{ letterSpacing: '0.3em' }}
+                             style={{ letterSpacing: '0.4em' }}
                           >
-                             Elite Delivery
+                             Elite Experience
                           </text>
                        </g>
                        
-                       {/* Cabin (Isometric Front) */}
-                       <g>
-                          <path d="M72 60 L98 60 C100 60 102 58 102 55 L102 38 C102 28 92 22 78 22 L72 22 Z" fill="url(#cabinGradient)" />
-                          {/* Window */}
-                          <path d="M80 26 L95 26 C98 26 100 28 98 32 L88 54 C87 56 85 57 82 57 L72 57 L72 26 Z" fill="#93c5fd" opacity="0.8" />
-                          {/* Window Shine */}
-                          <rect x="80" y="30" width="4" height="20" fill="white" opacity="0.4" transform="rotate(15 82 40)" />
+                       {/* Cabin (High Detail) */}
+                       <g transform="translate(0, 5)">
+                          <path d="M72 62 L98 62 C101 62 103 60 103 57 L103 36 C103 26 92 20 78 20 L72 20 Z" fill="#1e1b4b" />
+                          {/* Chrome Grill */}
+                          <rect x="94" y="45" width="9" height="12" rx="2" fill="url(#chrome)" />
+                          {/* Window with cloud reflections */}
+                          <path d="M80 24 L95 24 C97 24 99 26 98 29 L88 56 C87 58 85 59 82 59 L72 59 L72 24 Z" fill="#0ea5e9" opacity="0.7" />
+                          <path d="M82 28 Q88 28 92 34 L85 52 Q82 54 80 50 Z" fill="white" opacity="0.2" />
                           
-                          {/* Active Headlight Beam */}
+                          {/* Headlight & Flare */}
                           <motion.circle 
-                            cx="100" cy="52" r="5" 
-                            fill="#fde047"
-                            animate={{ opacity: [0.8, 1, 0.8], scale: [1, 1.1, 1] }}
+                            cx="101" cy="54" r="5" 
+                            fill="#fbbf24"
+                            animate={{ opacity: [0.7, 1, 0.7], scale: [1, 1.2, 1] }}
                             transition={{ repeat: Infinity, duration: 1 }}
                           />
                        </g>
 
-                       {/* Ultra-Detailed Spinning Wheels */}
-                       <g>
+                       {/* Pro Wheels */}
+                       <g transform="translate(0, 5)">
                           {/* Front */}
-                          <motion.g animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 0.4, ease: "linear" }}>
-                             <circle cx="88" cy="68" r="11" fill="#111827" />
-                             <circle cx="88" cy="68" r="7" fill="#334155" />
-                             <rect x="87" y="57" width="2" height="22" fill="#64748b" />
-                             <rect x="77" y="67" width="22" height="2" fill="#64748b" />
+                          <motion.g animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 0.35, ease: "linear" }}>
+                             <circle cx="88" cy="70" r="12" fill="#020617" />
+                             <circle cx="88" cy="70" r="8" fill="url(#chrome)" />
+                             <rect x="87" y="58" width="2" height="24" fill="#1e293b" />
                           </motion.g>
                           {/* Back */}
-                          <motion.g animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 0.4, ease: "linear" }}>
-                             <circle cx="28" cy="68" r="11" fill="#111827" />
-                             <circle cx="28" cy="68" r="7" fill="#334155" />
-                             <rect x="27" y="57" width="2" height="22" fill="#64748b" />
-                             <rect x="17" y="67" width="22" height="2" fill="#64748b" />
+                          <motion.g animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 0.35, ease: "linear" }}>
+                             <circle cx="28" cy="70" r="12" fill="#020617" />
+                             <circle cx="28" cy="70" r="8" fill="url(#chrome)" />
+                             <rect x="27" y="58" width="2" height="24" fill="#1e293b" />
                           </motion.g>
                        </g>
                     </motion.svg>
