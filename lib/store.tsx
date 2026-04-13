@@ -61,6 +61,15 @@ export interface OrderRequest {
   created_at: string;
 }
 
+export interface ReservaHorario {
+  id: string;
+  fecha: string; // YYYY-MM-DD
+  hora_inicio: string; // HH:mm
+  solicitud_id: string | null; // NULL if manual block
+  estado: 'bloqueado' | 'disponible';
+  created_at: string;
+}
+
 export interface Toast {
   id: string;
   message: string;
@@ -112,8 +121,10 @@ type StoreContextType = {
   allUsers: Profile[];
   fetchAllUsers: () => Promise<void>;
   orderRequests: OrderRequest[];
-  createOrderRequest: (data: Omit<OrderRequest, 'id' | 'created_at' | 'estado' | 'visto'>) => Promise<void>;
+  createOrderRequest: (data: Omit<OrderRequest, 'id' | 'created_at' | 'estado' | 'visto'>, reserva?: Omit<ReservaHorario, 'id' | 'created_at' | 'solicitud_id'>) => Promise<void>;
   fetchOrderRequests: () => Promise<void>;
+  reservasHorarios: ReservaHorario[];
+  fetchReservasHorarios: () => Promise<void>;
   approveOrderRequest: (id: string) => Promise<void>;
   rejectOrderRequest: (id: string) => Promise<void>;
   markRequestAsSeen: (id: string) => Promise<void>;
@@ -135,6 +146,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+
+  // Scheduling State
+  const [reservasHorarios, setReservasHorarios] = useState<ReservaHorario[]>([]);
 
   // Auth State
   const [user, setUser] = useState<User | null>(null);
@@ -190,6 +204,19 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         sizes: p.sizes || []
       }));
       setProducts(mappedProducts);
+    }
+
+  }, []);
+
+  const fetchReservasHorarios = useCallback(async () => {
+    const { data, error } = await supabase
+      .from('reservas_horarios')
+      .select('*')
+      .order('fecha', { ascending: true })
+      .order('hora_inicio', { ascending: true });
+    
+    if (!error && data) {
+      setReservasHorarios(data as ReservaHorario[]);
     }
   }, []);
 
@@ -270,6 +297,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     fetchProducts();
+    fetchReservasHorarios();
     // Check active sessions and sets the user
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
@@ -302,7 +330,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     });
 
     return () => subscription.unsubscribe();
-  }, [fetchProducts, fetchProfile]);
+  }, [fetchProducts, fetchProfile, fetchReservasHorarios]);
 
   // Final check for initial loading
   useEffect(() => {
@@ -557,12 +585,37 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (!error) setOrderRequests(data || []);
   }, []);
 
-  const createOrderRequest = useCallback(async (data: Omit<OrderRequest, 'id' | 'created_at' | 'estado' | 'visto'>) => {
-    const { error } = await supabase
+  const createOrderRequest = useCallback(async (data: Omit<OrderRequest, 'id' | 'created_at' | 'estado' | 'visto'>, reserva?: Omit<ReservaHorario, 'id' | 'created_at' | 'solicitud_id'>) => {
+    // Inject custom robust debugging for DB rejections
+    const { data: insertedData, error } = await supabase
       .from('solicitudes_pedidos')
-      .insert([{ ...data, estado: 'pendiente', visto: false }]);
-    if (error) throw error;
-  }, []);
+      .insert([{ ...data, estado: 'pendiente', visto: false }])
+      .select('id')
+      .single();
+      
+    if (error) {
+      console.error("[CRITICAL] Order Insert Failed Payload:", data);
+      console.error("[CRITICAL] Subabase Error Stack:", error);
+      throw new Error(`DB_REJECTED: ${error.message} | Details: ${error.details}`);
+    }
+
+    // Insert Reservation
+    if (reserva && insertedData) {
+      const { error: resError } = await supabase
+        .from('reservas_horarios')
+        .insert([{
+          ...reserva,
+          solicitud_id: insertedData.id,
+          estado: 'bloqueado'
+        }]);
+        
+      if (resError) {
+        console.error("Failed to insert reservation schedule mapping, but order went through:", resError);
+      } else {
+        await fetchReservasHorarios();
+      }
+    }
+  }, [fetchReservasHorarios]);
 
   const approveOrderRequest = useCallback(async (requestId: string) => {
     const request = orderRequests.find(r => r.id === requestId);
@@ -701,6 +754,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         orderRequests,
         createOrderRequest,
         fetchOrderRequests,
+        reservasHorarios,
+        fetchReservasHorarios,
         approveOrderRequest,
         rejectOrderRequest,
         markRequestAsSeen,
