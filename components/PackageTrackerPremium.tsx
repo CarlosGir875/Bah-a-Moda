@@ -86,45 +86,97 @@ export function PackageTrackerPremium() {
                    ))}
                 </div>
 
-                {/* THE ISOMETRIC TRUCK ANIMATION */}
+                {/* THE CARTOON TRUCK 2.0 ANIMATION */}
                 <motion.div 
-                  className="absolute top-1/2 -translate-y-[60px]"
+                  className="absolute top-1/2 -translate-y-[70px]"
                   animate={{ 
                     left: `${progressPercent}%`,
                     x: "-50%" 
                   }}
                   transition={{ duration: 2, ease: "easeInOut" }}
                 >
-                  <div className="relative group">
-                    {/* Truck Visual (Isometric SVG) */}
-                    <svg width="60" height="60" viewBox="0 0 100 100" className="drop-shadow-2xl translate-z-0 transition-transform active:scale-110">
-                       <motion.g 
-                         animate={{ y: [0, -4, 0] }} 
-                         transition={{ repeat: Infinity, duration: 0.6 }}
-                       >
-                          {/* Truck Body */}
-                          <path d="M20 60 L60 60 L80 40 L40 40 Z" fill="#4f46e5" />
-                          <path d="M60 60 L80 40 L80 60 L60 80 Z" fill="#4338ca" />
-                          <path d="M20 60 L60 60 L60 80 L20 80 Z" fill="#6366f1" />
-                          {/* Cabin */}
-                          <path d="M60 40 L80 40 L90 50 L70 50 Z" fill="#818cf8" opacity="0.8" />
-                          <rect x="70" y="50" width="20" height="20" fill="#312e81" />
-                          {/* Wheels shadow */}
-                          <circle cx="35" cy="80" r="6" fill="#1e1b4b" />
-                          <circle cx="75" cy="80" r="6" fill="#1e1b4b" />
-                       </motion.g>
-                    </svg>
-                    {/* Smoke Particles */}
-                    <motion.div 
+                  <div className="relative">
+                    {/* Wind lines (Speed effect) */}
+                    <div className="absolute -left-12 top-4 space-y-2 opacity-40">
+                       <motion.div animate={{ x: [-10, 0, -10], opacity: [0, 1, 0] }} transition={{ repeat: Infinity, duration: 0.5 }} className="w-8 h-1 bg-indigo-200 rounded-full" />
+                       <motion.div animate={{ x: [-20, -10, -20], opacity: [0, 1, 0] }} transition={{ repeat: Infinity, duration: 0.4, delay: 0.1 }} className="w-12 h-1 bg-indigo-100 rounded-full" />
+                    </div>
+
+                    {/* Truck Entity */}
+                    <motion.svg 
+                      width="80" height="70" viewBox="0 0 100 80" 
+                      className="drop-shadow-2xl overflow-visible"
                       animate={{ 
-                        opacity: [0, 1, 0],
-                        x: [-20, -40],
-                        y: [0, -10],
-                        scale: [0.5, 1.2]
+                        y: [0, -3, 0],
+                        rotate: [0, -1, 1, 0]
                       }}
-                      transition={{ repeat: Infinity, duration: 0.8 }}
-                      className="absolute left-0 bottom-2 w-3 h-3 bg-slate-300/40 rounded-full blur-sm"
-                    />
+                      transition={{ 
+                        repeat: Infinity, 
+                        duration: 0.4,
+                        ease: "linear"
+                      }}
+                    >
+                       {/* Truck Body (Cartoon Style) */}
+                       <g className="filter drop-shadow-md">
+                          {/* Chasis / Cargo Box */}
+                          <rect x="5" y="15" width="65" height="45" rx="12" fill="#4f46e5" />
+                          <rect x="8" y="18" width="59" height="39" rx="10" fill="#6366f1" />
+                          
+                          {/* Cabin */}
+                          <path d="M70 60 L95 60 C98 60 100 58 100 55 L100 40 C100 32 92 25 80 25 L70 25 Z" fill="#4338ca" />
+                          
+                          {/* Windshield */}
+                          <path d="M78 30 L92 30 C95 30 96 32 95 34 L88 52 C87 54 85 55 83 55 L78 55 Z" fill="#93c5fd" opacity="0.8" />
+                          <rect x="80" y="35" width="5" height="15" fill="white" opacity="0.3" transform="rotate(15 82 42)" />
+                          
+                          {/* Headlight */}
+                          <motion.circle 
+                            cx="96" cy="50" r="4" 
+                            fill="#fde047"
+                            animate={{ opacity: [0.6, 1, 0.6] }}
+                            transition={{ repeat: Infinity, duration: 1 }}
+                          />
+                          <div className="absolute top-[50px] left-[96px] w-10 h-10 bg-yellow-400/20 rounded-full blur-md" />
+                       </g>
+
+                       {/* Spinning Wheels */}
+                       <g>
+                          {/* Front Wheel */}
+                          <motion.g animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 0.5, ease: "linear" }}>
+                             <circle cx="85" cy="65" r="9" fill="#1e1b4b" />
+                             <circle cx="85" cy="65" r="5" fill="#475569" />
+                             <rect x="84" y="58" width="2" height="14" fill="#94a3b8" />
+                          </motion.g>
+                          {/* Back Wheel */}
+                          <motion.g animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 0.5, ease: "linear" }}>
+                             <circle cx="25" cy="65" r="9" fill="#1e1b4b" />
+                             <circle cx="25" cy="65" r="5" fill="#475569" />
+                             <rect x="24" y="58" width="2" height="14" fill="#94a3b8" />
+                          </motion.g>
+                       </g>
+                    </motion.svg>
+
+                    {/* Smoke (Exhaust) */}
+                    <div className="absolute left-2 bottom-4">
+                       {[0, 1, 2].map((i) => (
+                         <motion.div
+                           key={i}
+                           initial={{ opacity: 0, scale: 0 }}
+                           animate={{ 
+                             opacity: [0, 0.6, 0],
+                             scale: [0.5, 1.5, 2],
+                             x: [-10, -30],
+                             y: [0, -15]
+                           }}
+                           transition={{ 
+                             repeat: Infinity, 
+                             duration: 1, 
+                             delay: i * 0.3 
+                           }}
+                           className="absolute w-4 h-4 bg-slate-400/30 rounded-full blur-sm"
+                         />
+                       ))}
+                    </div>
                   </div>
                 </motion.div>
              </div>
