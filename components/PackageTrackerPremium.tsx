@@ -86,9 +86,25 @@ export function PackageTrackerPremium() {
                    ))}
                 </div>
 
-                {/* THE CARTOON TRUCK 2.0 ANIMATION */}
+                {/* DYNAMIC ROAD ENVIRONMENT */}
+                <div className="absolute top-1/2 left-0 right-0 h-40 flex flex-col items-center justify-center -translate-y-1/2">
+                    {/* The Asphalt Strip */}
+                    <div className="w-[120%] h-3 bg-slate-800/10 rounded-full flex items-center overflow-hidden">
+                       <motion.div 
+                         animate={{ x: [0, -40] }}
+                         transition={{ repeat: Infinity, duration: 0.5, ease: "linear" }}
+                         className="flex gap-8 px-4"
+                       >
+                         {[...Array(10)].map((_, i) => (
+                           <div key={i} className="w-8 h-1 bg-white/40 rounded-full shrink-0" />
+                         ))}
+                       </motion.div>
+                    </div>
+                </div>
+
+                {/* THE ULTRA TRUCK BM ELITE 3D */}
                 <motion.div 
-                  className="absolute top-1/2 -translate-y-[70px]"
+                  className="absolute top-1/2 -translate-y-[85px]"
                   animate={{ 
                     left: `${progressPercent}%`,
                     x: "-50%" 
@@ -96,84 +112,128 @@ export function PackageTrackerPremium() {
                   transition={{ duration: 2, ease: "easeInOut" }}
                 >
                   <div className="relative">
-                    {/* Wind lines (Speed effect) */}
-                    <div className="absolute -left-12 top-4 space-y-2 opacity-40">
-                       <motion.div animate={{ x: [-10, 0, -10], opacity: [0, 1, 0] }} transition={{ repeat: Infinity, duration: 0.5 }} className="w-8 h-1 bg-indigo-200 rounded-full" />
-                       <motion.div animate={{ x: [-20, -10, -20], opacity: [0, 1, 0] }} transition={{ repeat: Infinity, duration: 0.4, delay: 0.1 }} className="w-12 h-1 bg-indigo-100 rounded-full" />
-                    </div>
-
-                    {/* Truck Entity */}
-                    <motion.svg 
-                      width="80" height="70" viewBox="0 0 100 80" 
-                      className="drop-shadow-2xl overflow-visible"
+                    {/* Dynamic Ground Shadow */}
+                    <motion.div 
+                      className="absolute -bottom-2 -left-2 w-[110%] h-3 bg-black/10 blur-md rounded-full"
                       animate={{ 
-                        y: [0, -3, 0],
-                        rotate: [0, -1, 1, 0]
+                        scaleX: [1, 1.1, 1],
+                        opacity: [0.15, 0.25, 0.15]
+                      }}
+                      transition={{ repeat: Infinity, duration: 0.4 }}
+                    />
+
+                    {/* Truck Entity (Semi-Isometric Design) */}
+                    <motion.svg 
+                      width="100" height="90" viewBox="0 0 100 90" 
+                      className="drop-shadow-[0_20px_40px_rgba(0,0,0,0.15)] overflow-visible"
+                      animate={{ 
+                        y: [0, -5, 0],
+                        rotate: [0, -1.5, 1.5, 0]
                       }}
                       transition={{ 
                         repeat: Infinity, 
-                        duration: 0.4,
+                        duration: 0.45,
                         ease: "linear"
                       }}
                     >
-                       {/* Truck Body (Cartoon Style) */}
-                       <g className="filter drop-shadow-md">
-                          {/* Chasis / Cargo Box */}
-                          <rect x="5" y="15" width="65" height="45" rx="12" fill="#4f46e5" />
-                          <rect x="8" y="18" width="59" height="39" rx="10" fill="#6366f1" />
+                       <defs>
+                          <linearGradient id="bodyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                             <stop offset="0%" stopColor="#6366f1" />
+                             <stop offset="100%" stopColor="#4338ca" />
+                          </linearGradient>
+                          <linearGradient id="cabinGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                             <stop offset="0%" stopColor="#4338ca" />
+                             <stop offset="100%" stopColor="#312e81" />
+                          </linearGradient>
+                       </defs>
+
+                       {/* Truck Body (Cargo Container) */}
+                       <g>
+                          <rect x="2" y="10" width="70" height="50" rx="14" fill="url(#bodyGradient)" />
+                          {/* Shading/Highlights */}
+                          <rect x="2" y="10" width="70" height="2" rx="1" fill="white" opacity="0.2" />
+                          <rect x="2" y="58" width="70" height="2" rx="1" fill="black" opacity="0.1" />
                           
-                          {/* Cabin */}
-                          <path d="M70 60 L95 60 C98 60 100 58 100 55 L100 40 C100 32 92 25 80 25 L70 25 Z" fill="#4338ca" />
+                          {/* BM BRANDING LOGO */}
+                          <text 
+                             x="37" y="42" 
+                             className="text-[18px] font-black italic fill-white selection:bg-transparent"
+                             textAnchor="middle"
+                             style={{ letterSpacing: '0.1em', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }}
+                          >
+                             BM
+                          </text>
+                          <text 
+                             x="37" y="52" 
+                             className="text-[6px] font-black uppercase fill-white/60"
+                             textAnchor="middle"
+                             style={{ letterSpacing: '0.3em' }}
+                          >
+                             Elite Delivery
+                          </text>
+                       </g>
+                       
+                       {/* Cabin (Isometric Front) */}
+                       <g>
+                          <path d="M72 60 L98 60 C100 60 102 58 102 55 L102 38 C102 28 92 22 78 22 L72 22 Z" fill="url(#cabinGradient)" />
+                          {/* Window */}
+                          <path d="M80 26 L95 26 C98 26 100 28 98 32 L88 54 C87 56 85 57 82 57 L72 57 L72 26 Z" fill="#93c5fd" opacity="0.8" />
+                          {/* Window Shine */}
+                          <rect x="80" y="30" width="4" height="20" fill="white" opacity="0.4" transform="rotate(15 82 40)" />
                           
-                          {/* Windshield */}
-                          <path d="M78 30 L92 30 C95 30 96 32 95 34 L88 52 C87 54 85 55 83 55 L78 55 Z" fill="#93c5fd" opacity="0.8" />
-                          <rect x="80" y="35" width="5" height="15" fill="white" opacity="0.3" transform="rotate(15 82 42)" />
-                          
-                          {/* Headlight */}
+                          {/* Active Headlight Beam */}
                           <motion.circle 
-                            cx="96" cy="50" r="4" 
+                            cx="100" cy="52" r="5" 
                             fill="#fde047"
-                            animate={{ opacity: [0.6, 1, 0.6] }}
+                            animate={{ opacity: [0.8, 1, 0.8], scale: [1, 1.1, 1] }}
                             transition={{ repeat: Infinity, duration: 1 }}
                           />
-                          <div className="absolute top-[50px] left-[96px] w-10 h-10 bg-yellow-400/20 rounded-full blur-md" />
                        </g>
 
-                       {/* Spinning Wheels */}
+                       {/* Ultra-Detailed Spinning Wheels */}
                        <g>
-                          {/* Front Wheel */}
-                          <motion.g animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 0.5, ease: "linear" }}>
-                             <circle cx="85" cy="65" r="9" fill="#1e1b4b" />
-                             <circle cx="85" cy="65" r="5" fill="#475569" />
-                             <rect x="84" y="58" width="2" height="14" fill="#94a3b8" />
+                          {/* Front */}
+                          <motion.g animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 0.4, ease: "linear" }}>
+                             <circle cx="88" cy="68" r="11" fill="#111827" />
+                             <circle cx="88" cy="68" r="7" fill="#334155" />
+                             <rect x="87" y="57" width="2" height="22" fill="#64748b" />
+                             <rect x="77" y="67" width="22" height="2" fill="#64748b" />
                           </motion.g>
-                          {/* Back Wheel */}
-                          <motion.g animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 0.5, ease: "linear" }}>
-                             <circle cx="25" cy="65" r="9" fill="#1e1b4b" />
-                             <circle cx="25" cy="65" r="5" fill="#475569" />
-                             <rect x="24" y="58" width="2" height="14" fill="#94a3b8" />
+                          {/* Back */}
+                          <motion.g animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 0.4, ease: "linear" }}>
+                             <circle cx="28" cy="68" r="11" fill="#111827" />
+                             <circle cx="28" cy="68" r="7" fill="#334155" />
+                             <rect x="27" y="57" width="2" height="22" fill="#64748b" />
+                             <rect x="17" y="67" width="22" height="2" fill="#64748b" />
                           </motion.g>
                        </g>
                     </motion.svg>
 
-                    {/* Smoke (Exhaust) */}
-                    <div className="absolute left-2 bottom-4">
-                       {[0, 1, 2].map((i) => (
+                    {/* Headlight Glow */}
+                    <motion.div 
+                       className="absolute right-[-40px] top-[45px] w-20 h-10 bg-yellow-400/20 blur-xl rounded-full"
+                       animate={{ opacity: [0.2, 0.4, 0.2] }}
+                       transition={{ repeat: Infinity, duration: 1 }}
+                    />
+
+                    {/* High-Fidelity Smoke Particles */}
+                    <div className="absolute left-0 bottom-4">
+                       {[0, 1, 2, 3].map((i) => (
                          <motion.div
                            key={i}
                            initial={{ opacity: 0, scale: 0 }}
                            animate={{ 
-                             opacity: [0, 0.6, 0],
-                             scale: [0.5, 1.5, 2],
-                             x: [-10, -30],
-                             y: [0, -15]
+                             opacity: [0, 0.8, 0],
+                             scale: [0.5, 2, 3],
+                             x: [-15, -50],
+                             y: [0, -25]
                            }}
                            transition={{ 
                              repeat: Infinity, 
-                             duration: 1, 
+                             duration: 1.2, 
                              delay: i * 0.3 
                            }}
-                           className="absolute w-4 h-4 bg-slate-400/30 rounded-full blur-sm"
+                           className="absolute w-4 h-4 bg-slate-400/40 rounded-full blur-sm"
                          />
                        ))}
                     </div>
