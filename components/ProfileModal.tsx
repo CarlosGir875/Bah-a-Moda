@@ -6,7 +6,7 @@ import { useEffect, useState, useRef } from "react";
 import { ImageCropperModal } from "./ImageCropperModal";
 
 export function ProfileModal() {
-  const { isProfileModalOpen, setIsProfileModalOpen, user, profile, isAdmin, signOut, updateProfile, uploadAvatar, userOrders, fetchUserOrders, addToast } = useStore();
+  const { isProfileModalOpen, setIsProfileModalOpen, isTrackingOpen, setIsTrackingOpen, user, profile, isAdmin, signOut, updateProfile, uploadAvatar, userOrders, fetchUserOrders, addToast } = useStore();
   const [isVisible, setIsVisible] = useState(false);
   const [view, setView] = useState<"overview" | "orders">("overview");
   const fileInputRef = useRef<HTMLInputElement>(null);
