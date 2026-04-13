@@ -45,7 +45,7 @@ export function SidebarLeft() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/40 backdrop-blur-[2px] z-50"
+              className="fixed inset-0 bg-black/40 backdrop-blur-[2px] z-[110]"
               onClick={() => setIsLeftSidebarOpen(false)}
             />
 
@@ -55,7 +55,7 @@ export function SidebarLeft() {
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed inset-y-0 left-0 z-50 w-[85vw] sm:w-80 bg-white/95 backdrop-blur-xl shadow-[20px_0_60px_-15px_rgba(0,0,0,0.1)] flex flex-col border-r border-white/20"
+              className="fixed inset-y-0 left-0 z-[120] w-[85vw] sm:w-80 bg-white/95 backdrop-blur-xl shadow-[20px_0_60px_-15px_rgba(0,0,0,0.1)] flex flex-col border-r border-white/20"
             >
               <div className="h-full flex flex-col p-8 overflow-y-auto hide-scrollbar space-y-10">
                 
