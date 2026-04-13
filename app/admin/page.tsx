@@ -18,10 +18,6 @@ export default function AdminDashboard() {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [subscribing, setSubscribing] = useState(false);
   const [testing, setTesting] = useState(false);
-  
-  // Password Reset State
-  const [resetRequests, setResetRequests] = useState<any[]>([]);
-  const [loadingResets, setLoadingResets] = useState(false);
 
   useEffect(() => {
     // Register SW on load
@@ -127,6 +123,7 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<'upload' | 'inventory' | 'resets'>('upload');
   const [searchTerm, setSearchTerm] = useState("");
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [resetRequests, setResetRequests] = useState<any[]>([]);
   const [loadingResets, setLoadingResets] = useState(false);
 
   // ERP State
