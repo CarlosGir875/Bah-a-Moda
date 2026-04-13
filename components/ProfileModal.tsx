@@ -3,7 +3,6 @@
 import { X, LogOut, User, ShieldCheck, Mail, ArrowRight, ArrowLeft, Check, Phone, MapPin, Map, Package, Clock } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { useEffect, useState, useRef } from "react";
-import { OrderTracker } from "./OrderTracker";
 import { ImageCropperModal } from "./ImageCropperModal";
 
 export function ProfileModal() {
@@ -82,13 +81,6 @@ export function ProfileModal() {
     }
   };
 
-  const renderTracker = (order: any) => {
-    return (
-      <div className="mt-8 mb-4">
-        <OrderTracker status={order.estado} orderId={order.codigo_seguimiento} />
-      </div>
-    );
-  };
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -298,7 +290,6 @@ export function ProfileModal() {
                            <span className={`text-[11px] font-black uppercase tracking-[0.2em] px-6 py-3 rounded-xl border-2 ${getStatusColor(o.estado)}`}>{getStatusLabel(o.estado)}</span>
                         </div>
                         
-                        {renderTracker(o)}
                         
                         <div className="mt-8 mb-8 border-y-2 border-dashed border-zinc-300 py-8 space-y-4">
                            <div className="flex justify-between text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-4">
