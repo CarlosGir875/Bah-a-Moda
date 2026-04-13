@@ -139,7 +139,7 @@ export function EditProductModal({ product, onClose }: EditProductModalProps) {
                     
                     {previews.length === 0 ? (
                     <label className="border-2 border-dashed border-gray-300 bg-gray-50 rounded-3xl w-full aspect-[4/5] flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 hover:border-gray-400 transition-all group relative overflow-hidden">
-                        <input type="file" multiple onChange={handleFileChange} className="absolute inset-0 opacity-0 cursor-pointer" />
+                        <input type="file" multiple accept="image/jpeg, image/png, image/webp" onChange={handleFileChange} className="absolute inset-0 opacity-0 cursor-pointer" />
                         <div className="p-4 bg-white rounded-2xl shadow-sm mb-4 group-hover:scale-110 transition-transform">
                         <ImagePlus className="w-8 h-8 text-indigo-500" />
                         </div>
@@ -166,7 +166,7 @@ export function EditProductModal({ product, onClose }: EditProductModalProps) {
                             </div>
                         ))}
                         <label className="relative aspect-square border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors">
-                            <input type="file" multiple onChange={handleFileChange} className="absolute inset-0 opacity-0 cursor-pointer" />
+                            <input type="file" multiple accept="image/jpeg, image/png, image/webp" onChange={handleFileChange} className="absolute inset-0 opacity-0 cursor-pointer" />
                             <Plus className="w-6 h-6 text-gray-400" />
                             <span className="text-[9px] font-black text-gray-400 uppercase mt-1">Reemplazar Todo</span>
                         </label>
