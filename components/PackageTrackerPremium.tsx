@@ -19,7 +19,10 @@ export function PackageTrackerPremium() {
     { id: 'listo_entrega', label: 'Entregado', progress: 100 }
   ];
 
-  const currentStepIndex = steps.findIndex(s => s.id === activeOrder?.estado) || 0;
+  let currentStepIndex = steps.findIndex(s => s.id === activeOrder?.estado);
+  if (currentStepIndex === -1 && activeOrder?.estado === 'preparacion') currentStepIndex = 1; // Preparación also shows as Confirmado
+  if (currentStepIndex === -1) currentStepIndex = 0;
+
   const progressPercent = steps[currentStepIndex]?.progress || 10;
 
   return (
@@ -133,11 +136,11 @@ export function PackageTrackerPremium() {
 
                        {/* THE PIXEL PERFECT TRUCK 9.0 (Agency Illustration) */}
                        <motion.g 
-                          animate={{ x: `${progressPercent}%` }}
-                          initial={{ x: "0%" }}
+                          animate={{ x: (progressPercent * 2.5) }} /* Max width 250 in 400 viewBox */
+                          initial={{ x: 0 }}
                           transition={{ duration: 1.5, ease: "easeInOut" }}
                        >
-                          <g transform="translate(-80, 75)">
+                          <g transform="translate(-40, 75)">
                              {/* THE CARGO CONTAINER (Grey with Texture) */}
                              <rect x="5" y="10" width="105" height="70" rx="4" fill="#E8E8E8" />
                              {/* Vertical Texture Lines from Ref */}

@@ -58,11 +58,11 @@ export function ProfileModal() {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'pendiente': return 'bg-slate-100/50 text-slate-900 border-slate-200';
-      case 'recibido': return 'bg-amber-100/50 text-amber-900 border-amber-200';
-      case 'preparacion': return 'bg-blue-100/50 text-blue-900 border-blue-200';
+    const getStatusColor = (status: string) => {
+      switch (status) {
+        case 'pendiente': return 'bg-slate-100/50 text-slate-900 border-slate-200';
+        case 'recibido': return 'bg-emerald-100/50 text-emerald-900 border-emerald-200';
+        case 'preparacion': return 'bg-blue-100/50 text-blue-900 border-blue-200';
       case 'en_transito': return 'bg-indigo-100/50 text-indigo-900 border-indigo-200';
       case 'listo_entrega': return 'bg-emerald-100/50 text-emerald-900 border-emerald-200';
       case 'cancelado': return 'bg-rose-100/50 text-rose-900 border-rose-200';
