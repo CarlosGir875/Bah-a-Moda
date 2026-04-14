@@ -14,7 +14,8 @@ import {
   ExternalLink,
   ChevronRight,
   TrendingUp,
-  Clock
+  Clock,
+  Truck
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -27,7 +28,10 @@ export default function AdminRequestsPage() {
     rejectOrderRequest,
     markRequestAsSeen,
     authLoading,
-    addToast
+    addToast,
+    adminOrders,
+    updateOrderStatus,
+    fetchAllOrders
   } = useStore();
   const router = useRouter();
   const [processingId, setProcessingId] = useState<string | null>(null);
@@ -35,8 +39,9 @@ export default function AdminRequestsPage() {
   useEffect(() => {
     if (isAdmin) {
       fetchOrderRequests();
+      fetchAllOrders();
     }
-  }, [isAdmin, fetchOrderRequests]);
+  }, [isAdmin, fetchOrderRequests, fetchAllOrders]);
 
   // Marcar como visto automáticamente al entrar
   useEffect(() => {
@@ -173,11 +178,12 @@ export default function AdminRequestsPage() {
                       const itemCount = req.items.reduce((acc: number, item: any) => acc + (item.quantity || 1), 0);
                       const topItem = req.items[0]?.name || 'Varios';
                       const isNew = req.estado === 'pendiente' && !req.visto;
+                      const linkedOrder = adminOrders.find(o => o.nombre_cliente === req.cliente_nombre && o.total === req.total);
                       
                       return (
                         <tr 
                           key={req.id} 
-                          className={`group transition-all duration-300 hover:bg-indigo-50/50 ${isApproved ? 'opacity-50 grayscale bg-zinc-50/50 hover:bg-zinc-50/50' : 'bg-white'}`}
+                          className={`group transition-all duration-300 hover:bg-indigo-50/50 ${isApproved ? (linkedOrder?.estado === 'listo_entrega' || linkedOrder?.estado === 'cancelado' ? 'opacity-50 grayscale bg-zinc-50/50 hover:bg-zinc-50/50' : 'bg-indigo-50/30 border-l-[3px] border-l-indigo-500 shadow-sm') : 'bg-white'}`}
                         >
                           {/* STATUS DOT */}
                           <td className="p-4 text-center align-middle">
@@ -215,8 +221,8 @@ export default function AdminRequestsPage() {
                                 {topItem} {req.items.length > 1 ? '[...]' : ''}
                               </span>
                               {isApproved ? (
-                                <span className="text-[9px] font-black uppercase tracking-widest text-emerald-600 mt-1 flex items-center gap-1">
-                                  <Package className="w-3 h-3" /> ➔ En Logística (Pedidos)
+                                <span className="text-[9px] font-black uppercase tracking-widest text-indigo-600 mt-1 flex items-center gap-1">
+                                  <Package className="w-3 h-3" /> ➔ {linkedOrder?.estado === 'en_transito' ? 'EN RUTA' : (linkedOrder?.estado === 'listo_entrega' ? 'ENTREGADO' : 'LOGÍSTICA - CONFIRMADO')}
                                 </span>
                               ) : (
                                 <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-400 mt-1 flex items-center gap-1">
@@ -251,8 +257,30 @@ export default function AdminRequestsPage() {
                                   <XSquare className="w-5 h-5 group-hover:scale-110 transition-transform" />
                                 </button>
                               </div>
+                            ) : linkedOrder ? (
+                               <div className="flex flex-col gap-2 px-2">
+                                 {linkedOrder.estado === 'recibido' && (
+                                   <button 
+                                     onClick={() => updateOrderStatus(linkedOrder.id, 'en_transito')}
+                                     className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 shadow-md hover:scale-[1.02] active:scale-95"
+                                   >
+                                     <Truck className="w-4 h-4" /> Despachar
+                                   </button>
+                                 )}
+                                 {linkedOrder.estado === 'en_transito' && (
+                                   <button 
+                                     onClick={() => updateOrderStatus(linkedOrder.id, 'listo_entrega')}
+                                     className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-2.5 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(16,185,129,0.4)] hover:scale-[1.02] active:scale-95 animate-pulse"
+                                   >
+                                     <CheckCircle2 className="w-4 h-4" /> Entregado
+                                   </button>
+                                 )}
+                                 {['listo_entrega', 'cancelado'].includes(linkedOrder.estado) && (
+                                    <span className="px-3 py-1.5 bg-zinc-100 text-zinc-400 border border-zinc-200 rounded-full text-[9px] font-black uppercase tracking-widest inline-block pointer-events-none">Resuelto</span>
+                                 )}
+                               </div>
                             ) : (
-                               <span className="px-3 py-1 bg-zinc-100 text-zinc-400 border border-zinc-200 rounded-full text-[9px] font-black uppercase tracking-widest inline-block pointer-events-none">Resuelto</span>
+                               <span className="px-3 py-1.5 bg-zinc-100 text-zinc-400 border border-zinc-200 rounded-full text-[9px] font-black uppercase tracking-widest inline-block pointer-events-none">Validando...</span>
                             )}
                           </td>
                         </tr>
