@@ -9,17 +9,31 @@ export function LoadingScreen() {
   const [fade, setFade] = useState(false);
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+       if (sessionStorage.getItem('bahia_has_loaded') === 'true') {
+         setShouldRender(false);
+         setFade(true);
+       }
+    }
+  }, []);
+
+  useEffect(() => {
     let timer: NodeJS.Timeout;
-    if (!isInitialLoading) {
-      // Small delay to ensure the exit animation starts smoothly
-      const fadeTimer = setTimeout(() => setFade(true), 10);
+    let fadeTimer: NodeJS.Timeout;
+    
+    // Only animate exit if we haven't already skipped it
+    if (!isInitialLoading && shouldRender) {
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('bahia_has_loaded', 'true');
+      }
+      fadeTimer = setTimeout(() => setFade(true), 10);
       timer = setTimeout(() => setShouldRender(false), 800);
       return () => {
         clearTimeout(fadeTimer);
         clearTimeout(timer);
       };
     }
-  }, [isInitialLoading]);
+  }, [isInitialLoading, shouldRender]);
 
   if (!shouldRender) return null;
 

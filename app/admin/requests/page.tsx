@@ -90,25 +90,28 @@ export default function AdminRequestsPage() {
   return (
     <div className="min-h-screen bg-white pb-24 selection:bg-indigo-100">
       
-      {/* LUXURY BRUTALIST HEADER */}
-      <div className="bg-white border-b-4 border-black sticky top-0 z-50">
+      {/* PREMIUM MINIMALIST HEADER */}
+      <div className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100/50">
         <div className="max-w-6xl mx-auto px-6 h-24 flex items-center justify-between">
            <div className="flex items-center gap-4 sm:gap-6">
              <button 
                onClick={() => router.back()} 
-               className="group w-12 h-12 bg-black text-white rounded-xl flex items-center justify-center hover:bg-indigo-600 transition-colors shadow-[2px_2px_0px_0px_rgba(79,70,229,0.3)] hover:shadow-none translate-y-0 hover:translate-y-0.5 active:scale-95"
+               className="w-12 h-12 bg-transparent text-gray-400 hover:text-black hover:bg-gray-50 rounded-full flex items-center justify-center transition-all active:scale-95"
              >
-               <ArrowLeft className="w-5 h-5" />
+               <ArrowLeft className="w-6 h-6 stroke-[1.5]" />
              </button>
              <div>
-               <h1 className="text-xl sm:text-2xl font-black uppercase tracking-tighter text-black leading-none">Reservas</h1>
-               <p className="text-[8px] sm:text-[10px] font-black text-indigo-600 uppercase tracking-[0.2em] mt-1.5">Tráfico de Entradas</p>
+               <h1 className="text-2xl sm:text-3xl font-black tracking-tighter text-gray-900 leading-none">Reservas</h1>
+               <div className="flex items-center gap-2 mt-2">
+                 <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full" />
+                 <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em]">Tráfico de Entradas</p>
+               </div>
              </div>
            </div>
            
-           <div className="hidden sm:flex items-center gap-3 px-4 py-2 bg-zinc-100 rounded-lg border-2 border-black">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              <span className="text-[10px] font-black text-black uppercase tracking-widest">Sync</span>
+           <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-emerald-50/80 rounded-full border border-emerald-100">
+              <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+              <span className="text-[9px] font-bold text-emerald-600 uppercase tracking-widest">Online</span>
            </div>
         </div>
       </div>

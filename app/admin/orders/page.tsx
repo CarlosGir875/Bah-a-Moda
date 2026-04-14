@@ -160,20 +160,20 @@ export default function AdminOrdersPage() {
                   )}
                   {order.estado === 'recibido' && (
                     <button 
-                      onClick={() => updateOrderStatus(order.id, 'preparacion')}
-                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-5 rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.2em] transition-all shadow-xl flex items-center justify-center gap-3"
-                    >
-                      <Package className="w-5 h-5" /> Iniciar Preparación
-                    </button>
-                  )}
-                  {order.estado === 'preparacion' && (
-                    <button 
                       onClick={() => updateOrderStatus(order.id, 'en_transito')}
                       className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-5 rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.2em] transition-all shadow-xl flex items-center justify-center gap-3"
                     >
                       <Truck className="w-5 h-5" /> Despachar (En Camino)
                     </button>
                   )}
+
+
+
+
+
+
+
+
                   {order.estado === 'en_transito' && (
                     <button 
                       onClick={() => updateOrderStatus(order.id, 'listo_entrega')}
@@ -187,7 +187,7 @@ export default function AdminOrdersPage() {
                   )}
                 </div>
                 
-                {['pendiente', 'recibido', 'preparacion'].includes(order.estado) && (
+                {['pendiente', 'recibido'].includes(order.estado) && (
                   <button 
                     onClick={() => updateOrderStatus(order.id, 'cancelado')}
                     className="w-full bg-slate-50 hover:bg-rose-50 text-slate-400 hover:text-rose-600 py-4 rounded-[1.2rem] text-[8px] font-black uppercase tracking-[0.2em] transition-all border border-transparent hover:border-rose-100 flex items-center justify-center gap-2"
@@ -217,12 +217,12 @@ export default function AdminOrdersPage() {
             <CheckCircle className="w-3.5 h-3.5" /> Confirmado
           </span>
         );
-      case 'preparacion': 
-        return (
-          <span className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-100 text-blue-900 text-[10px] font-black uppercase tracking-widest border border-blue-200 shadow-sm">
-            <Package className="w-3.5 h-3.5" /> Preparación
-          </span>
-        );
+
+
+
+
+
+
       case 'en_transito': 
         return (
           <span className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-violet-100 text-violet-900 text-[10px] font-black uppercase tracking-widest border border-violet-200 shadow-sm animate-pulse">
