@@ -41,6 +41,7 @@ export interface Order {
   tipo_entrega: 'domicilio' | 'punto_encuentro';
   ubicacion_entrega: string | null;
   codigo_seguimiento: string | null;
+  fecha_entrega: string | null;
   visto: boolean;
   created_at: string;
 }
@@ -129,6 +130,7 @@ type StoreContextType = {
   fetchUserOrders: () => Promise<void>;
   fetchAllOrders: () => Promise<void>;
   updateOrderStatus: (orderId: string, newStatus: string) => Promise<void>;
+  updateOrderDetails: (orderId: string, updates: Partial<Order>) => Promise<void>;
   allUsers: Profile[];
   fetchAllUsers: () => Promise<void>;
   orderRequests: OrderRequest[];
@@ -589,6 +591,19 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     await fetchAllOrders();
   }, [fetchAllOrders]);
 
+  const updateOrderDetails = useCallback(async (orderId: string, updates: Partial<Order>) => {
+    const dbUpdates: any = { ...updates };
+    
+    const { error } = await supabase
+      .from('pedidos')
+      .update(dbUpdates)
+      .eq('id', orderId);
+    
+    if (error) throw error;
+    await fetchAllOrders();
+    if (user) await fetchUserOrders();
+  }, [fetchAllOrders, fetchUserOrders, user]);
+
   const markOrderAsSeen = useCallback(async (orderId: string) => {
     const { error } = await supabase
       .from('pedidos')
@@ -833,6 +848,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         fetchUserOrders,
         fetchAllOrders,
         updateOrderStatus,
+        updateOrderDetails,
         allUsers,
         fetchAllUsers,
         clearCart,

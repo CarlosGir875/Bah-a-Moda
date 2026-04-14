@@ -1,6 +1,6 @@
 "use client";
 
-import { X, LogOut, User, ShieldCheck, Mail, ArrowRight, ArrowLeft, Check, Phone, MapPin, Map, Package, Clock, CheckCircle2 } from "lucide-react";
+import { X, LogOut, User, ShieldCheck, Mail, ArrowRight, ArrowLeft, Check, Phone, MapPin, Map, Package, Clock, CheckCircle2, Calendar } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useStore } from "@/lib/store";
 import { useEffect, useState, useRef } from "react";
@@ -352,11 +352,19 @@ export function ProfileModal() {
                         </div>
                         
                         <div className="flex flex-col md:flex-row justify-between items-end gap-6 pt-4">
-                           <div className="flex gap-8">
+                           <div className="flex flex-col md:flex-row gap-8">
                               <div className="text-left bg-zinc-100 p-4 rounded-xl border border-zinc-200">
                                 <p className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] mb-1">Abonado / Reserva</p>
                                 <p className="text-xl font-black text-emerald-600 font-mono">Q{o.anticipo}</p>
                               </div>
+                              {o.fecha_entrega && (
+                                <div className="text-left bg-indigo-50 p-4 rounded-xl border border-indigo-100">
+                                  <p className="text-[10px] font-black text-indigo-500 uppercase tracking-[0.2em] mb-1 flex items-center gap-2">
+                                    <Calendar className="w-3 h-3" /> Fecha de Entrega
+                                  </p>
+                                  <p className="text-[14px] font-black text-indigo-700 uppercase">{o.fecha_entrega}</p>
+                                </div>
+                              )}
                            </div>
                            <div className="text-right">
                               <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] mb-2">Total del Pedido</p>

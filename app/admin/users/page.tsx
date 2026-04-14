@@ -2,7 +2,7 @@
 
 import { useStore } from "@/lib/store";
 import { useEffect, useState } from "react";
-import { ArrowLeft, User, Phone, MapPin, CreditCard, Search, ShoppingBag, X, ShieldAlert } from "lucide-react";
+import { ArrowLeft, User, Phone, MapPin, CreditCard, Search, ShoppingBag, X, ShieldAlert, Truck, Calendar, ArrowRight, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 
 export default function AdminUsersPage() {
@@ -12,6 +12,10 @@ export default function AdminUsersPage() {
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [newPassword, setNewPassword] = useState("");
   const [isResetting, setIsResetting] = useState(false);
+  const [logisticsModalOpen, setLogisticsModalOpen] = useState(false);
+  const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
+  const [editData, setEditData] = useState({ estado: '', fecha_entrega: '' });
+  const { updateOrderDetails } = useStore();
 
   useEffect(() => {
     fetchAllUsers();
@@ -134,12 +138,18 @@ export default function AdminUsersPage() {
                 </div>
 
                 <div className="mt-6 pt-6 border-t border-gray-100">
-                   <button 
-                     onClick={() => { setSelectedUser(u); setResetModalOpen(true); }}
-                     className="w-full bg-red-50 text-red-600 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-colors flex items-center justify-center gap-2 group"
-                   >
-                     <ShieldAlert className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" /> FORZAR ACCESO
-                   </button>
+                    <button 
+                      onClick={() => { setSelectedUser(u); setLogisticsModalOpen(true); }}
+                      className="w-full bg-indigo-50 text-indigo-600 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all flex items-center justify-center gap-2 group mb-3 shadow-sm font-black"
+                    >
+                      <Truck className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" /> GESTIONAR LOGÍSTICA
+                    </button>
+                    <button 
+                      onClick={() => { setSelectedUser(u); setResetModalOpen(true); }}
+                      className="w-full bg-red-50 text-red-600 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all flex items-center justify-center gap-2 group font-black"
+                    >
+                      <ShieldAlert className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" /> FORZAR ACCESO
+                    </button>
                 </div>
               </div>
             );
@@ -154,6 +164,137 @@ export default function AdminUsersPage() {
           </div>
         )}
       </div>
+
+      {/* Logistics Management Modal */}
+      {logisticsModalOpen && selectedUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+          <div className="bg-white rounded-[3rem] p-8 max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl relative animate-in fade-in slide-in-from-bottom-5 duration-300">
+             <button onClick={() => setLogisticsModalOpen(false)} className="absolute top-8 right-8 p-3 bg-gray-50 rounded-full hover:bg-gray-100 text-gray-500 transition-all border border-gray-100">
+                <X className="w-5 h-5" />
+             </button>
+
+             <div className="mb-8 pr-12">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-indigo-100">
+                    <Truck className="w-7 h-7" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-black uppercase tracking-tighter text-black leading-none mb-1">Centro Logístico</h3>
+                    <p className="text-xs font-bold text-gray-400">Gestionando a <span className="text-indigo-600">{selectedUser.nombre_completo}</span></p>
+                  </div>
+                </div>
+             </div>
+
+             <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+                {adminOrders.filter(o => o.cliente_id === selectedUser.id).length === 0 ? (
+                  <div className="text-center py-20 bg-gray-50 rounded-[2.5rem] border border-dashed border-gray-200">
+                    <ShoppingBag className="w-10 h-10 text-gray-300 mx-auto mb-4" />
+                    <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">No hay pedidos registrados</p>
+                  </div>
+                ) : (
+                  <div className="space-y-6 pb-6">
+                    {adminOrders.filter(o => o.cliente_id === selectedUser.id).map(order => (
+                      <div key={order.id} className="bg-white border-2 border-gray-100 rounded-[2.5rem] p-6 hover:border-black transition-all">
+                        <div className="flex flex-col sm:flex-row justify-between gap-4 mb-6">
+                           <div>
+                              <div className="flex items-center gap-3 mb-2">
+                                <span className="text-xs font-black text-black uppercase tracking-widest">Pedido #{order.id.split('-')[0]}</span>
+                                <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${
+                                  order.estado === 'listo_entrega' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 
+                                  order.estado === 'en_transito' ? 'bg-indigo-50 text-indigo-600 border-indigo-100' :
+                                  'bg-amber-50 text-amber-600 border-amber-100'
+                                }`}>
+                                  {order.estado}
+                                </span>
+                              </div>
+                              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest italic">{new Date(order.created_at).toLocaleDateString()}</p>
+                           </div>
+                           <div className="text-right">
+                              <p className="text-xl font-black text-black">Q{Number(order.total).toFixed(0)}</p>
+                              <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">{order.items.length} Artículos</p>
+                           </div>
+                        </div>
+
+                        {editingOrderId === order.id ? (
+                           <div className="bg-gray-50 rounded-3xl p-6 border border-gray-100 space-y-4 animate-in fade-in zoom-in-95">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                 <div>
+                                    <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 px-1">Fecha de Entrega</label>
+                                    <div className="relative">
+                                      <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                      <input 
+                                        type="text"
+                                        placeholder="Ej. Jueves 15 / Pronto"
+                                        value={editData.fecha_entrega}
+                                        onChange={e => setEditData({...editData, fecha_entrega: e.target.value})}
+                                        className="w-full pl-12 pr-4 py-4 bg-white border border-gray-200 rounded-2xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-black"
+                                      />
+                                    </div>
+                                 </div>
+                                 <div>
+                                    <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 px-1">Estado de Envío</label>
+                                    <select 
+                                      value={editData.estado}
+                                      onChange={e => setEditData({...editData, estado: e.target.value})}
+                                      className="w-full px-4 py-4 bg-white border border-gray-200 rounded-2xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-black appearance-none"
+                                    >
+                                      <option value="recibido">Confirmado</option>
+                                      <option value="en_transito">En Camino</option>
+                                      <option value="listo_entrega">Entregado</option>
+                                      <option value="cancelado">Cancelado</option>
+                                    </select>
+                                 </div>
+                              </div>
+                              <div className="flex gap-3">
+                                 <button 
+                                   onClick={async () => {
+                                      await updateOrderDetails(order.id, { 
+                                        estado: editData.estado as any, 
+                                        fecha_entrega: editData.fecha_entrega 
+                                      });
+                                      setEditingOrderId(null);
+                                      addToast("Pedido actualizado", "success");
+                                   }}
+                                   className="flex-1 bg-black text-white py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg hover:scale-[1.02] active:scale-95 transition-all"
+                                 >
+                                   Guardar Cambios
+                                 </button>
+                                 <button 
+                                   onClick={() => setEditingOrderId(null)}
+                                   className="px-6 bg-white text-gray-400 border border-gray-200 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-50"
+                                 >
+                                   Cancelar
+                                 </button>
+                              </div>
+                           </div>
+                        ) : (
+                           <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                             <div className="flex items-center gap-3">
+                                <Calendar className="w-4 h-4 text-indigo-500" />
+                                <div>
+                                   <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Est. de Entrega</p>
+                                   <p className="text-xs font-black text-black">{order.fecha_entrega || "No definida"}</p>
+                                </div>
+                             </div>
+                             <button 
+                               onClick={() => {
+                                 setEditingOrderId(order.id);
+                                 setEditData({ estado: order.estado, fecha_entrega: order.fecha_entrega || '' });
+                               }}
+                               className="px-4 py-2 bg-white text-black border border-gray-200 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-black hover:text-white transition-all shadow-sm"
+                             >
+                               Editar Info
+                             </button>
+                           </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+             </div>
+          </div>
+        </div>
+      )}
 
       {resetModalOpen && selectedUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">

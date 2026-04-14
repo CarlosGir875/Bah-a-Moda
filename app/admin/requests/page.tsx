@@ -15,7 +15,8 @@ import {
   ChevronRight,
   TrendingUp,
   Clock,
-  Truck
+  Truck,
+  Calendar
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -31,6 +32,7 @@ export default function AdminRequestsPage() {
     addToast,
     adminOrders,
     updateOrderStatus,
+    updateOrderDetails,
     fetchAllOrders
   } = useStore();
   const router = useRouter();
@@ -258,26 +260,45 @@ export default function AdminRequestsPage() {
                                 </button>
                               </div>
                             ) : linkedOrder ? (
-                               <div className="flex flex-col gap-2 px-2">
-                                 {linkedOrder.estado === 'recibido' && (
-                                   <button 
-                                     onClick={() => updateOrderStatus(linkedOrder.id, 'en_transito')}
-                                     className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 shadow-md hover:scale-[1.02] active:scale-95"
-                                   >
-                                     <Truck className="w-4 h-4" /> Despachar
-                                   </button>
-                                 )}
-                                 {linkedOrder.estado === 'en_transito' && (
-                                   <button 
-                                     onClick={() => updateOrderStatus(linkedOrder.id, 'listo_entrega')}
-                                     className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-2.5 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(16,185,129,0.4)] hover:scale-[1.02] active:scale-95 animate-pulse"
-                                   >
-                                     <CheckCircle2 className="w-4 h-4" /> Entregado
-                                   </button>
-                                 )}
-                                 {['listo_entrega', 'cancelado'].includes(linkedOrder.estado) && (
-                                    <span className="px-3 py-1.5 bg-zinc-100 text-zinc-400 border border-zinc-200 rounded-full text-[9px] font-black uppercase tracking-widest inline-block pointer-events-none">Resuelto</span>
-                                 )}
+                               <div className="flex flex-col gap-2 min-w-[140px]">
+                                 {/* Date Selector Row */}
+                                 <div className="relative group/date">
+                                    <Calendar className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-zinc-400 group-hover/date:text-black transition-colors" />
+                                    <input 
+                                      type="text"
+                                      placeholder="Llega el..."
+                                      defaultValue={linkedOrder.fecha_entrega || ''}
+                                      onBlur={async (e) => {
+                                        if (e.target.value !== linkedOrder.fecha_entrega) {
+                                          await updateOrderDetails(linkedOrder.id, { fecha_entrega: e.target.value });
+                                          addToast("📅 Fecha actualizada", "success");
+                                        }
+                                      }}
+                                      className="w-full pl-7 pr-2 py-1.5 bg-zinc-50 border border-zinc-200 rounded-lg text-[9px] font-bold focus:outline-none focus:ring-1 focus:ring-black placeholder:text-zinc-300 transition-all"
+                                    />
+                                 </div>
+
+                                 <div className="flex gap-2">
+                                   {linkedOrder.estado === 'recibido' && (
+                                     <button 
+                                       onClick={() => updateOrderStatus(linkedOrder.id, 'en_transito')}
+                                       className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg text-[8px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1 shadow-sm hover:scale-[1.02] active:scale-95"
+                                     >
+                                       <Truck className="w-3 h-3" /> Despachar
+                                     </button>
+                                   )}
+                                   {linkedOrder.estado === 'en_transito' && (
+                                     <button 
+                                       onClick={() => updateOrderStatus(linkedOrder.id, 'listo_entrega')}
+                                       className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-2 rounded-lg text-[8px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1 shadow-sm hover:scale-[1.02] active:scale-95"
+                                     >
+                                       <CheckCircle2 className="w-3 h-3" /> Entregar
+                                     </button>
+                                   )}
+                                   {['listo_entrega', 'cancelado'].includes(linkedOrder.estado) && (
+                                      <span className="w-full px-3 py-2 bg-zinc-100 text-zinc-400 border border-zinc-200 rounded-lg text-[8px] font-black uppercase tracking-widest text-center pointer-events-none">Resuelto</span>
+                                   )}
+                                 </div>
                                </div>
                             ) : (
                                <span className="px-3 py-1.5 bg-zinc-100 text-zinc-400 border border-zinc-200 rounded-full text-[9px] font-black uppercase tracking-widest inline-block pointer-events-none">Validando...</span>
