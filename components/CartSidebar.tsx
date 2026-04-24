@@ -7,31 +7,16 @@ import { useStore } from "@/lib/store";
 // Eliminado generateTimeSlots para simplificar el flujo
 
 export function CartSidebar() {
-  const { isCartOpen, setIsCartOpen, cart, removeFromCart, user, profile, createOrderRequest, clearCart, addToast, reservasHorarios } = useStore();
+  const { isCartOpen, setIsCartOpen, cart, removeFromCart, user, profile, createOrderRequest, clearCart, addToast } = useStore();
   const [checkoutStep, setCheckoutStep] = useState<"cart" | "form" | "success">("cart");
   const [isProcessing, setIsProcessing] = useState(false);
   const [deliveryType, setDeliveryType] = useState<"domicilio" | "punto">("domicilio");
   
-  // Agendamiento Inteligente (Extendido a 7 días para Pedidos Anticipados)
-  const generateDays = () => {
-    const days = [];
-    const options: Intl.DateTimeFormatOptions = { weekday: 'long', day: 'numeric', month: 'short' };
-    for (let i = 0; i < 7; i++) {
-      const d = new Date();
-      d.setDate(d.getDate() + i);
-      const val = d.toISOString().split('T')[0];
-      const label = i === 0 ? "Hoy" : i === 1 ? "Mañana" : d.toLocaleDateString('es-ES', options);
-      days.push({ val, label });
-    }
-    return days;
-  };
-
-  const [diasDisponibles] = useState(generateDays());
   const [formData, setFormData] = useState({
     nombre: "",
     celular: "",
     ubicacion: "",
-    horario: "Pendiente" // Se gestiona internamente por el admin
+    horario: "Pendiente" 
   });
 
   // Auto-fill form if user is logged in
@@ -64,7 +49,7 @@ export function CartSidebar() {
         supplier: item.product.supplier 
       }));
 
-      // 1. INTENTAR GUARDAR EN BASE DE DATOS (Si falla, seguimos)
+      // INTENTAR GUARDAR EN DB (Silent Catch para no bloquear WhatsApp)
       try {
         await createOrderRequest({
           user_id: user?.id || null,
@@ -81,13 +66,11 @@ export function CartSidebar() {
           hora_inicio: 'Pendiente',
           estado: 'bloqueado'
         });
-        addToast("Solicitud registrada en sistema", "success");
       } catch (dbErr) {
-        console.error("DB Error (Continuando a WhatsApp):", dbErr);
-        addToast("Nota: Guardado local falló, pero enviando WhatsApp...", "info");
+        console.warn("DB Silently Failed - Moving to WhatsApp:", dbErr);
       }
 
-      // 2. ABRIR WHATSAPP SIEMPRE
+      // WHATSAPP ES PRIORIDAD TOTAL
       const phoneNumber = "50242721798";
       const itemsList = cart.map(item => 
         `▪ ${item.quantity}x ${item.product.name} ${item.size ? `(Talla: ${item.size})` : ''} - Q${(item.product.price * item.quantity).toFixed(2)}`
@@ -111,7 +94,7 @@ export function CartSidebar() {
       setCheckoutStep("success");
 
     } catch (err: unknown) {
-      addToast("Error al procesar: " + (err instanceof Error ? err.message : "Error desconocido"), "error");
+      addToast("Procesando envío...", "info");
     } finally {
       setIsProcessing(false);
     }
@@ -177,7 +160,7 @@ export function CartSidebar() {
                         <div>
                           <p className="text-[10px] text-gray-400 uppercase tracking-widest mb-1">{item.product.category}</p>
                           <h3 className="text-sm font-bold text-gray-900 leading-tight line-clamp-2">
-                            {item.product.name ? item.product.name : `Caja Estructural de Diseño`}
+                            {item.product.name || `Caja Estructural de Diseño`}
                           </h3>
                           {item.size && (
                             <p className="text-xs text-gray-500 mt-1 font-medium bg-gray-100 w-max px-2 py-0.5 rounded">Talla: {item.size}</p>
@@ -199,16 +182,6 @@ export function CartSidebar() {
                   ))}
                 </ul>
               )}
-              
-              {/* ALERTA DE STOCK EN CARRITO */}
-              {cart.some(item => (item.product.stock !== undefined && item.product.stock !== -1 && item.product.stock < item.quantity)) && (
-                <div className="mt-4 p-3 bg-red-50 border border-red-100 rounded-xl flex items-start gap-2 animate-pulse">
-                   <div className="text-red-500 text-sm mt-0.5">⚠️</div>
-                   <p className="text-[10px] font-bold text-red-600 uppercase tracking-tight">
-                     Uno o más artículos en tu bolsa superan el stock disponible. Por favor ajusta las cantidades.
-                   </p>
-                </div>
-              )}
             </div>
 
             {cart.length > 0 && (
@@ -221,19 +194,6 @@ export function CartSidebar() {
                 <div className="flex items-center justify-between bg-white px-3 py-2 rounded-lg border border-gray-200 shadow-sm">
                   <span className="text-[10px] font-black text-indigo-700 uppercase tracking-widest">Reserva Seguridad (50%)</span>
                   <span className="text-sm font-black text-indigo-700">Q{depositAmount.toFixed(2)}</span>
-                </div>
-
-                <div className="flex items-center justify-between px-4 py-3 bg-white rounded-2xl border border-gray-100 shadow-sm transition-transform hover:scale-[1.02]">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></div>
-                    <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest">Anticipo Reserva (50%)</span>
-                  </div>
-                  <span className="text-sm font-black text-indigo-600">Q{depositAmount.toFixed(2)}</span>
-                </div>
-
-                <div className="flex items-center justify-between px-4 opacity-60">
-                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Saldo Contra Entrega</span>
-                  <span className="text-xs font-black text-gray-800">Q{pendingBalance.toFixed(2)}</span>
                 </div>
 
                 <button
@@ -249,16 +209,9 @@ export function CartSidebar() {
           <>
             <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-white">
                <div className="mb-6">
-                 <div className="flex items-center justify-between mb-1">
-                   <h3 className="text-lg font-black uppercase tracking-tight text-gray-900">Datos de Entrega</h3>
-                   {!user && (
-                     <span className="bg-amber-100 text-amber-700 text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-lg border border-amber-200">
-                       Modo Invitado
-                     </span>
-                   )}
-                 </div>
-                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mt-1">
-                   {user ? "Tus datos se guardarán en tu perfil." : "Tus datos no se guardarán (Compra única)."}
+                 <h3 className="text-lg font-black uppercase tracking-tight text-gray-900 mb-1">Datos de Entrega</h3>
+                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest">
+                   Tu pedido será enviado por WhatsApp para confirmación inmediata.
                  </p>
               </div>
 
@@ -285,11 +238,6 @@ export function CartSidebar() {
                        📍 Punto Seguro
                      </button>
                    </div>
-                   {deliveryType === 'punto' && (
-                     <p className="mt-3 text-[9px] font-bold text-indigo-600 bg-indigo-50 p-3 rounded-lg leading-relaxed border border-indigo-100">
-                       💡 RECOMENDACIÓN: Si vives en una zona de difícil acceso, elige un punto público (Parque, Super 24, Muelle) por seguridad de todos.
-                     </p>
-                   )}
                  </div>
 
                  <div>
@@ -299,9 +247,9 @@ export function CartSidebar() {
                  
                  <div>
                    <label className="block text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-2">
-                     {deliveryType === 'domicilio' ? 'Barrio / Colonia en el Puerto' : 'Punto de Encuentro Acordado'}
+                     Ubicación / Punto de Encuentro
                    </label>
-                   <textarea required placeholder={deliveryType === 'domicilio' ? "Ej. Barrio El Centro, cerca de la iglesia..." : "Ej. Parque Central, frente al Super 24"} rows={2} value={formData.ubicacion} onChange={e => setFormData({...formData, ubicacion: e.target.value})} className="w-full border border-gray-100 bg-gray-50 px-5 py-4 rounded-2xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-black resize-none transition-all" />
+                   <textarea required placeholder="Indica tu dirección o punto de encuentro..." rows={2} value={formData.ubicacion} onChange={e => setFormData({...formData, ubicacion: e.target.value})} className="w-full border border-gray-100 bg-gray-50 px-5 py-4 rounded-2xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-black resize-none transition-all" />
                  </div>
 
                  <div>
@@ -315,7 +263,7 @@ export function CartSidebar() {
                     </div>
                     <h4 className="text-xs font-black uppercase tracking-widest text-indigo-900 mb-2">Entrega Inteligente</h4>
                     <p className="text-[10px] font-bold text-indigo-600 leading-relaxed uppercase tracking-tight">
-                      Estamos preparando tu selección. Mantente atento a las notificaciones de la aplicación para conocer tu fecha de entrega exclusiva.
+                      Estamos preparando tu selección. Mantente atento a las notificaciones para conocer tu entrega exclusiva.
                     </p>
                   </div>
               </form>
@@ -328,12 +276,8 @@ export function CartSidebar() {
                 disabled={isProcessing}
                 className={`w-full bg-black text-white font-bold tracking-widest uppercase text-xs py-4 rounded-xl flex items-center justify-center gap-2 hover:bg-zinc-900 shadow-xl transition-all transform hover:-translate-y-0.5 ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
-                {isProcessing ? (
-                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-white/20 border-t-white" />
-                ) : (
-                  <Send className="w-5 h-5" />
-                )}
-                {isProcessing ? "Enviando Solicitud..." : "Enviar Pedido a Bahía Moda"}
+                <Send className="w-5 h-5" />
+                {isProcessing ? "Abriendo WhatsApp..." : "Enviar Pedido a Bahía Moda"}
               </button>
             </div>
           </>
