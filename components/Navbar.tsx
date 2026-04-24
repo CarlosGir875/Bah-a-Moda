@@ -90,7 +90,7 @@ export function Navbar() {
           </div>
 
           {/* Utilidades: Buscar, Cuenta, Bolsa */}
-          <div className="flex-none flex justify-end items-center gap-1 sm:gap-2 overflow-x-auto scrollbar-hide py-1">
+          <div className="flex-none flex justify-end items-center gap-1 sm:gap-2 overflow-hidden py-1">
             <button onClick={openSearch} aria-label="Buscar" className="p-2 text-gray-500 hover:text-black hover:bg-gray-200 rounded-full transition-colors flex-shrink-0">
               <Search className="h-5 w-5" strokeWidth={1.7} />
             </button>
