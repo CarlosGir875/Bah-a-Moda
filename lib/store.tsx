@@ -652,36 +652,34 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [fetchFinanzas]);
 
   const createOrderRequest = useCallback(async (data: Omit<OrderRequest, 'id' | 'created_at' | 'estado' | 'visto'>, reserva?: Omit<ReservaHorario, 'id' | 'created_at' | 'solicitud_id'>) => {
-    // Inject custom robust debugging for DB rejections
-    const { data: insertedData, error } = await supabase
-      .from('solicitudes_pedidos')
-      .insert([{ ...data, estado: 'pendiente', visto: false }])
-      .select('id')
-      .single();
-      
-    if (error) {
-      console.error("[CRITICAL] Order Insert Failed Payload:", data);
-      console.error("[CRITICAL] Subabase Error Stack:", error);
-      throw new Error(`DB_REJECTED: ${error.message} | Details: ${error.details}`);
-    }
-
-    // Insert Reservation
-    if (reserva && insertedData) {
-      const { error: resError } = await supabase
-        .from('reservas_horarios')
-        .insert([{
-          ...reserva,
-          solicitud_id: insertedData.id,
-          estado: 'bloqueado'
-        }]);
+    try {
+      const { data: insertedData, error } = await supabase
+        .from('solicitudes_pedidos')
+        .insert([{ ...data, estado: 'pendiente', visto: false }])
+        .select('id')
+        .single();
         
-      if (resError) {
-        console.error("Failed to insert reservation schedule mapping, but order went through:", resError);
-      } else {
-        await fetchReservasHorarios();
+      if (error) {
+        console.error("[CRITICAL] Error al guardar solicitud:", error);
+        throw error;
       }
+
+      if (reserva && insertedData) {
+        await supabase
+          .from('reservas_horarios')
+          .insert([{
+            ...reserva,
+            solicitud_id: insertedData.id,
+            estado: 'bloqueado'
+          }]);
+      }
+      
+      await fetchOrderRequests();
+    } catch (err) {
+      console.error("Fallo total en DB:", err);
+      throw err;
     }
-  }, [fetchReservasHorarios]);
+  }, [fetchOrderRequests]);
 
   const approveOrderRequest = useCallback(async (requestId: string) => {
     const request = orderRequests.find(r => r.id === requestId);
