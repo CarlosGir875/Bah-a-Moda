@@ -76,7 +76,6 @@ const StoreContext = createContext<StoreContextType | undefined>(undefined);
 const ADMIN_EMAILS = ["bahiamodapuerto@gmail.com", "carlosgironmejia@gmail.com"];
 
 export function StoreProvider({ children }: { children: ReactNode }) {
-  // Navigation UI
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -87,16 +86,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isTrackingOpen, setIsTrackingOpen] = useState(false);
 
-  // Auth & Profile
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
-  
-  // LOGIC: Splash screen only on first visit of the session
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
-  // Business Data
   const [products, setProducts] = useState<Product[]>([]);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [userOrders, setUserOrders] = useState<Order[]>([]);
@@ -106,7 +101,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [reservasHorarios, setReservasHorarios] = useState<any[]>([]);
   const [allUsers, setAllUsers] = useState<Profile[]>([]);
 
-  // UTILS
   const addToast = useCallback((message: string, type: 'success'|'error'|'info' = 'info') => {
     const id = Math.random().toString(36).substr(2, 9);
     setToasts(prev => [...prev, { id, message, type }]);
@@ -115,36 +109,35 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const removeToast = useCallback((id: string) => setToasts(p => p.filter(t => t.id !== id)), []);
 
-  // FETCHERS
   const fetchProducts = useCallback(async () => {
-    const { data } = await supabase.from('products').select('*').order('created_at', { ascending: false });
-    if (data) setProducts(data.map((p: any) => ({
-      id: p.id, name: p.name, price: p.price, cost: p.cost || 0, stock: p.stock ?? 1,
-      images: p.image_urls || [], category: p.category, subCategory: p.sub_category,
-      filterTag: p.filter_tag, supplier: p.supplier, delivery_date: p.delivery_date, description: p.description, sizes: p.sizes || []
-    })));
+    try {
+      const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
+      if (error) throw error;
+      if (data) setProducts(data.map((p: any) => ({
+        id: p.id, name: p.name, price: p.price, cost: p.cost || 0, stock: p.stock ?? 1,
+        images: p.image_urls || [], category: p.category, subCategory: p.sub_category,
+        filterTag: p.filter_tag, supplier: p.supplier, delivery_date: p.delivery_date, description: p.description, sizes: p.sizes || []
+      })));
+    } catch (e) { console.error("Error fetching products:", e); }
   }, []);
 
   const fetchProfile = useCallback(async (uid: string) => {
     const { data } = await supabase.from('cliente_perfiles').select('*').eq('id', uid).maybeSingle();
     if (data) { 
-      const p = data as Profile;
-      setProfile(p);
-      setIsAdmin(ADMIN_EMAILS.includes(user?.email || "") || p.rol === 'admin');
+      setProfile(data as Profile);
+      setIsAdmin(ADMIN_EMAILS.includes(user?.email || "") || data.rol === 'admin');
     }
   }, [user]);
 
   const fetchOrderRequests = useCallback(async () => {
-    if (!isAdmin) return;
     const { data } = await supabase.from('solicitudes_pedidos').select('*').order('created_at', { ascending: false });
     if (data) setOrderRequests(data);
-  }, [isAdmin]);
+  }, []);
 
   const fetchAllOrders = useCallback(async () => {
-    if (!isAdmin) return;
     const { data } = await supabase.from('pedidos').select('*').order('created_at', { ascending: false });
     if (data) setAdminOrders(data);
-  }, [isAdmin]);
+  }, []);
 
   const fetchUserOrders = useCallback(async () => {
     if (!user) return;
@@ -153,10 +146,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [user]);
 
   const fetchFinanzas = useCallback(async () => {
-    if (!isAdmin) return;
     const { data } = await supabase.from('finanzas').select('*').order('created_at', { ascending: false });
     if (data) setFinanzas(data);
-  }, [isAdmin]);
+  }, []);
 
   const fetchReservasHorarios = useCallback(async () => {
     const { data } = await supabase.from('reservas_horarios').select('*').order('fecha', { ascending: true });
@@ -164,12 +156,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const fetchAllUsers = useCallback(async () => {
-    if (!isAdmin) return;
     const { data } = await supabase.from('cliente_perfiles').select('*').order('nombre_completo', { ascending: true });
     if (data) setAllUsers(data);
-  }, [isAdmin]);
+  }, []);
 
-  // AUTH ACTIONS
   const signIn = useCallback(async (email: string, password: string) => {
     setAuthLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -205,7 +195,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return url;
   }, [user, updateProfile]);
 
-  // PRODUCT ACTIONS
   const addProduct = useCallback(async (p: any) => {
     await supabase.from('products').insert([{ ...p, image_urls: p.images, sub_category: p.subCategory, filter_tag: p.filterTag }]);
     await fetchProducts();
@@ -231,7 +220,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return urls;
   }, []);
 
-  // ORDER ACTIONS
   const createOrderRequest = useCallback(async (data: any, res?: any) => {
     const { data: ins, error } = await supabase.from('solicitudes_pedidos').insert([{ ...data, estado: 'pendiente', visto: false }]).select('id').single();
     if (!error && res && ins) await supabase.from('reservas_horarios').insert([{ ...res, solicitud_id: ins.id, estado: 'bloqueado' }]);
@@ -282,16 +270,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     await fetchAllOrders();
   }, [fetchAllOrders]);
 
-  // INITIALIZATION
   useEffect(() => {
     let isMounted = true;
-    
-    // CHECK MEMORY: If already loaded in this session, skip splash
     const alreadyLoaded = typeof window !== 'undefined' && sessionStorage.getItem('bm_loaded');
-    if (alreadyLoaded) setIsInitialLoading(false);
 
     const init = async () => {
-      await Promise.all([fetchProducts(), fetchReservasHorarios()]);
+      // Priority 1: Data
+      await fetchProducts();
+      await fetchReservasHorarios();
+      
+      // Priority 2: Session
       const { data: { session } } = await supabase.auth.getSession();
       if (isMounted) {
         setUser(session?.user ?? null);
@@ -300,6 +288,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           setIsAdmin(ADMIN_EMAILS.includes(session.user.email || ""));
         }
         setAuthLoading(false);
+        // ONLY HIDE SPLASH AFTER PRODUCTS LOAD
+        setTimeout(() => { if (isMounted) { setIsInitialLoading(false); sessionStorage.setItem('bm_loaded', 'true'); } }, 100);
       }
     };
 
@@ -317,14 +307,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setAuthLoading(false);
     });
 
-    const safetyTimer = setTimeout(() => { 
-      if (isMounted) {
-        setIsInitialLoading(false); 
-        sessionStorage.setItem('bm_loaded', 'true'); // Save to memory
-      }
-    }, alreadyLoaded ? 0 : 2000);
-
-    return () => { isMounted = false; subscription.unsubscribe(); clearTimeout(safetyTimer); };
+    return () => { isMounted = false; subscription.unsubscribe(); };
   }, [fetchProducts, fetchReservasHorarios, fetchProfile]);
 
   const contextValue = useMemo(() => ({
@@ -353,11 +336,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     markRequestAsSeen, markOrderAsSeen, fetchFinanzas, addToast, removeToast
   ]);
 
-  return (
-    <StoreContext.Provider value={contextValue}>
-      {children}
-    </StoreContext.Provider>
-  );
+  return <StoreContext.Provider value={contextValue}>{children}</StoreContext.Provider>;
 }
 
 export function useStore() {
