@@ -139,6 +139,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  
   const [products, setProducts] = useState<Product[]>([]);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [userOrders, setUserOrders] = useState<Order[]>([]);
@@ -315,6 +317,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     fetchProducts(); fetchReservasHorarios();
     
+    // Check initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      if (session?.user) fetchProfile(session.user.id).finally(() => setAuthLoading(false));
+      else setAuthLoading(false);
+    });
+
     // Auth Listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       setUser(session?.user ?? null);
@@ -330,7 +339,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const ch = supabase.channel('db').on('postgres_changes', { event: '*', schema: 'public', table: 'solicitudes_pedidos' }, () => fetchOrderRequests())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos' }, () => fetchAllOrders()).subscribe();
     
-    return () => { subscription.unsubscribe(); supabase.removeChannel(ch); };
+    // SAFETY TIMEOUT: Force splash screen to hide after 2.5 seconds no matter what
+    const timer = setTimeout(() => setIsInitialLoading(false), 2500);
+
+    return () => { 
+      subscription.unsubscribe(); 
+      supabase.removeChannel(ch); 
+      clearTimeout(timer);
+    };
   }, [fetchProducts, fetchReservasHorarios, fetchProfile, fetchOrderRequests, fetchAllOrders]);
 
   return (
@@ -348,7 +364,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       rejectOrderRequest: async (id) => { await supabase.from('solicitudes_pedidos').update({ estado: 'rechazado' }).eq('id', id); await fetchOrderRequests(); },
       markRequestAsSeen, markOrderAsSeen, finanzas, fetchFinanzas,
       addFinanza: async (f: any) => { await supabase.from('finanzas').insert([f]); await fetchFinanzas(); },
-      toasts, addToast, removeToast, isInitialLoading: authLoading
+      toasts, addToast, removeToast, isInitialLoading
     }}>
       {children}
     </StoreContext.Provider>
