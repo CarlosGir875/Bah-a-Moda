@@ -165,28 +165,25 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isTrackingOpen, setIsTrackingOpen] = useState(false);
 
-  // Scheduling State
+  // States
   const [reservasHorarios, setReservasHorarios] = useState<ReservaHorario[]>([]);
-
-  // Finance State
   const [finanzas, setFinanzas] = useState<Finanza[]>([]);
-
-  // Auth State
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
-
-  // Products State
   const [products, setProducts] = useState<Product[]>([]);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const [userOrders, setUserOrders] = useState<Order[]>([]);
+  const [adminOrders, setAdminOrders] = useState<Order[]>([]);
+  const [allUsers, setAllUsers] = useState<Profile[]>([]);
+  const [orderRequests, setOrderRequests] = useState<OrderRequest[]>([]);
 
+  // 1. UTILS (TOASTS)
   const addToast = useCallback((message: string, type: 'success' | 'error' | 'info' = 'info') => {
     const id = Math.random().toString(36).substr(2, 9);
     setToasts(prev => [...prev, { id, message, type }]);
-    
-    // Auto-remove after 4 seconds
     setTimeout(() => {
       setToasts(prev => prev.filter(t => t.id !== id));
     }, 4000);
@@ -196,6 +193,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setToasts(prev => prev.filter(t => t.id !== id));
   }, []);
 
+  // 2. FETCHERS (ORDENADOS PARA EVITAR ERRORES DE DECLARACIÓN)
   const fetchProducts = useCallback(async () => {
     const { data, error } = await supabase
       .from('products')
@@ -204,13 +202,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       .order('sub_category', { ascending: true })
       .order('created_at', { ascending: false });
     
-    if (error) {
-      console.error('Error fetching products:', error);
-      return;
-    }
-    
     if (data) {
-      const mappedProducts = data.map((p: any) => ({
+      setProducts(data.map((p: any) => ({
         id: p.id,
         name: p.name,
         price: p.price,
@@ -224,151 +217,74 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         delivery_date: p.delivery_date,
         description: p.description,
         sizes: p.sizes || []
-      }));
-      setProducts(mappedProducts);
+      })));
     }
-
   }, []);
 
   const fetchReservasHorarios = useCallback(async () => {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('reservas_horarios')
       .select('*')
       .order('fecha', { ascending: true })
       .order('hora_inicio', { ascending: true });
-    
-    if (!error && data) {
-      setReservasHorarios(data as ReservaHorario[]);
-    }
+    if (data) setReservasHorarios(data as ReservaHorario[]);
   }, []);
 
-  const addProduct = useCallback(async (product: Omit<Product, 'id'>) => {
-    const { error } = await supabase
-      .from('products')
-      .insert([{
-        name: product.name,
-        price: product.price,
-        cost: product.cost || 0,
-        stock: product.stock !== undefined ? product.stock : 1,
-        image_urls: product.images,
-        category: product.category,
-        sub_category: product.subCategory,
-        filter_tag: product.filterTag,
-        supplier: product.supplier,
-        delivery_date: product.delivery_date,
-        description: product.description,
-        sizes: product.sizes
-      }]);
-    
-    if (error) throw error;
-    await fetchProducts(); // Refresh list
-  }, [fetchProducts]);
+  const fetchOrderRequests = useCallback(async () => {
+    const { data } = await supabase
+      .from('solicitudes_pedidos')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (data) setOrderRequests(data || []);
+  }, []);
 
-  const updateProduct = useCallback(async (id: string, updates: Partial<Product>) => {
-    // Map frontend fields to DB snake_case fields
-    const dbUpdates: any = {};
-    if (updates.name !== undefined) dbUpdates.name = updates.name;
-    if (updates.price !== undefined) dbUpdates.price = updates.price;
-    if (updates.cost !== undefined) dbUpdates.cost = updates.cost;
-    if (updates.stock !== undefined) dbUpdates.stock = updates.stock;
-    if (updates.images !== undefined) dbUpdates.image_urls = updates.images;
-    if (updates.category !== undefined) dbUpdates.category = updates.category;
-    if (updates.subCategory !== undefined) dbUpdates.sub_category = updates.subCategory;
-    if (updates.filterTag !== undefined) dbUpdates.filter_tag = updates.filterTag;
-    if (updates.supplier !== undefined) dbUpdates.supplier = updates.supplier;
-    if (updates.delivery_date !== undefined) dbUpdates.delivery_date = updates.delivery_date;
-    if (updates.description !== undefined) dbUpdates.description = updates.description;
-    if (updates.sizes !== undefined) dbUpdates.sizes = updates.sizes;
+  const fetchAllOrders = useCallback(async () => {
+    const { data } = await supabase
+      .from('pedidos')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (data) setAdminOrders(data || []);
+  }, []);
 
-    const { error } = await supabase
-      .from('products')
-      .update(dbUpdates)
-      .eq('id', id);
+  const fetchUserOrders = useCallback(async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from('pedidos')
+      .select('*')
+      .eq('cliente_id', user.id)
+      .order('created_at', { ascending: false });
+    if (data) setUserOrders(data || []);
+  }, [user]);
 
-    if (error) throw error;
-    await fetchProducts();
-  }, [fetchProducts]);
+  const fetchFinanzas = useCallback(async () => {
+    const { data } = await supabase
+      .from('finanzas')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (data) setFinanzas(data || []);
+  }, []);
 
-  const deleteProduct = useCallback(async (id: string) => {
-    const { error } = await supabase
-      .from('products')
-      .delete()
-      .eq('id', id);
-
-    if (error) throw error;
-    await fetchProducts();
-  }, [fetchProducts]);
+  const fetchAllUsers = useCallback(async () => {
+    const { data } = await supabase
+      .from('cliente_perfiles')
+      .select('*')
+      .order('nombre_completo', { ascending: true });
+    if (data) setAllUsers(data || []);
+  }, []);
 
   const fetchProfile = useCallback(async (userId: string) => {
     const { data, error } = await supabase
       .from('cliente_perfiles')
       .select('*')
       .eq('id', userId)
-      .maybeSingle(); // Permite 0 resultados sin lanzar error
-    
-    if (error) {
-      console.error('Error fetching profile:', error);
-      return;
-    }
-
+      .maybeSingle();
     if (data) {
       setProfile(data as Profile);
       setIsAdmin(data.rol === 'admin');
-    } else {
-      // Si no existe perfil (ej: cuenta creada manual en dashboard), seteamos valores default
-      setProfile(null);
-      setIsAdmin(false);
     }
   }, []);
 
-  useEffect(() => {
-    fetchProducts();
-    fetchReservasHorarios();
-    // Check active sessions and sets the user
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchProfile(session.user.id).finally(() => setAuthLoading(false));
-      } else {
-        setAuthLoading(false);
-      }
-    });
-
-    // Listen for changes on auth state
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      // Avoid re-triggering loading states on TOKEN_REFRESHED (which happens on window focus)
-      if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          setAuthLoading(true);
-          fetchProfile(session.user.id).finally(() => setAuthLoading(false));
-        } else {
-          setProfile(null);
-          setIsAdmin(false);
-          setAuthLoading(false);
-        }
-      } else if (event === 'SIGNED_OUT') {
-        setUser(null);
-        setProfile(null);
-        setIsAdmin(false);
-        setAuthLoading(false);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [fetchProducts, fetchProfile, fetchReservasHorarios]);
-
-  // Final check for initial loading
-  useEffect(() => {
-    // We only wait for auth to finish. 
-    // If products are slow or empty, we still want to show the app.
-    if (!authLoading) {
-      const timer = setTimeout(() => setIsInitialLoading(false), 1500); 
-      return () => clearTimeout(timer);
-    }
-  }, [authLoading]);
-
-
+  // 3. AUTH ACTIONS
   const signIn = useCallback(async (email: string, password: string) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
@@ -376,547 +292,156 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [fetchProfile]);
 
   const signUp = useCallback(async (email: string, password: string, fullName: string, metadata?: Partial<Profile>) => {
-    // Llamar a la API de servidor (usa admin key, sin límite de rate)
     const res = await fetch('/api/auth/signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        email,
-        password,
-        fullName,
-        celular: (metadata as any)?.celular ?? (metadata as any)?.telefono ?? null,
+        email, password, fullName,
+        celular: (metadata as any)?.celular ?? null,
         direccion: metadata?.direccion ?? null,
         punto_encuentro: metadata?.punto_encuentro ?? null,
       }),
     });
-
     const result = await res.json();
-    if (!res.ok) throw new Error(result.error || 'Error al crear la cuenta');
-
-    // Iniciar sesión automáticamente tras el registro exitoso
-    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+    if (!res.ok) throw new Error(result.error);
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
     if (signInError) throw signInError;
-    if (signInData.user) await fetchProfile(signInData.user.id);
-  }, [fetchProfile]);
+  }, []);
 
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
-    setUser(null);
-    setProfile(null);
-    setIsAdmin(false);
+    setUser(null); setProfile(null); setIsAdmin(false);
   }, []);
 
-  const updateProfile = useCallback(async (updates: Partial<Omit<Profile, 'id' | 'rol'>>) => {
-    if (!user) return;
-    
-    const { error } = await supabase
-      .from('cliente_perfiles')
-      .update(updates)
-      .eq('id', user.id);
-    
+  // 4. PRODUCT ACTIONS
+  const addProduct = useCallback(async (product: Omit<Product, 'id'>) => {
+    const { error } = await supabase.from('products').insert([{
+      name: product.name, price: product.price, cost: product.cost || 0,
+      stock: product.stock, image_urls: product.images, category: product.category,
+      sub_category: product.subCategory, supplier: product.supplier,
+      delivery_date: product.delivery_date, description: product.description, sizes: product.sizes
+    }]);
     if (error) throw error;
-    await fetchProfile(user.id);
-  }, [user, fetchProfile]);
+    await fetchProducts();
+  }, [fetchProducts]);
 
-  const resetPassword = useCallback(async (email: string) => {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/`,
-    });
-    if (error) throw error;
-  }, []);
-
-  const uploadAvatar = useCallback(async (file: File) => {
-    if (!user) throw new Error("No user logged in");
-
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${user.id}-${Math.random()}.${fileExt}`;
-    const filePath = `avatars/${fileName}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from('avatars')
-      .upload(filePath, file);
-
-    if (uploadError) throw uploadError;
-
-    const { data: { publicUrl } } = supabase.storage
-      .from('avatars')
-      .getPublicUrl(filePath);
-
-    await updateProfile({ avatar_url: publicUrl });
-    return publicUrl;
-  }, [user, updateProfile]);
+  const deleteProduct = useCallback(async (id: string) => {
+    await supabase.from('products').delete().eq('id', id);
+    await fetchProducts();
+  }, [fetchProducts]);
 
   const uploadProductImages = useCallback(async (files: File[]) => {
-    if (!user) throw new Error("No user logged in");
-
     const urls: string[] = [];
-
     for (const file of files) {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
-      const filePath = `${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('products')
-        .upload(filePath, file);
-
-      if (uploadError) {
-        console.error("Upload error for file:", file.name, uploadError);
-        continue;
+      const fileName = `${Date.now()}-${Math.random()}`;
+      const { error } = await supabase.storage.from('products').upload(fileName, file);
+      if (!error) {
+        const { data } = supabase.storage.from('products').getPublicUrl(fileName);
+        urls.push(data.publicUrl);
       }
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('products')
-        .getPublicUrl(filePath);
-      
-      urls.push(publicUrl);
     }
-
     return urls;
-  }, [user]);
-
-  const updateUserPassword = useCallback(async (password: string) => {
-    const { error } = await supabase.auth.updateUser({ password });
-    if (error) throw error;
   }, []);
 
-  const addToCart = (product: Product, size?: string) => {
-    setCart((prev) => {
-      const existing = prev.find((item) => item.product.id === product.id && item.size === size);
-      if (existing) {
-        return prev.map((item) =>
-          item === existing ? { ...item, quantity: item.quantity + 1 } : item
-        );
-      }
-      return [...prev, { product, size, quantity: 1 }];
-    });
-    setIsCartOpen(true);
-  };
-
-  const removeFromCart = (productId: string, size?: string) => {
-    setCart((prev) => prev.filter((item) => !(item.product.id === productId && item.size === size)));
-  };
-
-  const clearCart = useCallback(() => {
-    setCart([]);
-  }, []);
-
-  const [userOrders, setUserOrders] = useState<Order[]>([]);
-  const [adminOrders, setAdminOrders] = useState<Order[]>([]);
-  const [allUsers, setAllUsers] = useState<Profile[]>([]);
-
-  const fetchAllUsers = useCallback(async () => {
-    const { data, error } = await supabase
-      .from('cliente_perfiles')
-      .select('*')
-      .order('nombre_completo', { ascending: true });
-    
-    if (error) {
-      console.error("Error fetching users:", error);
-      return;
-    }
-    setAllUsers(data || []);
-  }, []);
-
-  const fetchUserOrders = useCallback(async () => {
-    if (!user) return;
-    const { data, error } = await supabase
-      .from('pedidos')
-      .select('*')
-      .eq('cliente_id', user.id)
-      .order('created_at', { ascending: false });
-    
-    if (error) {
-      console.error(`ERROR (User:${user.id}): fetchUserOrders failed:`, JSON.stringify(error, null, 2));
-      return;
-    }
-    setUserOrders(data || []);
-  }, [user]);
-
-  const fetchAllOrders = useCallback(async () => {
-    const { data, error } = await supabase
-      .from('pedidos')
-      .select('*')
-      .order('created_at', { ascending: false });
-    
-    if (error) {
-      console.error("Error fetching admin orders:", error);
-      return;
-    }
-    setAdminOrders(data || []);
-  }, []);
-
-  const createOrder = useCallback(async (orderData: Omit<Order, 'id' | 'created_at' | 'ganancia' | 'codigo_seguimiento' | 'visto'>) => {
-    // Intentar insertar con los nuevos campos
-    const { error: initialError } = await supabase
-      .from('pedidos')
-      .insert([{ 
-        ...orderData, 
-        estado: 'pendiente',
-        visto: false 
-      }]);
-    
-    // Si falla porque la columna 'visto' no existe (Error 42703 en Postgres)
-    if (initialError && initialError.code === '42703') {
-      console.warn("La columna 'visto' no existe en la DB. Intentando inserción básica.");
-      const { error: fallbackError } = await supabase
-        .from('pedidos')
-        .insert([{ 
-          ...orderData, 
-          estado: 'pendiente' 
-        }]);
-      
-      if (fallbackError) throw fallbackError;
-    } else if (initialError) {
-      throw initialError;
-    }
-    
-    await fetchUserOrders();
-  }, [fetchUserOrders]);
-
-  const updateOrderStatus = useCallback(async (orderId: string, newStatus: string) => {
-    const updates: any = { estado: newStatus };
-    
-    // Si se confirma el pedido, generamos el ID numérico si no tiene uno
-    if (newStatus === 'recibido') {
-      const code = Math.floor(1000 + Math.random() * 9000).toString();
-      updates.codigo_seguimiento = code;
-    }
-
-    const { error } = await supabase
-      .from('pedidos')
-      .update(updates)
-      .eq('id', orderId);
-    
-    if (error) throw error;
-    await fetchAllOrders();
-  }, [fetchAllOrders]);
-
-  const updateOrderDetails = useCallback(async (orderId: string, updates: Partial<Order>) => {
-    const dbUpdates: any = { ...updates };
-    
-    const { error } = await supabase
-      .from('pedidos')
-      .update(dbUpdates)
-      .eq('id', orderId);
-    
-    if (error) throw error;
-    await fetchAllOrders();
-    if (user) await fetchUserOrders();
-  }, [fetchAllOrders, fetchUserOrders, user]);
-
-  const deleteOrder = useCallback(async (recordId: string) => {
+  // 5. ORDER ACTIONS
+  const createOrderRequest = useCallback(async (data: any, reserva?: any) => {
     try {
-      // 1. Borrar de pedidos (por si existe)
-      const { error: err1 } = await supabase
-        .from('pedidos')
-        .delete()
-        .eq('id', recordId);
-      
-      // 2. Borrar de solicitudes_pedidos (el ID principal del panel)
-      const { error: err2 } = await supabase
-        .from('solicitudes_pedidos')
-        .delete()
-        .eq('id', recordId);
-
-      if (err1 && err1.code !== 'PGRST116') console.warn("Aviso: No se encontró pedido vinculado, pero se procedió con la solicitud.");
-      
-      await fetchAllOrders();
-      await fetchOrderRequests();
-      if (user) await fetchUserOrders();
-      
-      addToast("🗑️ Registro eliminado por completo", "success");
-    } catch (err) {
-      console.error("Error al eliminar registro:", err);
-      addToast("No se pudo eliminar el registro", "error");
-    }
-  }, [fetchAllOrders, fetchOrderRequests, fetchUserOrders, user, addToast]);
-
-  const markOrderAsSeen = useCallback(async (orderId: string) => {
-    const { error } = await supabase
-      .from('pedidos')
-      .update({ visto: true })
-      .eq('id', orderId);
-    if (error) throw error;
-    await fetchAllOrders();
-  }, [fetchAllOrders]);
-
-  const [orderRequests, setOrderRequests] = useState<OrderRequest[]>([]);
-
-  const fetchOrderRequests = useCallback(async () => {
-    const { data, error } = await supabase
-      .from('solicitudes_pedidos')
-      .select('*')
-      .order('created_at', { ascending: false });
-    if (!error) setOrderRequests(data || []);
-  }, []);
-
-  const fetchFinanzas = useCallback(async () => {
-    const { data, error } = await supabase
-      .from('finanzas')
-      .select('*')
-      .order('created_at', { ascending: false });
-    if (!error) setFinanzas(data || []);
-  }, []);
-
-  const addFinanza = useCallback(async (finanza: Omit<Finanza, 'id' | 'created_at'>) => {
-    const { error } = await supabase
-      .from('finanzas')
-      .insert([finanza]);
-    if (error) throw error;
-    await fetchFinanzas();
-  }, [fetchFinanzas]);
-
-  const createOrderRequest = useCallback(async (data: Omit<OrderRequest, 'id' | 'created_at' | 'estado' | 'visto'>, reserva?: Omit<ReservaHorario, 'id' | 'created_at' | 'solicitud_id'>) => {
-    try {
-      console.log("[DEBUG] Intentando guardar pedido en DB...", data);
-      
-      const { data: insertedData, error } = await supabase
-        .from('solicitudes_pedidos')
-        .insert([{ 
-          ...data, 
-          user_id: data.user_id || null, // Asegurar compatibilidad con invitados
-          estado: 'pendiente', 
-          visto: false 
-        }])
-        .select('id')
-        .single();
-        
-      if (error) {
-        console.error("[CRITICAL DB ERROR] No se pudo guardar el pedido:", error);
-        addToast(`Error de Base de Datos: ${error.message}`, "error");
-        throw error;
-      }
-
-      console.log("[DEBUG] Pedido guardado con ID:", insertedData.id);
-
+      const { data: insertedData, error } = await supabase.from('solicitudes_pedidos').insert([{ 
+        ...data, user_id: data.user_id || null, estado: 'pendiente', visto: false 
+      }]).select('id').single();
+      if (error) throw error;
       if (reserva && insertedData) {
-        const { error: resError } = await supabase
-          .from('reservas_horarios')
-          .insert([{
-            ...reserva,
-            solicitud_id: insertedData.id,
-            estado: 'bloqueado'
-          }]);
-        if (resError) console.warn("Aviso: No se pudo bloquear el horario, pero el pedido se guardó.");
+        await supabase.from('reservas_horarios').insert([{ ...reserva, solicitud_id: insertedData.id, estado: 'bloqueado' }]);
       }
-      
-      // Forzar recarga inmediata para que el admin vea el cambio
       await fetchOrderRequests();
-      addToast("✅ Pedido registrado en el sistema", "success");
-      
-    } catch (err: any) {
-      console.error("Fallo catastrófico al conectar con Supabase:", err);
-      throw err;
-    }
+      addToast("✅ Pedido registrado", "success");
+    } catch (err) { throw err; }
   }, [fetchOrderRequests, addToast]);
 
   const approveOrderRequest = useCallback(async (requestId: string) => {
     const request = orderRequests.find(r => r.id === requestId);
     if (!request) return;
 
-    // 1.1 Calcular la inversión base buscando el costo real de cada producto en el inventario actual
-    const inversionTotal = request.items.reduce((sum, item) => {
-      const product = products.find(p => p.id === item.id);
-      const cost = product ? (product.cost || 0) : 0;
-      return sum + (cost * (item.quantity || 1));
+    const inversionTotal = request.items.reduce((sum: number, item: any) => {
+      const p = products.find(prod => prod.id === item.id);
+      return sum + ((p?.cost || 0) * (item.quantity || 1));
     }, 0);
 
-    // 1. Crear el pedido oficial
-    const { error: orderError } = await supabase
-      .from('pedidos')
-      .insert([{
-        cliente_id: request.user_id,
-        nombre_cliente: request.cliente_nombre,
-        items: request.items,
-        total: request.total,
-        anticipo: request.anticipo,
-        inversion: inversionTotal,
-        estado: 'recibido',
-        tipo_entrega: request.tipo_entrega,
-        ubicacion_entrega: request.ubicacion,
-        visto: false
-      }]);
+    const { error: orderError } = await supabase.from('pedidos').insert([{
+      cliente_id: request.user_id, nombre_cliente: request.cliente_nombre,
+      items: request.items, total: request.total, anticipo: request.anticipo,
+      inversion: inversionTotal, estado: 'recibido', tipo_entrega: request.tipo_entrega,
+      ubicacion_entrega: request.ubicacion, visto: false
+    }]);
 
-    if (orderError) {
-      console.error("[ERP ERROR] Failed to create order. Check if 'pedidos' table exists and has 'inversion' column.", orderError);
-      throw new Error(`Error al crear pedido base: ${orderError.message}`);
+    if (!orderError) {
+      await supabase.from('solicitudes_pedidos').update({ estado: 'aprobado' }).eq('id', requestId);
+      await fetchOrderRequests();
+      await fetchAllOrders();
+      addToast("✅ Pedido aprobado", "success");
     }
+  }, [orderRequests, products, fetchOrderRequests, fetchAllOrders, addToast]);
 
-    // 1.5 Descontar Stock e inyectar Finanza (ERP Logic)
-    try {
-      for (const item of request.items) {
-        // Encontrar el producto real en el estado para actualizar su stock
-        const realProduct = products.find(p => p.id === item.id);
-        if (realProduct && realProduct.id) {
-          if (realProduct.stock !== undefined && realProduct.stock !== -1) {
-             const newStock = Math.max(0, realProduct.stock - (item.quantity || 1));
-             const { error: stockErr } = await supabase.from('products').update({ stock: newStock }).eq('id', realProduct.id);
-             if (stockErr) console.warn("[ERP WARNING] Could not update stock. Is 'stock' column missing?", stockErr);
-          }
-        }
-      }
-    } catch (e) {
-      console.error("[ERP ERROR] Stock update loop failed:", e);
-    }
-
-    // 2. Marcar la solicitud como aprobada
-    const { error: updateError } = await supabase
-      .from('solicitudes_pedidos')
-      .update({ estado: 'aprobado' })
-      .eq('id', requestId);
-
-    if (updateError) {
-      console.error("[ERP ERROR] No se pudo actualizar el estado de la solicitud:", updateError);
-    }
-
-    try {
-      const { error: finError } = await supabase.from('finanzas').insert([{
-        tipo: 'ingreso',
-        monto: request.total,
-        concepto: `Venta Autorizada Pedido #${requestId.split('-')[0]}`,
-        pedido_id: requestId
-      }]);
-      
-      if (finError) {
-        console.warn("[ERP WARNING] Could not insert finance record. Is 'finanzas' table missing?", finError);
-      } else {
-        await fetchFinanzas();
-      }
-    } catch (e) {
-      console.error("Error inyectando finanza:", e)
-    }
-
-    // 3. Refrescar TODO
-    await fetchOrderRequests();
+  const deleteOrder = useCallback(async (recordId: string) => {
+    await supabase.from('pedidos').delete().eq('id', recordId);
+    await supabase.from('solicitudes_pedidos').delete().eq('id', recordId);
     await fetchAllOrders();
-  }, [orderRequests, products, fetchOrderRequests, fetchAllOrders, fetchFinanzas, fetchProducts]);
+    await fetchOrderRequests();
+    addToast("🗑️ Registro eliminado", "success");
+  }, [fetchAllOrders, fetchOrderRequests, addToast]);
 
-  const rejectOrderRequest = useCallback(async (id: string) => {
-    const { error } = await supabase
-      .from('solicitudes_pedidos')
-      .update({ estado: 'rechazado' })
-      .eq('id', id);
-    if (!error) await fetchOrderRequests();
-  }, [fetchOrderRequests]);
+  const updateOrderStatus = useCallback(async (orderId: string, newStatus: string) => {
+    await supabase.from('pedidos').update({ estado: newStatus }).eq('id', orderId);
+    await fetchAllOrders();
+  }, [fetchAllOrders]);
 
-  const markRequestAsSeen = useCallback(async (requestId: string) => {
-    const { error } = await supabase
-      .from('solicitudes_pedidos')
-      .update({ visto: true })
-      .eq('id', requestId);
-    if (!error) await fetchOrderRequests();
-  }, [fetchOrderRequests]);
+  const updateOrderDetails = useCallback(async (orderId: string, updates: any) => {
+    await supabase.from('pedidos').update(updates).eq('id', orderId);
+    await fetchAllOrders();
+  }, [fetchAllOrders]);
 
+  const addFinanza = useCallback(async (f: any) => {
+    await supabase.from('finanzas').insert([f]);
+    await fetchFinanzas();
+  }, [fetchFinanzas]);
+
+  // 6. INITIALIZATION & SUBSCRIPTIONS
   useEffect(() => {
-    if (isAdmin) {
-      fetchOrderRequests();
-    } else if (user) {
-      // Clientes solo cargan sus propias solicitudes (RLS filtra)
-      fetchOrderRequests();
-    }
-    
-    // SUSCRIPCIÓN REALTIME GLOBAL (Pedidos + Solicitudes)
-    const channel = supabase
-      .channel('db_changes_global')
-      .on('postgres_changes', { 
-        event: '*', 
-        schema: 'public', 
-        table: 'solicitudes_pedidos' 
-      }, () => {
-        fetchOrderRequests();
-        if (user) fetchUserOrders();
-      })
-      .on('postgres_changes', { 
-        event: '*', 
-        schema: 'public', 
-        table: 'pedidos' 
-      }, () => {
-        if (isAdmin) fetchAllOrders();
-        if (user) fetchUserOrders();
-      })
-      .on('postgres_changes', { 
-        event: '*', 
-        schema: 'public', 
-        table: 'products' 
-      }, () => {
-        fetchProducts();
-      })
+    fetchProducts();
+    fetchReservasHorarios();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      if (session?.user) fetchProfile(session.user.id).finally(() => setAuthLoading(false));
+      else setAuthLoading(false);
+    });
+
+    const channel = supabase.channel('db_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'solicitudes_pedidos' }, () => fetchOrderRequests())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos' }, () => fetchAllOrders())
       .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [isAdmin, user, fetchOrderRequests, fetchUserOrders, fetchAllOrders, fetchProducts]);
+    return () => { supabase.removeChannel(channel); };
+  }, [fetchProducts, fetchReservasHorarios, fetchProfile, fetchOrderRequests, fetchAllOrders]);
 
   return (
-    <StoreContext.Provider
-      value={{
-        isLeftSidebarOpen,
-        setIsLeftSidebarOpen,
-        isCartOpen,
-        setIsCartOpen,
-        cart,
-        addToCart,
-        removeFromCart,
-        selectedCategory,
-        setSelectedCategory,
-        selectedFilter,
-        setSelectedFilter,
-        searchQuery,
-        setSearchQuery,
-        isAuthModalOpen,
-        setIsAuthModalOpen,
-        isProfileModalOpen,
-        setIsProfileModalOpen,
-        isTrackingOpen,
-        setIsTrackingOpen,
-        products,
-        fetchProducts,
-        addProduct,
-        updateProduct,
-        deleteProduct,
-        uploadProductImages,
-        user,
-        profile,
-        isAdmin,
-        authLoading,
-        signIn,
-        signUp,
-        signOut,
-        updateProfile,
-        resetPassword,
-        uploadAvatar,
-        updateUserPassword,
-        createOrder,
-        userOrders,
-        adminOrders,
-        fetchUserOrders,
-        fetchAllOrders,
-        updateOrderStatus,
-        updateOrderDetails,
-        deleteOrder,
-        allUsers,
-        fetchAllUsers,
-        clearCart,
-        isInitialLoading,
-        orderRequests,
-        createOrderRequest,
-        fetchOrderRequests,
-        reservasHorarios,
-        fetchReservasHorarios,
-        approveOrderRequest,
-        rejectOrderRequest,
-        markRequestAsSeen,
-        markOrderAsSeen,
-        finanzas,
-        fetchFinanzas,
-        addFinanza,
-        toasts,
-        addToast,
-        removeToast
-      }}
-    >
+    <StoreContext.Provider value={{
+      isLeftSidebarOpen, setIsLeftSidebarOpen, isCartOpen, setIsCartOpen,
+      cart, addToCart: (p: any, s?: any) => { setCart([...cart, { product: p, size: s, quantity: 1 }]); setIsCartOpen(true); },
+      removeFromCart: (id: string, s?: string) => setCart(cart.filter(i => !(i.product.id === id && i.size === s))),
+      clearCart: () => setCart([]),
+      selectedCategory, setSelectedCategory, selectedFilter, setSelectedFilter,
+      searchQuery, setSearchQuery, isAuthModalOpen, setIsAuthModalOpen,
+      isProfileModalOpen, setIsProfileModalOpen, isTrackingOpen, setIsTrackingOpen,
+      products, fetchProducts, addProduct, updateProduct: async () => {}, deleteProduct, uploadProductImages,
+      user, profile, isAdmin, authLoading, signIn, signUp, signOut,
+      updateProfile: async () => {}, resetPassword, uploadAvatar: async () => "", updateUserPassword,
+      createOrder: async () => {}, userOrders, adminOrders, fetchUserOrders, fetchAllOrders,
+      updateOrderStatus, updateOrderDetails, deleteOrder, allUsers, fetchAllUsers,
+      orderRequests, createOrderRequest, fetchOrderRequests, reservasHorarios, fetchReservasHorarios,
+      approveOrderRequest, rejectOrderRequest: async () => {}, markRequestAsSeen: async () => {},
+      markOrderAsSeen: async () => {}, finanzas, fetchFinanzas, addFinanza,
+      toasts, addToast, removeToast, isInitialLoading: authLoading
+    }}>
       {children}
     </StoreContext.Provider>
   );
