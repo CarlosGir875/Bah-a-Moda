@@ -26,13 +26,7 @@ export interface Order {
   id: string;
   cliente_id: string | null;
   nombre_cliente: string;
-  items: { 
-    id: string; 
-    name: string; 
-    price: number; 
-    quantity: number; 
-    size?: string 
-  }[];
+  items: { id: string; name: string; price: number; quantity: number; size?: string }[];
   total: number;
   anticipo: number;
   inversion: number;
@@ -75,7 +69,7 @@ export interface ReservaHorario {
   id: string;
   fecha: string; // YYYY-MM-DD
   hora_inicio: string; // HH:mm
-  solicitud_id: string | null; // NULL if manual block
+  solicitud_id: string | null;
   estado: 'bloqueado' | 'disponible';
   created_at: string;
 }
@@ -87,68 +81,44 @@ export interface Toast {
 }
 
 type StoreContextType = {
-  isLeftSidebarOpen: boolean;
-  setIsLeftSidebarOpen: (val: boolean) => void;
-  isCartOpen: boolean;
-  setIsCartOpen: (val: boolean) => void;
-  cart: CartItem[];
-  addToCart: (product: Product, size?: string) => void;
-  removeFromCart: (productId: string, size?: string) => void;
-  clearCart: () => void;
-  selectedCategory: string;
-  setSelectedCategory: (category: string) => void;
-  selectedFilter: string;
-  setSelectedFilter: (filter: string) => void;
-  searchQuery: string;
-  setSearchQuery: (q: string) => void;
-  isAuthModalOpen: boolean;
-  setIsAuthModalOpen: (val: boolean) => void;
-  isProfileModalOpen: boolean;
-  setIsProfileModalOpen: (val: boolean) => void;
-  isTrackingOpen: boolean;
-  setIsTrackingOpen: (val: boolean) => void;
-  products: Product[];
-  fetchProducts: () => Promise<void>;
-  addProduct: (product: Omit<Product, 'id'>) => Promise<void>;
-  updateProduct: (id: string, updates: Partial<Product>) => Promise<void>;
+  isLeftSidebarOpen: boolean; setIsLeftSidebarOpen: (v: boolean) => void;
+  isCartOpen: boolean; setIsCartOpen: (v: boolean) => void;
+  cart: CartItem[]; addToCart: (p: Product, s?: string) => void;
+  removeFromCart: (id: string, s?: string) => void; clearCart: () => void;
+  selectedCategory: string; setSelectedCategory: (c: string) => void;
+  selectedFilter: string; setSelectedFilter: (f: string) => void;
+  searchQuery: string; setSearchQuery: (q: string) => void;
+  isAuthModalOpen: boolean; setIsAuthModalOpen: (v: boolean) => void;
+  isProfileModalOpen: boolean; setIsProfileModalOpen: (v: boolean) => void;
+  isTrackingOpen: boolean; setIsTrackingOpen: (v: boolean) => void;
+  products: Product[]; fetchProducts: () => Promise<void>;
+  addProduct: (p: Omit<Product, 'id'>) => Promise<void>;
+  updateProduct: (id: string, u: Partial<Product>) => Promise<void>;
   deleteProduct: (id: string) => Promise<void>;
-  uploadProductImages: (files: File[]) => Promise<string[]>;
-  user: User | null;
-  profile: Profile | null;
-  isAdmin: boolean;
-  authLoading: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, fullName: string, metadata?: Partial<Profile>) => Promise<void>;
+  uploadProductImages: (f: File[]) => Promise<string[]>;
+  user: User | null; profile: Profile | null; isAdmin: boolean; authLoading: boolean;
+  signIn: (e: string, p: string) => Promise<void>;
+  signUp: (e: string, p: string, f: string, m?: any) => Promise<void>;
   signOut: () => Promise<void>;
-  updateProfile: (updates: Partial<Omit<Profile, 'id' | 'rol'>>) => Promise<void>;
-  resetPassword: (email: string) => Promise<void>;
-  uploadAvatar: (file: File) => Promise<string>;
-  updateUserPassword: (password: string) => Promise<void>;
-  createOrder: (orderData: Omit<Order, 'id' | 'created_at' | 'ganancia'>) => Promise<void>;
-  userOrders: Order[];
-  adminOrders: Order[];
-  fetchUserOrders: () => Promise<void>;
-  fetchAllOrders: () => Promise<void>;
-  updateOrderStatus: (orderId: string, newStatus: string) => Promise<void>;
-  updateOrderDetails: (orderId: string, updates: Partial<Order>) => Promise<void>;
-  deleteOrder: (orderId: string) => Promise<void>;
-  allUsers: Profile[];
-  fetchAllUsers: () => Promise<void>;
-  orderRequests: OrderRequest[];
-  createOrderRequest: (data: Omit<OrderRequest, 'id' | 'created_at' | 'estado' | 'visto'>, reserva?: Omit<ReservaHorario, 'id' | 'created_at' | 'solicitud_id'>) => Promise<void>;
-  fetchOrderRequests: () => Promise<void>;
-  reservasHorarios: ReservaHorario[];
-  fetchReservasHorarios: () => Promise<void>;
+  updateProfile: (u: any) => Promise<void>;
+  resetPassword: (e: string) => Promise<void>;
+  uploadAvatar: (f: File) => Promise<string>;
+  updateUserPassword: (p: string) => Promise<void>;
+  createOrder: (d: any) => Promise<void>;
+  userOrders: Order[]; adminOrders: Order[]; fetchUserOrders: () => Promise<void>; fetchAllOrders: () => Promise<void>;
+  updateOrderStatus: (id: string, s: string) => Promise<void>;
+  updateOrderDetails: (id: string, u: any) => Promise<void>;
+  deleteOrder: (id: string) => Promise<void>;
+  allUsers: Profile[]; fetchAllUsers: () => Promise<void>;
+  orderRequests: OrderRequest[]; createOrderRequest: (d: any, r?: any) => Promise<void>; fetchOrderRequests: () => Promise<void>;
+  reservasHorarios: ReservaHorario[]; fetchReservasHorarios: () => Promise<void>;
   approveOrderRequest: (id: string) => Promise<void>;
   rejectOrderRequest: (id: string) => Promise<void>;
   markRequestAsSeen: (id: string) => Promise<void>;
   markOrderAsSeen: (id: string) => Promise<void>;
-  finanzas: Finanza[];
-  fetchFinanzas: () => Promise<void>;
-  addFinanza: (finanza: Omit<Finanza, 'id' | 'created_at'>) => Promise<void>;
-  toasts: Toast[];
-  addToast: (message: string, type?: 'success' | 'error' | 'info') => void;
-  removeToast: (id: string) => void;
+  finanzas: Finanza[]; fetchFinanzas: () => Promise<void>;
+  addFinanza: (f: any) => Promise<void>;
+  toasts: Toast[]; addToast: (m: string, t?: 'success'|'error'|'info') => void; removeToast: (id: string) => void;
   isInitialLoading: boolean;
 };
 
@@ -158,46 +128,48 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>("");
-  const [selectedFilter, setSelectedFilter] = useState<string>("Todo");
-  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedFilter, setSelectedFilter] = useState("Todo");
+  const [searchQuery, setSearchQuery] = useState("");
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isTrackingOpen, setIsTrackingOpen] = useState(false);
 
-  // States
-  const [reservasHorarios, setReservasHorarios] = useState<ReservaHorario[]>([]);
-  const [finanzas, setFinanzas] = useState<Finanza[]>([]);
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
   const [products, setProducts] = useState<Product[]>([]);
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [userOrders, setUserOrders] = useState<Order[]>([]);
   const [adminOrders, setAdminOrders] = useState<Order[]>([]);
-  const [allUsers, setAllUsers] = useState<Profile[]>([]);
   const [orderRequests, setOrderRequests] = useState<OrderRequest[]>([]);
+  const [finanzas, setFinanzas] = useState<Finanza[]>([]);
+  const [reservasHorarios, setReservasHorarios] = useState<ReservaHorario[]>([]);
+  const [allUsers, setAllUsers] = useState<Profile[]>([]);
 
-  // 1. UTILS
-  const addToast = useCallback((message: string, type: 'success' | 'error' | 'info' = 'info') => {
+  // UTILS
+  const addToast = useCallback((message: string, type: 'success'|'error'|'info' = 'info') => {
     const id = Math.random().toString(36).substr(2, 9);
     setToasts(prev => [...prev, { id, message, type }]);
-    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 4000);
+    setTimeout(() => setToasts(p => p.filter(t => t.id !== id)), 4000);
   }, []);
 
-  const removeToast = useCallback((id: string) => setToasts(prev => prev.filter(t => t.id !== id)), []);
+  const removeToast = useCallback((id: string) => setToasts(p => p.filter(t => t.id !== id)), []);
 
-  // 2. FETCHERS
+  // FETCHERS
   const fetchProducts = useCallback(async () => {
     const { data } = await supabase.from('products').select('*').order('created_at', { ascending: false });
     if (data) setProducts(data.map((p: any) => ({
       id: p.id, name: p.name, price: p.price, cost: p.cost || 0, stock: p.stock ?? 1,
       images: p.image_urls || [], category: p.category, subCategory: p.sub_category,
-      filterTag: p.filter_tag, supplier: p.supplier, delivery_date: p.delivery_date,
-      description: p.description, sizes: p.sizes || []
+      filterTag: p.filter_tag, supplier: p.supplier, delivery_date: p.delivery_date, description: p.description, sizes: p.sizes || []
     })));
+  }, []);
+
+  const fetchProfile = useCallback(async (uid: string) => {
+    const { data } = await supabase.from('cliente_perfiles').select('*').eq('id', uid).maybeSingle();
+    if (data) { setProfile(data as Profile); setIsAdmin(data.rol === 'admin'); }
   }, []);
 
   const fetchOrderRequests = useCallback(async () => {
@@ -231,59 +203,45 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (data) setAllUsers(data);
   }, []);
 
-  const fetchProfile = useCallback(async (userId: string) => {
-    const { data } = await supabase.from('cliente_perfiles').select('*').eq('id', userId).maybeSingle();
-    if (data) { setProfile(data as Profile); setIsAdmin(data.rol === 'admin'); }
-  }, []);
-
-  // 3. AUTH & PROFILE ACTIONS
+  // AUTH ACTIONS
   const signIn = useCallback(async (email: string, password: string) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
-    if (data.user) await fetchProfile(data.user.id);
-  }, [fetchProfile]);
+  }, []);
 
   const signUp = useCallback(async (email: string, password: string, fullName: string, metadata?: any) => {
-    const res = await fetch('/api/auth/signup', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, fullName, ...metadata }),
-    });
+    const res = await fetch('/api/auth/signup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password, fullName, ...metadata }) });
     if (!res.ok) throw new Error("Error en registro");
     await signIn(email, password);
   }, [signIn]);
 
-  const signOut = useCallback(async () => {
-    await supabase.auth.signOut();
-    setUser(null); setProfile(null); setIsAdmin(false);
-  }, []);
+  const signOut = useCallback(async () => { await supabase.auth.signOut(); }, []);
 
-  const updateProfile = useCallback(async (updates: any) => {
+  const updateProfile = useCallback(async (u: any) => {
     if (!user) return;
-    const { error } = await supabase.from('cliente_perfiles').update(updates).eq('id', user.id);
-    if (!error) await fetchProfile(user.id);
+    await supabase.from('cliente_perfiles').update(u).eq('id', user.id);
+    await fetchProfile(user.id);
   }, [user, fetchProfile]);
 
-  const resetPassword = useCallback(async (email: string) => {
-    await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/` });
-  }, []);
-
-  const updateUserPassword = useCallback(async (password: string) => {
-    await supabase.auth.updateUser({ password });
-  }, []);
-
-  const uploadAvatar = useCallback(async (file: File) => {
+  const resetPassword = useCallback(async (e: string) => { await supabase.auth.resetPasswordForEmail(e, { redirectTo: `${window.location.origin}/` }); }, []);
+  const updateUserPassword = useCallback(async (p: string) => { await supabase.auth.updateUser({ password: p }); }, []);
+  const uploadAvatar = useCallback(async (f: File) => {
     if (!user) return "";
     const path = `avatars/${user.id}-${Date.now()}`;
-    await supabase.storage.from('avatars').upload(path, file);
-    const { data } = supabase.storage.from('avatars').getPublicUrl(path);
-    await updateProfile({ avatar_url: data.publicUrl });
-    return data.publicUrl;
+    await supabase.storage.from('avatars').upload(path, f);
+    const url = supabase.storage.from('avatars').getPublicUrl(path).data.publicUrl;
+    await updateProfile({ avatar_url: url });
+    return url;
   }, [user, updateProfile]);
 
-  // 4. PRODUCT ACTIONS
+  // PRODUCT ACTIONS
   const addProduct = useCallback(async (p: any) => {
     await supabase.from('products').insert([{ ...p, image_urls: p.images, sub_category: p.subCategory, filter_tag: p.filterTag }]);
+    await fetchProducts();
+  }, [fetchProducts]);
+
+  const updateProduct = useCallback(async (id: string, u: any) => {
+    await supabase.from('products').update({ ...u, image_urls: u.images, sub_category: u.subCategory, filter_tag: u.filterTag }).eq('id', id);
     await fetchProducts();
   }, [fetchProducts]);
 
@@ -302,7 +260,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return urls;
   }, []);
 
-  // 5. ORDER ACTIONS
+  // ORDER ACTIONS
   const createOrderRequest = useCallback(async (data: any, res?: any) => {
     const { data: ins, error } = await supabase.from('solicitudes_pedidos').insert([{ ...data, estado: 'pendiente', visto: false }]).select('id').single();
     if (!error && res && ins) await supabase.from('reservas_horarios').insert([{ ...res, solicitud_id: ins.id, estado: 'bloqueado' }]);
@@ -353,36 +311,43 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     await fetchAllOrders();
   }, [fetchAllOrders]);
 
-  // 6. INITIALIZATION & SUBSCRIPTIONS
+  // INITIALIZATION & AUTH LISTENER
   useEffect(() => {
     fetchProducts(); fetchReservasHorarios();
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    
+    // Auth Listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       setUser(session?.user ?? null);
-      if (session?.user) fetchProfile(session.user.id).finally(() => setAuthLoading(false));
-      else setAuthLoading(false);
+      if (session?.user) {
+        setAuthLoading(true);
+        await fetchProfile(session.user.id);
+        setAuthLoading(false);
+      } else {
+        setProfile(null); setIsAdmin(false); setAuthLoading(false);
+      }
     });
+
     const ch = supabase.channel('db').on('postgres_changes', { event: '*', schema: 'public', table: 'solicitudes_pedidos' }, () => fetchOrderRequests())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos' }, () => fetchAllOrders()).subscribe();
-    return () => { supabase.removeChannel(ch); };
+    
+    return () => { subscription.unsubscribe(); supabase.removeChannel(ch); };
   }, [fetchProducts, fetchReservasHorarios, fetchProfile, fetchOrderRequests, fetchAllOrders]);
 
   return (
     <StoreContext.Provider value={{
-      isLeftSidebarOpen, setIsLeftSidebarOpen, isCartOpen, setIsCartOpen,
-      cart, addToCart: (p: any, s?: any) => { setCart([...cart, { product: p, size: s, quantity: 1 }]); setIsCartOpen(true); },
+      isLeftSidebarOpen, setIsLeftSidebarOpen, isCartOpen, setIsCartOpen, cart,
+      addToCart: (p: any, s?: any) => { setCart([...cart, { product: p, size: s, quantity: 1 }]); setIsCartOpen(true); },
       removeFromCart: (id: string, s?: string) => setCart(cart.filter(i => !(i.product.id === id && i.size === s))),
-      clearCart: () => setCart([]),
-      selectedCategory, setSelectedCategory, selectedFilter, setSelectedFilter,
-      searchQuery, setSearchQuery, isAuthModalOpen, setIsAuthModalOpen,
-      isProfileModalOpen, setIsProfileModalOpen, isTrackingOpen, setIsTrackingOpen,
-      products, fetchProducts, addProduct, updateProduct: async () => {}, deleteProduct, uploadProductImages,
-      user, profile, isAdmin, authLoading, signIn, signUp, signOut,
-      updateProfile, resetPassword, uploadAvatar, updateUserPassword,
-      createOrder: async () => {}, userOrders, adminOrders, fetchUserOrders, fetchAllOrders,
-      updateOrderStatus, updateOrderDetails, deleteOrder, allUsers, fetchAllUsers,
-      orderRequests, createOrderRequest, fetchOrderRequests, reservasHorarios, fetchReservasHorarios,
-      approveOrderRequest, rejectOrderRequest: async () => {}, markRequestAsSeen,
-      markOrderAsSeen, finanzas, fetchFinanzas, addFinanza: async (f: any) => { await supabase.from('finanzas').insert([f]); await fetchFinanzas(); },
+      clearCart: () => setCart([]), selectedCategory, setSelectedCategory, selectedFilter, setSelectedFilter,
+      searchQuery, setSearchQuery, isAuthModalOpen, setIsAuthModalOpen, isProfileModalOpen, setIsProfileModalOpen,
+      isTrackingOpen, setIsTrackingOpen, products, fetchProducts, addProduct, updateProduct, deleteProduct,
+      uploadProductImages, user, profile, isAdmin, authLoading, signIn, signUp, signOut, updateProfile, resetPassword,
+      uploadAvatar, updateUserPassword, createOrder: async () => {}, userOrders, adminOrders, fetchUserOrders, fetchAllOrders,
+      updateOrderStatus, updateOrderDetails, deleteOrder, allUsers, fetchAllUsers, orderRequests, createOrderRequest,
+      fetchOrderRequests, reservasHorarios, fetchReservasHorarios, approveOrderRequest,
+      rejectOrderRequest: async (id) => { await supabase.from('solicitudes_pedidos').update({ estado: 'rechazado' }).eq('id', id); await fetchOrderRequests(); },
+      markRequestAsSeen, markOrderAsSeen, finanzas, fetchFinanzas,
+      addFinanza: async (f: any) => { await supabase.from('finanzas').insert([f]); await fetchFinanzas(); },
       toasts, addToast, removeToast, isInitialLoading: authLoading
     }}>
       {children}
