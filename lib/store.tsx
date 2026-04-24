@@ -744,6 +744,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       console.error("[ERP ERROR] Stock update loop failed:", e);
     }
 
+    // 2. Marcar la solicitud como aprobada
+    const { error: updateError } = await supabase
+      .from('solicitudes_pedidos')
+      .update({ estado: 'aprobado' })
+      .eq('id', requestId);
+
+    if (updateError) {
+      console.error("[ERP ERROR] No se pudo actualizar el estado de la solicitud:", updateError);
+    }
+
     try {
       const { error: finError } = await supabase.from('finanzas').insert([{
         tipo: 'ingreso',
@@ -761,13 +771,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       console.error("Error inyectando finanza:", e)
     }
 
-    // 2. Marcar solicitud como aprobada
-    await supabase.from('solicitudes_pedidos').update({ estado: 'aprobado' }).eq('id', requestId);
-    
-    // 3. Actualizar listas globales
+    // 3. Refrescar TODO
     await fetchOrderRequests();
     await fetchAllOrders();
-    await fetchProducts(); // Refrescar inventario
   }, [orderRequests, products, fetchOrderRequests, fetchAllOrders, fetchFinanzas, fetchProducts]);
 
   const rejectOrderRequest = useCallback(async (id: string) => {
