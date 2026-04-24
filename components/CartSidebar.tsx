@@ -7,7 +7,7 @@ import { useStore } from "@/lib/store";
 // Eliminado generateTimeSlots para simplificar el flujo
 
 export function CartSidebar() {
-  const { isCartOpen, setIsCartOpen, cart, removeFromCart, user, profile, createOrderRequest, clearCart, addToast } = useStore();
+  const { isCartOpen, setIsCartOpen, cart, removeFromCart, user, profile, createOrderRequest, clearCart, addToast, setIsProfileModalOpen } = useStore();
   const [checkoutStep, setCheckoutStep] = useState<"cart" | "form" | "success">("cart");
   const [isProcessing, setIsProcessing] = useState(false);
   const [deliveryType, setDeliveryType] = useState<"domicilio" | "punto">("domicilio");
@@ -88,13 +88,22 @@ export function CartSidebar() {
         `_Nota: Ya ingresé mi solicitud. ¡Quedo atento a las notificaciones para conocer mi fecha de entrega exclusiva!_`;
 
       const encodedMessage = encodeURIComponent(rawMessage);
+      
+      // Bloqueo y cierre inmediato para evitar duplicados
       window.open(`https://wa.me/${phoneNumber}?text=${encodedMessage}`, '_blank');
-
+      
       clearCart();
-      setCheckoutStep("success");
+      setIsCartOpen(false); // Sacarlo del carrito de inmediato
+      setCheckoutStep("cart"); // Resetear para la próxima vez
+      
+      // Abrir el perfil para que vea su pedido registrado
+      setTimeout(() => {
+        setIsProfileModalOpen(true);
+        addToast("🚀 ¡Pedido enviado! Revisa tu historial.", "success");
+      }, 500);
 
     } catch (err: unknown) {
-      addToast("Procesando envío...", "info");
+      addToast("Hubo un problema al procesar el pedido.", "error");
     } finally {
       setIsProcessing(false);
     }
