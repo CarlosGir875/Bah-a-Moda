@@ -604,6 +604,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (user) await fetchUserOrders();
   }, [fetchAllOrders, fetchUserOrders, user]);
 
+  const deleteOrder = useCallback(async (orderId: string) => {
+    const { error } = await supabase
+      .from('pedidos')
+      .delete()
+      .eq('id', orderId);
+    
+    if (error) throw error;
+    await fetchAllOrders();
+    if (user) await fetchUserOrders();
+  }, [fetchAllOrders, fetchUserOrders, user]);
+
   const markOrderAsSeen = useCallback(async (orderId: string) => {
     const { error } = await supabase
       .from('pedidos')

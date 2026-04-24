@@ -28,6 +28,20 @@ export function AuthModal() {
 
   // Detect recovery flow or auth errors from URL hash
   useEffect(() => {
+    if (isAuthModalOpen) {
+      setFormData({
+        email: "",
+        password: "",
+        confirmPassword: "",
+        name: "",
+        telefono: "",
+        direccion: "",
+        punto_encuentro: ""
+      });
+      setShowPassword(false);
+      setShowConfirmPassword(false);
+    }
+    
     if (typeof window !== "undefined") {
       const hash = window.location.hash;
       if (hash.includes("type=recovery") || hash.includes("access_token=")) {

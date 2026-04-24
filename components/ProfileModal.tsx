@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useStore } from "@/lib/store";
 import { useEffect, useState, useRef } from "react";
 import { ImageCropperModal } from "./ImageCropperModal";
+import { LuxuryTicket } from "./LuxuryTicket";
 
 export function ProfileModal() {
   const { isProfileModalOpen, setIsProfileModalOpen, isTrackingOpen, setIsTrackingOpen, user, profile, isAdmin, signOut, updateProfile, uploadAvatar, userOrders, fetchUserOrders, addToast } = useStore();
@@ -14,6 +15,7 @@ export function ProfileModal() {
   const [isUploading, setIsUploading] = useState(false);
   const [cropperOpen, setCropperOpen] = useState(false);
   const [imageFileUrl, setImageFileUrl] = useState<string | null>(null);
+  const [selectedTicketOrder, setSelectedTicketOrder] = useState<any>(null);
 
   useEffect(() => {
     if (isProfileModalOpen && user) {
@@ -169,10 +171,20 @@ export function ProfileModal() {
       <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => setIsProfileModalOpen(false)} />
 
       <div 
-        className={`relative w-full max-w-[95%] md:max-w-xl max-h-[92vh] bg-slate-50 rounded-[3rem] md:rounded-[4rem] shadow-[0_50px_150px_rgba(0,0,0,0.8)] overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] transform flex flex-col ${
+        className={`relative w-full max-w-[95%] md:max-w-xl max-h-[92vh] bg-slate-50/80 backdrop-blur-3xl rounded-[3rem] md:rounded-[4rem] shadow-[0_50px_150px_rgba(0,0,0,0.8)] overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] transform flex flex-col border border-white/20 ${
           isProfileModalOpen ? "translate-y-0 scale-100 opacity-100" : "translate-y-20 scale-95 opacity-0"
         }`}
       >
+        <AnimatePresence>
+          {selectedTicketOrder && (
+            <div className="absolute inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md overflow-y-auto pt-20 pb-10 custom-scrollbar">
+              <LuxuryTicket 
+                order={selectedTicketOrder} 
+                onClose={() => setSelectedTicketOrder(null)} 
+              />
+            </div>
+          )}
+        </AnimatePresence>
         <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
 
         <div className="flex-1 overflow-y-auto custom-scrollbar relative">
@@ -326,7 +338,7 @@ export function ProfileModal() {
                    <div className="absolute inset-0 pointer-events-none opacity-[0.02] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]" />
                    
                    {userOrders.map(o => (
-                     <div key={o.id} className="relative bg-[#fffdfb] p-10 md:p-12 rounded-2xl border-[3px] border-zinc-900 shadow-[8px_8px_0px_#18181b] overflow-hidden transition-all hover:translate-y-1 hover:shadow-[4px_4px_0px_#18181b] group cursor-pointer" onClick={() => { setIsTrackingOpen(true); setIsProfileModalOpen(false); }}>
+                     <div key={o.id} className="relative bg-[#fffdfb]/70 backdrop-blur-md p-10 md:p-12 rounded-2xl border-[3px] border-zinc-900 shadow-[8px_8px_0px_#18181b] overflow-hidden transition-all hover:translate-y-1 hover:shadow-[4px_4px_0px_#18181b] group cursor-pointer" onClick={() => setSelectedTicketOrder(o)}>
                         
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10 border-b-2 border-dashed border-zinc-300 pb-8">
                            <div>
