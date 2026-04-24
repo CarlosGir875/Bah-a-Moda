@@ -605,16 +605,32 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (user) await fetchUserOrders();
   }, [fetchAllOrders, fetchUserOrders, user]);
 
-  const deleteOrder = useCallback(async (orderId: string) => {
-    const { error } = await supabase
-      .from('pedidos')
-      .delete()
-      .eq('id', orderId);
-    
-    if (error) throw error;
-    await fetchAllOrders();
-    if (user) await fetchUserOrders();
-  }, [fetchAllOrders, fetchUserOrders, user]);
+  const deleteOrder = useCallback(async (recordId: string) => {
+    try {
+      // 1. Borrar de pedidos (por si existe)
+      const { error: err1 } = await supabase
+        .from('pedidos')
+        .delete()
+        .eq('id', recordId);
+      
+      // 2. Borrar de solicitudes_pedidos (el ID principal del panel)
+      const { error: err2 } = await supabase
+        .from('solicitudes_pedidos')
+        .delete()
+        .eq('id', recordId);
+
+      if (err1 && err1.code !== 'PGRST116') console.warn("Aviso: No se encontró pedido vinculado, pero se procedió con la solicitud.");
+      
+      await fetchAllOrders();
+      await fetchOrderRequests();
+      if (user) await fetchUserOrders();
+      
+      addToast("🗑️ Registro eliminado por completo", "success");
+    } catch (err) {
+      console.error("Error al eliminar registro:", err);
+      addToast("No se pudo eliminar el registro", "error");
+    }
+  }, [fetchAllOrders, fetchOrderRequests, fetchUserOrders, user, addToast]);
 
   const markOrderAsSeen = useCallback(async (orderId: string) => {
     const { error } = await supabase
