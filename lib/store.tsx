@@ -131,6 +131,7 @@ type StoreContextType = {
   fetchAllOrders: () => Promise<void>;
   updateOrderStatus: (orderId: string, newStatus: string) => Promise<void>;
   updateOrderDetails: (orderId: string, updates: Partial<Order>) => Promise<void>;
+  deleteOrder: (orderId: string) => Promise<void>;
   allUsers: Profile[];
   fetchAllUsers: () => Promise<void>;
   orderRequests: OrderRequest[];
