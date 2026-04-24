@@ -268,10 +268,17 @@ export function ProfileModal() {
                          <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">{item.label}</span>
                       </div>
                       {item.isEditing ? (
-                        <div className="flex gap-1.5">
-                          <input value={item.val} onChange={e => item.setVal(e.target.value)} className="w-full text-[10px] font-bold bg-slate-50 p-2 rounded-xl border-2 border-slate-900 outline-none" />
-                          <button onClick={item.save} className="p-2 bg-slate-900 text-white rounded-xl active:scale-90"><Check className="w-3.5 h-3.5" /></button>
-                          <button onClick={item.cancel} className="p-2 bg-slate-50 text-slate-400 rounded-xl active:scale-90"><X className="w-3.5 h-3.5" /></button>
+                        <div className="flex flex-col gap-2">
+                          <div className="flex gap-1.5">
+                            <input value={item.val} onChange={e => item.setVal(e.target.value)} className="w-full text-[10px] font-bold bg-slate-50 p-2 rounded-xl border-2 border-slate-900 outline-none" />
+                            <button onClick={item.save} className="p-2 bg-slate-900 text-white rounded-xl active:scale-90"><Check className="w-3.5 h-3.5" /></button>
+                            <button onClick={item.cancel} className="p-2 bg-slate-50 text-slate-400 rounded-xl active:scale-90"><X className="w-3.5 h-3.5" /></button>
+                          </div>
+                          {item.label === "WhatsApp" && (
+                            <p className="text-[8px] font-black uppercase text-amber-600 bg-amber-50 px-2 py-1.5 rounded-lg border border-amber-100">
+                              ⚠️ Usa WhatsApp para recibir facturas.
+                            </p>
+                          )}
                         </div>
                       ) : (
                         <div className="flex items-center justify-between gap-2">

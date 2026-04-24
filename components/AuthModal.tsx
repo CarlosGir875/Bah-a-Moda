@@ -389,6 +389,9 @@ export function AuthModal() {
                         onChange={e => setFormData({ ...formData, telefono: e.target.value })}
                         className="w-full border border-gray-200 bg-gray-50 px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black transition-all cursor-text"
                       />
+                      <p className="mt-2 text-[8px] font-black uppercase text-amber-600 bg-amber-50 px-3 py-2 rounded-lg border border-amber-100 leading-tight">
+                        ⚠️ Asegúrate de registrar un número con WhatsApp para recibir tus facturas y seguimiento.
+                      </p>
                     </div>
                     <div>
                       <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2 px-1">Dirección de Casa (Opcional)</label>
