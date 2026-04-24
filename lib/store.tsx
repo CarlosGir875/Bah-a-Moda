@@ -6,78 +6,30 @@ import { supabase } from "./supabase";
 import { User } from "@supabase/supabase-js";
 
 export interface CartItem {
-  product: Product;
-  size?: string;
-  quantity: number;
+  product: Product; size?: string; quantity: number;
 }
 
 interface Profile {
-  id: string;
-  rol: string | null;
-  nombre_completo: string | null;
-  avatar_url: string | null;
-  celular: string | null;
-  direccion: string | null;
-  punto_encuentro: string | null;
-  dpi: string | null;
+  id: string; rol: string | null; nombre_completo: string | null;
+  avatar_url: string | null; celular: string | null; direccion: string | null;
+  punto_encuentro: string | null; dpi: string | null;
 }
 
 export interface Order {
-  id: string;
-  cliente_id: string | null;
-  nombre_cliente: string;
-  items: { id: string; name: string; price: number; quantity: number; size?: string }[];
-  total: number;
-  anticipo: number;
-  inversion: number;
-  ganancia: number;
-  estado: 'pendiente' | 'recibido' | 'preparacion' | 'en_transito' | 'listo_entrega' | 'cancelado';
-  tipo_entrega: 'domicilio' | 'punto_encuentro';
-  ubicacion_entrega: string | null;
-  codigo_seguimiento: string | null;
-  fecha_entrega: string | null;
-  visto: boolean;
-  created_at: string;
+  id: string; cliente_id: string | null; nombre_cliente: string;
+  items: any[]; total: number; anticipo: number; inversion: number; ganancia: number;
+  estado: string; tipo_entrega: string; ubicacion_entrega: string | null;
+  codigo_seguimiento: string | null; fecha_entrega: string | null; visto: boolean; created_at: string;
 }
 
 export interface OrderRequest {
-  id: string;
-  user_id: string | null;
-  cliente_nombre: string;
-  cliente_telefono: string;
-  cliente_email: string | null;
-  items: any[];
-  total: number;
-  anticipo: number;
-  tipo_entrega: string;
-  ubicacion: string;
-  estado: 'pendiente' | 'aprobado' | 'rechazado';
-  visto: boolean;
-  created_at: string;
-}
-
-export interface Finanza {
-  id: string;
-  tipo: 'ingreso' | 'egreso';
-  monto: number;
-  concepto: string;
-  pedido_id: string | null;
-  created_at: string;
-}
-
-export interface ReservaHorario {
-  id: string;
-  fecha: string; // YYYY-MM-DD
-  hora_inicio: string; // HH:mm
-  solicitud_id: string | null;
-  estado: 'bloqueado' | 'disponible';
-  created_at: string;
+  id: string; user_id: string | null; cliente_nombre: string; cliente_telefono: string;
+  cliente_email: string | null; items: any[]; total: number; anticipo: number;
+  tipo_entrega: string; ubicacion: string; estado: string; visto: boolean; created_at: string;
 }
 
 export interface Toast {
-  id: string;
-  message: string;
-  type: 'success' | 'error' | 'info';
+  id: string; message: string; type: 'success' | 'error' | 'info';
 }
 
 type StoreContextType = {
@@ -92,10 +44,8 @@ type StoreContextType = {
   isProfileModalOpen: boolean; setIsProfileModalOpen: (v: boolean) => void;
   isTrackingOpen: boolean; setIsTrackingOpen: (v: boolean) => void;
   products: Product[]; fetchProducts: () => Promise<void>;
-  addProduct: (p: Omit<Product, 'id'>) => Promise<void>;
-  updateProduct: (id: string, u: Partial<Product>) => Promise<void>;
-  deleteProduct: (id: string) => Promise<void>;
-  uploadProductImages: (f: File[]) => Promise<string[]>;
+  addProduct: (p: any) => Promise<void>; updateProduct: (id: string, u: any) => Promise<void>;
+  deleteProduct: (id: string) => Promise<void>; uploadProductImages: (f: File[]) => Promise<string[]>;
   user: User | null; profile: Profile | null; isAdmin: boolean; authLoading: boolean;
   signIn: (e: string, p: string) => Promise<void>;
   signUp: (e: string, p: string, f: string, m?: any) => Promise<void>;
@@ -104,19 +54,18 @@ type StoreContextType = {
   resetPassword: (e: string) => Promise<void>;
   uploadAvatar: (f: File) => Promise<string>;
   updateUserPassword: (p: string) => Promise<void>;
-  createOrder: (d: any) => Promise<void>;
   userOrders: Order[]; adminOrders: Order[]; fetchUserOrders: () => Promise<void>; fetchAllOrders: () => Promise<void>;
   updateOrderStatus: (id: string, s: string) => Promise<void>;
   updateOrderDetails: (id: string, u: any) => Promise<void>;
   deleteOrder: (id: string) => Promise<void>;
   allUsers: Profile[]; fetchAllUsers: () => Promise<void>;
   orderRequests: OrderRequest[]; createOrderRequest: (d: any, r?: any) => Promise<void>; fetchOrderRequests: () => Promise<void>;
-  reservasHorarios: ReservaHorario[]; fetchReservasHorarios: () => Promise<void>;
+  reservasHorarios: any[]; fetchReservasHorarios: () => Promise<void>;
   approveOrderRequest: (id: string) => Promise<void>;
   rejectOrderRequest: (id: string) => Promise<void>;
   markRequestAsSeen: (id: string) => Promise<void>;
   markOrderAsSeen: (id: string) => Promise<void>;
-  finanzas: Finanza[]; fetchFinanzas: () => Promise<void>;
+  finanzas: any[]; fetchFinanzas: () => Promise<void>;
   addFinanza: (f: any) => Promise<void>;
   toasts: Toast[]; addToast: (m: string, t?: 'success'|'error'|'info') => void; removeToast: (id: string) => void;
   isInitialLoading: boolean;
@@ -124,7 +73,10 @@ type StoreContextType = {
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
+const ADMIN_EMAILS = ["bahiamodapuerto@gmail.com", "carlosgironmejia@gmail.com"];
+
 export function StoreProvider({ children }: { children: ReactNode }) {
+  // Navigation UI
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -135,22 +87,30 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isTrackingOpen, setIsTrackingOpen] = useState(false);
 
+  // Auth & Profile
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
-  
+
+  // Business Data
   const [products, setProducts] = useState<Product[]>([]);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [userOrders, setUserOrders] = useState<Order[]>([]);
   const [adminOrders, setAdminOrders] = useState<Order[]>([]);
   const [orderRequests, setOrderRequests] = useState<OrderRequest[]>([]);
-  const [finanzas, setFinanzas] = useState<Finanza[]>([]);
-  const [reservasHorarios, setReservasHorarios] = useState<ReservaHorario[]>([]);
+  const [finanzas, setFinanzas] = useState<any[]>([]);
+  const [reservasHorarios, setReservasHorarios] = useState<any[]>([]);
   const [allUsers, setAllUsers] = useState<Profile[]>([]);
 
-  // UTILS
+  // 1. HELPER: Admin Check
+  const checkAdminStatus = useCallback((u: User | null, p: Profile | null) => {
+    if (!u) return false;
+    return ADMIN_EMAILS.includes(u.email || "") || p?.rol === 'admin';
+  }, []);
+
+  // 2. UTILS
   const addToast = useCallback((message: string, type: 'success'|'error'|'info' = 'info') => {
     const id = Math.random().toString(36).substr(2, 9);
     setToasts(prev => [...prev, { id, message, type }]);
@@ -159,7 +119,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const removeToast = useCallback((id: string) => setToasts(p => p.filter(t => t.id !== id)), []);
 
-  // FETCHERS
+  // 3. DATA FETCHERS (Optimized with less frequent calls)
   const fetchProducts = useCallback(async () => {
     const { data } = await supabase.from('products').select('*').order('created_at', { ascending: false });
     if (data) setProducts(data.map((p: any) => ({
@@ -171,18 +131,25 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const fetchProfile = useCallback(async (uid: string) => {
     const { data } = await supabase.from('cliente_perfiles').select('*').eq('id', uid).maybeSingle();
-    if (data) { setProfile(data as Profile); setIsAdmin(data.rol === 'admin'); }
-  }, []);
+    if (data) { 
+      const p = data as Profile;
+      setProfile(p);
+      // Dual check for admin
+      setIsAdmin(ADMIN_EMAILS.includes(user?.email || "") || p.rol === 'admin');
+    }
+  }, [user]);
 
   const fetchOrderRequests = useCallback(async () => {
+    if (!isAdmin) return;
     const { data } = await supabase.from('solicitudes_pedidos').select('*').order('created_at', { ascending: false });
     if (data) setOrderRequests(data);
-  }, []);
+  }, [isAdmin]);
 
   const fetchAllOrders = useCallback(async () => {
+    if (!isAdmin) return;
     const { data } = await supabase.from('pedidos').select('*').order('created_at', { ascending: false });
     if (data) setAdminOrders(data);
-  }, []);
+  }, [isAdmin]);
 
   const fetchUserOrders = useCallback(async () => {
     if (!user) return;
@@ -191,24 +158,27 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [user]);
 
   const fetchFinanzas = useCallback(async () => {
+    if (!isAdmin) return;
     const { data } = await supabase.from('finanzas').select('*').order('created_at', { ascending: false });
     if (data) setFinanzas(data);
-  }, []);
+  }, [isAdmin]);
 
   const fetchReservasHorarios = useCallback(async () => {
     const { data } = await supabase.from('reservas_horarios').select('*').order('fecha', { ascending: true });
-    if (data) setReservasHorarios(data as ReservaHorario[]);
+    if (data) setReservasHorarios(data);
   }, []);
 
   const fetchAllUsers = useCallback(async () => {
+    if (!isAdmin) return;
     const { data } = await supabase.from('cliente_perfiles').select('*').order('nombre_completo', { ascending: true });
     if (data) setAllUsers(data);
-  }, []);
+  }, [isAdmin]);
 
-  // AUTH ACTIONS
+  // 4. AUTH ACTIONS
   const signIn = useCallback(async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) throw error;
+    setAuthLoading(true);
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) { setAuthLoading(false); throw error; }
   }, []);
 
   const signUp = useCallback(async (email: string, password: string, fullName: string, metadata?: any) => {
@@ -217,7 +187,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     await signIn(email, password);
   }, [signIn]);
 
-  const signOut = useCallback(async () => { await supabase.auth.signOut(); }, []);
+  const signOut = useCallback(async () => { 
+    await supabase.auth.signOut();
+    setUser(null); setProfile(null); setIsAdmin(false); setAuthLoading(false);
+  }, []);
 
   const updateProfile = useCallback(async (u: any) => {
     if (!user) return;
@@ -227,6 +200,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const resetPassword = useCallback(async (e: string) => { await supabase.auth.resetPasswordForEmail(e, { redirectTo: `${window.location.origin}/` }); }, []);
   const updateUserPassword = useCallback(async (p: string) => { await supabase.auth.updateUser({ password: p }); }, []);
+  
   const uploadAvatar = useCallback(async (f: File) => {
     if (!user) return "";
     const path = `avatars/${user.id}-${Date.now()}`;
@@ -236,7 +210,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return url;
   }, [user, updateProfile]);
 
-  // PRODUCT ACTIONS
+  // 5. PRODUCT ACTIONS
   const addProduct = useCallback(async (p: any) => {
     await supabase.from('products').insert([{ ...p, image_urls: p.images, sub_category: p.subCategory, filter_tag: p.filterTag }]);
     await fetchProducts();
@@ -262,7 +236,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return urls;
   }, []);
 
-  // ORDER ACTIONS
+  // 6. ORDER ACTIONS
   const createOrderRequest = useCallback(async (data: any, res?: any) => {
     const { data: ins, error } = await supabase.from('solicitudes_pedidos').insert([{ ...data, estado: 'pendiente', visto: false }]).select('id').single();
     if (!error && res && ins) await supabase.from('reservas_horarios').insert([{ ...res, solicitud_id: ins.id, estado: 'bloqueado' }]);
@@ -313,59 +287,88 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     await fetchAllOrders();
   }, [fetchAllOrders]);
 
-  // INITIALIZATION & AUTH LISTENER
+  // 7. INITIALIZATION & RECOVERY (Optimized)
   useEffect(() => {
-    fetchProducts(); fetchReservasHorarios();
-    
-    // Check initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) fetchProfile(session.user.id).finally(() => setAuthLoading(false));
-      else setAuthLoading(false);
-    });
+    let isMounted = true;
 
-    // Auth Listener
+    const init = async () => {
+      // Parallel fetch essential data
+      await Promise.all([fetchProducts(), fetchReservasHorarios()]);
+      
+      const { data: { session } } = await supabase.auth.getSession();
+      if (isMounted) {
+        setUser(session?.user ?? null);
+        if (session?.user) {
+          await fetchProfile(session.user.id);
+          setIsAdmin(ADMIN_EMAILS.includes(session.user.email || ""));
+        }
+        setAuthLoading(false);
+      }
+    };
+
+    init();
+
+    // Session Listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (!isMounted) return;
       setUser(session?.user ?? null);
       if (session?.user) {
-        setAuthLoading(true);
+        setIsAdmin(ADMIN_EMAILS.includes(session.user.email || ""));
         await fetchProfile(session.user.id);
-        setAuthLoading(false);
       } else {
-        setProfile(null); setIsAdmin(false); setAuthLoading(false);
+        setProfile(null); setIsAdmin(false);
       }
+      setAuthLoading(false);
     });
 
-    const ch = supabase.channel('db').on('postgres_changes', { event: '*', schema: 'public', table: 'solicitudes_pedidos' }, () => fetchOrderRequests())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos' }, () => fetchAllOrders()).subscribe();
-    
-    // SAFETY TIMEOUT: Force splash screen to hide after 2.5 seconds no matter what
-    const timer = setTimeout(() => setIsInitialLoading(false), 2500);
+    // Subscriptions (Only for Admin to save resources on mobile)
+    let ch: any = null;
+    if (isAdmin) {
+      ch = supabase.channel('db-admin')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'solicitudes_pedidos' }, () => fetchOrderRequests())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos' }, () => fetchAllOrders())
+        .subscribe();
+    }
+
+    const safetyTimer = setTimeout(() => { if (isMounted) setIsInitialLoading(false); }, 1500);
 
     return () => { 
+      isMounted = false;
       subscription.unsubscribe(); 
-      supabase.removeChannel(ch); 
-      clearTimeout(timer);
+      if (ch) supabase.removeChannel(ch);
+      clearTimeout(safetyTimer);
     };
-  }, [fetchProducts, fetchReservasHorarios, fetchProfile, fetchOrderRequests, fetchAllOrders]);
+  }, [fetchProducts, fetchReservasHorarios, fetchProfile, fetchOrderRequests, fetchAllOrders, isAdmin]);
+
+  // MEMOIZE CONTEXT VALUE
+  const contextValue = useMemo(() => ({
+    isLeftSidebarOpen, setIsLeftSidebarOpen, isCartOpen, setIsCartOpen, cart,
+    addToCart: (p: any, s?: any) => { setCart(prev => [...prev, { product: p, size: s, quantity: 1 }]); setIsCartOpen(true); },
+    removeFromCart: (id: string, s?: string) => setCart(prev => prev.filter(i => !(i.product.id === id && i.size === s))),
+    clearCart: () => setCart([]), selectedCategory, setSelectedCategory, selectedFilter, setSelectedFilter,
+    searchQuery, setSearchQuery, isAuthModalOpen, setIsAuthModalOpen, isProfileModalOpen, setIsProfileModalOpen,
+    isTrackingOpen, setIsTrackingOpen, products, fetchProducts, addProduct, updateProduct, deleteProduct,
+    uploadProductImages, user, profile, isAdmin, authLoading, signIn, signUp, signOut, updateProfile, resetPassword,
+    uploadAvatar, updateUserPassword, createOrder: async () => {}, userOrders, adminOrders, fetchUserOrders, fetchAllOrders,
+    updateOrderStatus, updateOrderDetails, deleteOrder, allUsers, fetchAllUsers, orderRequests, createOrderRequest,
+    fetchOrderRequests, reservasHorarios, fetchReservasHorarios, approveOrderRequest,
+    rejectOrderRequest: async (id: string) => { await supabase.from('solicitudes_pedidos').update({ estado: 'rechazado' }).eq('id', id); await fetchOrderRequests(); },
+    markRequestAsSeen, markOrderAsSeen, finanzas, fetchFinanzas,
+    addFinanza: async (f: any) => { await supabase.from('finanzas').insert([f]); await fetchFinanzas(); },
+    toasts, addToast, removeToast, isInitialLoading
+  }), [
+    isLeftSidebarOpen, isCartOpen, cart, selectedCategory, selectedFilter, searchQuery, isAuthModalOpen, 
+    isProfileModalOpen, isTrackingOpen, products, user, profile, isAdmin, authLoading, userOrders, 
+    adminOrders, allUsers, orderRequests, reservasHorarios, finanzas, toasts, isInitialLoading,
+    fetchProducts, addProduct, updateProduct, deleteProduct, uploadProductImages, signIn, signUp, 
+    signOut, updateProfile, resetPassword, uploadAvatar, updateUserPassword, fetchUserOrders, 
+    fetchAllOrders, updateOrderStatus, updateOrderDetails, deleteOrder, fetchAllUsers, 
+    createOrderRequest, fetchOrderRequests, fetchReservasHorarios, approveOrderRequest, 
+    markRequestAsSeen, markOrderAsSeen, fetchFinanzas, addToast, removeToast
+  ]);
 
   return (
-    <StoreContext.Provider value={{
-      isLeftSidebarOpen, setIsLeftSidebarOpen, isCartOpen, setIsCartOpen, cart,
-      addToCart: (p: any, s?: any) => { setCart([...cart, { product: p, size: s, quantity: 1 }]); setIsCartOpen(true); },
-      removeFromCart: (id: string, s?: string) => setCart(cart.filter(i => !(i.product.id === id && i.size === s))),
-      clearCart: () => setCart([]), selectedCategory, setSelectedCategory, selectedFilter, setSelectedFilter,
-      searchQuery, setSearchQuery, isAuthModalOpen, setIsAuthModalOpen, isProfileModalOpen, setIsProfileModalOpen,
-      isTrackingOpen, setIsTrackingOpen, products, fetchProducts, addProduct, updateProduct, deleteProduct,
-      uploadProductImages, user, profile, isAdmin, authLoading, signIn, signUp, signOut, updateProfile, resetPassword,
-      uploadAvatar, updateUserPassword, createOrder: async () => {}, userOrders, adminOrders, fetchUserOrders, fetchAllOrders,
-      updateOrderStatus, updateOrderDetails, deleteOrder, allUsers, fetchAllUsers, orderRequests, createOrderRequest,
-      fetchOrderRequests, reservasHorarios, fetchReservasHorarios, approveOrderRequest,
-      rejectOrderRequest: async (id) => { await supabase.from('solicitudes_pedidos').update({ estado: 'rechazado' }).eq('id', id); await fetchOrderRequests(); },
-      markRequestAsSeen, markOrderAsSeen, finanzas, fetchFinanzas,
-      addFinanza: async (f: any) => { await supabase.from('finanzas').insert([f]); await fetchFinanzas(); },
-      toasts, addToast, removeToast, isInitialLoading
-    }}>
+    <StoreContext.Provider value={contextValue}>
       {children}
     </StoreContext.Provider>
   );
