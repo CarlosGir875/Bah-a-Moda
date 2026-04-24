@@ -653,33 +653,47 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const createOrderRequest = useCallback(async (data: Omit<OrderRequest, 'id' | 'created_at' | 'estado' | 'visto'>, reserva?: Omit<ReservaHorario, 'id' | 'created_at' | 'solicitud_id'>) => {
     try {
+      console.log("[DEBUG] Intentando guardar pedido en DB...", data);
+      
       const { data: insertedData, error } = await supabase
         .from('solicitudes_pedidos')
-        .insert([{ ...data, estado: 'pendiente', visto: false }])
+        .insert([{ 
+          ...data, 
+          user_id: data.user_id || null, // Asegurar compatibilidad con invitados
+          estado: 'pendiente', 
+          visto: false 
+        }])
         .select('id')
         .single();
         
       if (error) {
-        console.error("[CRITICAL] Error al guardar solicitud:", error);
+        console.error("[CRITICAL DB ERROR] No se pudo guardar el pedido:", error);
+        addToast(`Error de Base de Datos: ${error.message}`, "error");
         throw error;
       }
 
+      console.log("[DEBUG] Pedido guardado con ID:", insertedData.id);
+
       if (reserva && insertedData) {
-        await supabase
+        const { error: resError } = await supabase
           .from('reservas_horarios')
           .insert([{
             ...reserva,
             solicitud_id: insertedData.id,
             estado: 'bloqueado'
           }]);
+        if (resError) console.warn("Aviso: No se pudo bloquear el horario, pero el pedido se guardó.");
       }
       
+      // Forzar recarga inmediata para que el admin vea el cambio
       await fetchOrderRequests();
-    } catch (err) {
-      console.error("Fallo total en DB:", err);
+      addToast("✅ Pedido registrado en el sistema", "success");
+      
+    } catch (err: any) {
+      console.error("Fallo catastrófico al conectar con Supabase:", err);
       throw err;
     }
-  }, [fetchOrderRequests]);
+  }, [fetchOrderRequests, addToast]);
 
   const approveOrderRequest = useCallback(async (requestId: string) => {
     const request = orderRequests.find(r => r.id === requestId);
