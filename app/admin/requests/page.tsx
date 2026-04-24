@@ -18,7 +18,10 @@ import {
   Truck,
   Calendar,
   Trash2,
-  ChevronDown
+  ChevronDown,
+  MapPin,
+  CircleDollarSign,
+  ReceiptText
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
@@ -38,7 +41,8 @@ export default function AdminRequestsPage() {
     updateOrderStatus,
     updateOrderDetails,
     deleteOrder,
-    fetchAllOrders
+    fetchAllOrders,
+    products
   } = useStore();
   const router = useRouter();
   const [processingId, setProcessingId] = useState<string | null>(null);
@@ -84,7 +88,6 @@ export default function AdminRequestsPage() {
     try {
       await approveOrderRequest(id);
       addToast("✅ Pedido procesado exitosamente", "success");
-      // Forzar refresco para evitar el estado "Validando"
       await fetchAllOrders();
       await fetchOrderRequests();
     } catch (err: any) {
@@ -210,7 +213,7 @@ export default function AdminRequestsPage() {
                               {/* CLIENT & CONTACT */}
                               <td className="p-4 align-middle">
                                 <div className="flex items-center gap-3">
-                                   <div className="w-10 h-10 rounded-xl bg-black text-white flex items-center justify-center text-sm font-black uppercase shrink-0 shadow-md">
+                                   <div className="w-10 h-10 rounded-xl bg-black text-white flex items-center justify-center text-sm font-black uppercase shrink-0 shadow-md transition-transform group-hover:scale-110">
                                      {req.cliente_nombre.charAt(0)}
                                    </div>
                                    <div className="flex flex-col min-w-0">
@@ -235,7 +238,7 @@ export default function AdminRequestsPage() {
                                   </span>
                                   {isApproved ? (
                                     <span className="text-[9px] font-black uppercase tracking-widest text-indigo-600 mt-1 flex items-center gap-1">
-                                      <circle className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse mr-1" />
+                                      <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse mr-1" />
                                       {linkedOrder?.estado === 'en_transito' ? 'EN RUTA' : (linkedOrder?.estado === 'listo_entrega' ? 'ENTREGADO' : 'LOGÍSTICA - CONFIRMADO')}
                                     </span>
                                   ) : (
@@ -320,79 +323,125 @@ export default function AdminRequestsPage() {
                               </td>
                             </tr>
 
-                            {/* EXPANDED VIEW */}
+                            {/* LUXURY TICKET VIEW */}
                             <AnimatePresence>
-                              {isExpanded && linkedOrder && (
-                                <tr className="bg-zinc-50/50">
-                                  <td colSpan={5} className="p-0 border-none">
+                              {isExpanded && (
+                                <tr className="bg-white">
+                                  <td colSpan={5} className="p-0 border-none relative overflow-hidden">
                                     <motion.div 
                                       initial={{ height: 0, opacity: 0 }}
                                       animate={{ height: 'auto', opacity: 1 }}
                                       exit={{ height: 0, opacity: 0 }}
-                                      className="overflow-hidden"
+                                      className="p-6 sm:p-10 border-t-4 border-black bg-zinc-50"
                                     >
-                                      <div className="p-8 bg-white border-x-2 border-b-2 border-zinc-900 rounded-b-[2rem] mx-4 mb-4 shadow-xl">
-                                        <div className="flex items-center justify-between mb-8 pb-6 border-b border-zinc-100">
-                                          <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 bg-black rounded-2xl flex items-center justify-center text-white">
-                                              <Package className="w-6 h-6" />
-                                            </div>
-                                            <div>
-                                              <h4 className="text-sm font-black uppercase tracking-tighter">Detalle de Productos</h4>
-                                              <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Revisión de inventario</p>
-                                            </div>
-                                          </div>
-                                          <button 
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              if (window.confirm("⚠️ ¿Eliminar pedido completo?")) {
-                                                deleteOrder(linkedOrder.id);
-                                                addToast("Pedido borrado", "success");
-                                              }
-                                            }}
-                                            className="px-6 py-3 bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2"
-                                          >
-                                            <Trash2 className="w-4 h-4" /> Borrar Definitivo
-                                          </button>
-                                        </div>
-
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                          {linkedOrder.items.map((item: any, idx: number) => (
-                                            <div key={idx} className="flex items-center justify-between p-5 bg-zinc-50 rounded-3xl border border-zinc-100">
-                                              <div className="flex items-center gap-4">
-                                                <div className="w-16 h-16 bg-white rounded-2xl border border-zinc-200 flex items-center justify-center overflow-hidden">
-                                                  <Package className="w-7 h-7 text-zinc-200" />
-                                                </div>
-                                                <div>
-                                                  <p className="text-xs font-black text-zinc-900 uppercase tracking-tight mb-1">{item.name}</p>
-                                                  <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
-                                                    Talla: <span className="text-black">{item.size || 'N/A'}</span> · Cant: <span className="text-black">{item.quantity}</span>
-                                                  </p>
-                                                </div>
+                                      <div className="max-w-4xl mx-auto bg-white rounded-[3rem] shadow-2xl border-[3px] border-black p-8 sm:p-12 relative overflow-hidden">
+                                        {/* TICKET HEADER */}
+                                        <div className="flex flex-col sm:flex-row justify-between items-start gap-8 mb-12 border-b-2 border-dashed border-zinc-200 pb-12">
+                                          <div className="space-y-4">
+                                            <div className="flex items-center gap-4">
+                                              <div className="w-16 h-16 bg-black rounded-3xl flex items-center justify-center text-white shadow-xl">
+                                                <ReceiptText className="w-8 h-8" />
                                               </div>
-                                              <div className="text-right">
-                                                <p className="text-sm font-black text-black font-mono">Q{item.price * item.quantity}</p>
-                                                <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">Unit: Q{item.price}</p>
+                                              <div>
+                                                <h4 className="text-2xl font-black uppercase tracking-tighter">Ticket de Pedido</h4>
+                                                <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Ref: {req.id.split('-')[0]}</p>
                                               </div>
                                             </div>
-                                          ))}
+                                            <div className="flex flex-col gap-2 pt-4">
+                                              <div className="flex items-center gap-3 text-zinc-500 font-bold text-sm">
+                                                <User className="w-4 h-4" /> {req.cliente_nombre}
+                                              </div>
+                                              <div className="flex items-center gap-3 text-indigo-600 font-black text-sm">
+                                                <Phone className="w-4 h-4" /> {req.cliente_telefono}
+                                              </div>
+                                              <div className="flex items-center gap-3 text-zinc-500 font-bold text-sm italic">
+                                                <MapPin className="w-4 h-4 text-rose-500" /> {req.ubicacion}
+                                              </div>
+                                            </div>
+                                          </div>
+
+                                          <div className="bg-zinc-900 text-white p-8 rounded-[2.5rem] shadow-2xl min-w-[240px] border-2 border-black">
+                                            <div className="flex items-center gap-2 mb-4">
+                                              <CircleDollarSign className="w-5 h-5 text-emerald-400" />
+                                              <span className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400">Balance Total</span>
+                                            </div>
+                                            <p className="text-5xl font-black tracking-tighter font-mono mb-2">Q{req.total.toFixed(0)}</p>
+                                            <div className="flex flex-col gap-1 mt-4">
+                                              <div className="flex justify-between text-[10px] font-black uppercase text-emerald-400">
+                                                <span>Anticipo (50%):</span>
+                                                <span>Q{req.anticipo.toFixed(0)}</span>
+                                              </div>
+                                              <div className="flex justify-between text-[10px] font-black uppercase text-zinc-500">
+                                                <span>Pendiente:</span>
+                                                <span>Q{(req.total - req.anticipo).toFixed(0)}</span>
+                                              </div>
+                                            </div>
+                                          </div>
                                         </div>
 
-                                        <div className="mt-8 pt-8 border-t border-zinc-100 flex flex-col sm:flex-row justify-between items-center gap-6">
-                                          <div className="flex gap-8">
-                                            <div className="text-left">
-                                              <p className="text-[9px] font-black text-emerald-600 uppercase tracking-widest mb-1">Abonado (50%)</p>
-                                              <p className="text-2xl font-black text-black font-mono">Q{linkedOrder.anticipo}</p>
-                                            </div>
-                                            <div className="text-left">
-                                              <p className="text-[9px] font-black text-rose-600 uppercase tracking-widest mb-1">Saldo Pendiente</p>
-                                              <p className="text-2xl font-black text-black font-mono">Q{linkedOrder.total - linkedOrder.anticipo}</p>
-                                            </div>
+                                        {/* PRODUCT GRID WITH IMAGES */}
+                                        <div className="space-y-6 mb-12">
+                                          <h5 className="text-xs font-black uppercase tracking-[0.3em] text-zinc-400 mb-6">Contenido del Pedido</h5>
+                                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            {req.items.map((item: any, idx: number) => {
+                                              // Intentar encontrar la imagen real del producto en el catálogo
+                                              const realProduct = products.find(p => p.id === item.id);
+                                              const imageUrl = realProduct?.images?.[0] || null;
+
+                                              return (
+                                                <div key={idx} className="flex items-center gap-5 p-5 bg-zinc-50 rounded-[2rem] border-2 border-zinc-100 hover:border-black transition-all group/item">
+                                                  <div className="w-24 h-24 bg-white rounded-3xl border-2 border-zinc-200 overflow-hidden flex-shrink-0 shadow-sm relative">
+                                                    {imageUrl ? (
+                                                      <img src={imageUrl} alt={item.name} className="w-full h-full object-cover transition-transform group-hover/item:scale-110" />
+                                                    ) : (
+                                                      <div className="w-full h-full flex flex-col items-center justify-center bg-zinc-50 text-zinc-300">
+                                                        <Package className="w-8 h-8 mb-1" />
+                                                        <span className="text-[7px] font-black uppercase tracking-widest italic text-center">Bahía Moda</span>
+                                                      </div>
+                                                    )}
+                                                    <div className="absolute top-1 right-1 bg-black text-white text-[9px] font-black px-2 py-0.5 rounded-full">
+                                                       x{item.quantity}
+                                                    </div>
+                                                  </div>
+                                                  <div className="flex-1 min-w-0">
+                                                    <p className="text-[10px] font-black text-indigo-500 uppercase tracking-widest mb-1">{item.supplier || "Colección"}</p>
+                                                    <h6 className="text-sm font-black text-zinc-900 leading-tight truncate mb-1">{item.name}</h6>
+                                                    <div className="flex items-center gap-3">
+                                                       <span className="text-[11px] font-bold text-zinc-500 font-mono">Q{item.price} c/u</span>
+                                                       {item.size && <span className="bg-zinc-200 text-zinc-600 text-[9px] font-black px-2 py-0.5 rounded uppercase">{item.size}</span>}
+                                                    </div>
+                                                  </div>
+                                                </div>
+                                              );
+                                            })}
                                           </div>
-                                          <div className="text-center sm:text-right bg-zinc-900 text-white px-8 py-4 rounded-3xl">
-                                            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Inversión Total</p>
-                                            <p className="text-4xl font-black tracking-tighter font-mono">Q{linkedOrder.total}</p>
-                                          </div>
+                                        </div>
+
+                                        {/* ADMIN ACTION ZONE */}
+                                        <div className="flex flex-col sm:flex-row justify-between items-center gap-8 pt-10 border-t-2 border-zinc-100">
+                                           <div className="flex gap-4">
+                                              <button 
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  if (window.confirm("⚠️ ¿Eliminar este registro permanentemente?")) {
+                                                    deleteOrder(req.id);
+                                                    addToast("Registro eliminado", "success");
+                                                  }
+                                                }}
+                                                className="px-8 py-4 bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-3 border-2 border-rose-100 shadow-sm"
+                                              >
+                                                <Trash2 className="w-4 h-4" /> Eliminar Registro
+                                              </button>
+                                           </div>
+                                           <div className="flex items-center gap-4">
+                                              <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Cerrar Detalle</p>
+                                              <button 
+                                                onClick={() => setExpandedOrderId(null)}
+                                                className="w-12 h-12 bg-zinc-100 rounded-full flex items-center justify-center hover:bg-black hover:text-white transition-all shadow-inner"
+                                              >
+                                                <ChevronDown className="w-6 h-6 rotate-180" />
+                                              </button>
+                                           </div>
                                         </div>
                                       </div>
                                     </motion.div>

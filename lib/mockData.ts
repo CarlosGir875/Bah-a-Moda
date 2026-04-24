@@ -37,7 +37,8 @@ export const CATEGORY_MAPPING: Record<string, string[]> = {
     "Ropa y Artículos de Bebé", 
     "Zapatos y Calzado", 
     "Relojes y Joyería"
-  ]
+  ],
+  "🥘 Comida y Antojos": ["Platillos Fuertes", "Postres y Dulces", "Bebidas y Antojos"]
 };
 
 export const QUICK_FILTERS = [
