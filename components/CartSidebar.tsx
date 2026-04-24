@@ -61,29 +61,33 @@ export function CartSidebar() {
         price: item.product.price,
         quantity: item.quantity,
         size: item.size,
-        supplier: item.product.supplier // Añadido para distinguir comida/revista
+        supplier: item.product.supplier 
       }));
 
-      await createOrderRequest({
-        user_id: user?.id || null,
-        cliente_nombre: formData.nombre,
-        cliente_telefono: formData.celular,
-        cliente_email: user?.email || null,
-        items: orderItems,
-        total: cartTotal,
-        anticipo: depositAmount,
-        tipo_entrega: deliveryType === 'domicilio' ? 'domicilio' : 'punto_encuentro',
-        ubicacion: `${formData.ubicacion}`,
-      }, {
-        fecha: new Date().toISOString().split('T')[0], // Fecha actual como referencia
-        hora_inicio: 'Pendiente',
-        estado: 'bloqueado'
-      });
+      // 1. INTENTAR GUARDAR EN BASE DE DATOS (Si falla, seguimos)
+      try {
+        await createOrderRequest({
+          user_id: user?.id || null,
+          cliente_nombre: formData.nombre,
+          cliente_telefono: formData.celular,
+          cliente_email: user?.email || null,
+          items: orderItems,
+          total: cartTotal,
+          anticipo: depositAmount,
+          tipo_entrega: deliveryType === 'domicilio' ? 'domicilio' : 'punto_encuentro',
+          ubicacion: `${formData.ubicacion}`,
+        }, {
+          fecha: new Date().toISOString().split('T')[0],
+          hora_inicio: 'Pendiente',
+          estado: 'bloqueado'
+        });
+        addToast("Solicitud registrada en sistema", "success");
+      } catch (dbErr) {
+        console.error("DB Error (Continuando a WhatsApp):", dbErr);
+        addToast("Nota: Guardado local falló, pero enviando WhatsApp...", "info");
+      }
 
-      clearCart();
-      setCheckoutStep("success");
-      
-      // Construir recibo detallado para WhatsApp
+      // 2. ABRIR WHATSAPP SIEMPRE
       const phoneNumber = "50242721798";
       const itemsList = cart.map(item => 
         `▪ ${item.quantity}x ${item.product.name} ${item.size ? `(Talla: ${item.size})` : ''} - Q${(item.product.price * item.quantity).toFixed(2)}`
@@ -103,8 +107,11 @@ export function CartSidebar() {
       const encodedMessage = encodeURIComponent(rawMessage);
       window.open(`https://wa.me/${phoneNumber}?text=${encodedMessage}`, '_blank');
 
+      clearCart();
+      setCheckoutStep("success");
+
     } catch (err: unknown) {
-      addToast("Error al enviar solicitud: " + (err instanceof Error ? err.message : "Error desconocido"), "error");
+      addToast("Error al procesar: " + (err instanceof Error ? err.message : "Error desconocido"), "error");
     } finally {
       setIsProcessing(false);
     }
