@@ -861,6 +861,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         fetchAllOrders,
         updateOrderStatus,
         updateOrderDetails,
+        deleteOrder,
         allUsers,
         fetchAllUsers,
         clearCart,
