@@ -4,14 +4,7 @@ import { useState, useEffect } from "react";
 import { X, Trash2, ShoppingBag, ArrowLeft, Send } from "lucide-react";
 import { useStore } from "@/lib/store";
 
-const generateTimeSlots = (startHour: number, endHour: number) => {
-  const slots: string[] = [];
-  for (let i = startHour; i < endHour; i++) {
-    slots.push(`${i.toString().padStart(2, '0')}:00`);
-    slots.push(`${i.toString().padStart(2, '0')}:30`);
-  }
-  return slots;
-};
+// Eliminado generateTimeSlots para simplificar el flujo
 
 export function CartSidebar() {
   const { isCartOpen, setIsCartOpen, cart, removeFromCart, user, profile, createOrderRequest, clearCart, addToast, reservasHorarios } = useStore();
@@ -34,14 +27,11 @@ export function CartSidebar() {
   };
 
   const [diasDisponibles] = useState(generateDays());
-  const [selectedDate, setSelectedDate] = useState(diasDisponibles[0].val);
-  const timeSlots = generateTimeSlots(9, 18); // 9 AM a 6 PM
-
   const [formData, setFormData] = useState({
     nombre: "",
     celular: "",
     ubicacion: "",
-    horario: "" // se guarda la hora, ej "14:30"
+    horario: "Pendiente" // Se gestiona internamente por el admin
   });
 
   // Auto-fill form if user is logged in
@@ -83,10 +73,10 @@ export function CartSidebar() {
         total: cartTotal,
         anticipo: depositAmount,
         tipo_entrega: deliveryType === 'domicilio' ? 'domicilio' : 'punto_encuentro',
-        ubicacion: `${formData.ubicacion} | Fecha: ${selectedDate} | Hora: ${formData.horario}`,
+        ubicacion: `${formData.ubicacion}`,
       }, {
-        fecha: selectedDate,
-        hora_inicio: formData.horario,
+        fecha: new Date().toISOString().split('T')[0], // Fecha actual como referencia
+        hora_inicio: 'Pendiente',
         estado: 'bloqueado'
       });
 
@@ -103,14 +93,12 @@ export function CartSidebar() {
         `👤 *Cliente:* ${formData.nombre}\n` +
         `📱 *Celular:* ${formData.celular}\n` +
         `📍 *Modalidad:* ${deliveryType === 'domicilio' ? 'Envío a Domicilio' : 'Punto de Encuentro'}\n` +
-        `🗺️ *Ubicación:* ${formData.ubicacion}\n` +
-        `📅 *Día:* ${selectedDate}\n` +
-        `⏰ *Horario:* ${formData.horario}\n\n` +
+        `🗺️ *Ubicación:* ${formData.ubicacion}\n\n` +
         `🛍️ *RESUMEN DE COMPRA:*\n${itemsList}\n\n` +
         `💰 *Total:* Q${cartTotal.toFixed(2)}\n` +
-        `💳 *Anticipo Depositado (50%):* Q${depositAmount.toFixed(2)}\n` +
-        `💵 *Saldo Pago Contra Entrega:* Q${pendingBalance.toFixed(2)}\n\n` +
-        `_Nota de cliente: Ya ingresé mi solicitud a través del carrito en la página web. ¡Quedo a la espera de que la confirmen en la base de datos!_`;
+        `💳 *Anticipo Reserva (50%):* Q${depositAmount.toFixed(2)}\n` +
+        `💵 *Saldo Contra Entrega:* Q${pendingBalance.toFixed(2)}\n\n` +
+        `_Nota: Ya ingresé mi solicitud. ¡Quedo atento a las notificaciones para conocer mi fecha de entrega exclusiva!_`;
 
       const encodedMessage = encodeURIComponent(rawMessage);
       window.open(`https://wa.me/${phoneNumber}?text=${encodedMessage}`, '_blank');
@@ -314,46 +302,15 @@ export function CartSidebar() {
                    <input required type="tel" placeholder="Ej. 4567 8910" value={formData.celular} onChange={e => setFormData({...formData, celular: e.target.value})} className="w-full border border-gray-100 bg-gray-50 px-5 py-4 rounded-2xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-black transition-all" />
                  </div>
                  
-                  <div>
-                   <label className="block text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Horario de Entrega</label>
-                   <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden mb-2 shadow-sm">
-                     <div className="flex border-b border-gray-100">
-                       {diasDisponibles.map(d => (
-                         <button
-                           key={d.val}
-                           type="button"
-                           onClick={() => { setSelectedDate(d.val); setFormData({...formData, horario: ""}); }}
-                           className={`flex-1 py-3 text-[10px] font-black uppercase tracking-widest transition-colors ${
-                             selectedDate === d.val ? 'bg-indigo-50 text-indigo-700' : 'text-gray-400 hover:bg-gray-50'
-                           }`}
-                         >
-                           {d.label} <span className="font-light truncate ml-1">({d.val.split('-')[2]}/{d.val.split('-')[1]})</span>
-                         </button>
-                       ))}
-                     </div>
-                     <div className="p-3 grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-48 overflow-y-auto">
-                       {timeSlots.map(hora => {
-                         const isReserved = reservasHorarios.some(r => r.fecha === selectedDate && r.hora_inicio === hora && r.estado === 'bloqueado');
-                         const isSelected = formData.horario === hora;
-                         return (
-                           <button
-                             key={hora}
-                             type="button"
-                             disabled={isReserved}
-                             onClick={() => setFormData({...formData, horario: hora})}
-                             className={`py-2 rounded-lg text-center text-[11px] font-black tracking-wider transition-all disabled:opacity-40 disabled:cursor-not-allowed border ${
-                               isReserved ? 'bg-gray-100/50 text-gray-400 border-gray-100' :
-                               isSelected ? 'bg-indigo-600 text-white border-indigo-600 shadow-md transform scale-105' : 'bg-gray-50 text-gray-700 border-gray-200 hover:border-gray-300'
-                             }`}
-                           >
-                             {isReserved ? '🔒 OCUPAD' : hora}
-                           </button>
-                         );
-                       })}
-                     </div>
-                   </div>
-                   {!formData.horario && <p className="text-[10px] text-red-500 font-bold ml-1">Selecciona una hora requerida.</p>}
-                 </div>
+                  <div className="bg-indigo-50 border border-indigo-100 p-6 rounded-[2rem] mt-8 text-center shadow-inner">
+                    <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
+                      <Send className="w-6 h-6 text-indigo-500" />
+                    </div>
+                    <h4 className="text-xs font-black uppercase tracking-widest text-indigo-900 mb-2">Entrega Inteligente</h4>
+                    <p className="text-[10px] font-bold text-indigo-600 leading-relaxed uppercase tracking-tight">
+                      Estamos preparando tu selección. Mantente atento a las notificaciones de la aplicación para conocer tu fecha de entrega exclusiva.
+                    </p>
+                  </div>
               </form>
             </div>
 
