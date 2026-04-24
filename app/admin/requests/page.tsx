@@ -84,6 +84,9 @@ export default function AdminRequestsPage() {
     try {
       await approveOrderRequest(id);
       addToast("✅ Pedido procesado exitosamente", "success");
+      // Forzar refresco para evitar el estado "Validando"
+      await fetchAllOrders();
+      await fetchOrderRequests();
     } catch (err: any) {
       console.error("Error approving order:", err);
       addToast(`❌ Error: ${err.message || "Fallo en el servidor"}`, "error");
@@ -232,7 +235,8 @@ export default function AdminRequestsPage() {
                                   </span>
                                   {isApproved ? (
                                     <span className="text-[9px] font-black uppercase tracking-widest text-indigo-600 mt-1 flex items-center gap-1">
-                                      <Package className="w-3 h-3" /> ➔ {linkedOrder?.estado === 'en_transito' ? 'EN RUTA' : (linkedOrder?.estado === 'listo_entrega' ? 'ENTREGADO' : 'LOGÍSTICA - CONFIRMADO')}
+                                      <circle className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse mr-1" />
+                                      {linkedOrder?.estado === 'en_transito' ? 'EN RUTA' : (linkedOrder?.estado === 'listo_entrega' ? 'ENTREGADO' : 'LOGÍSTICA - CONFIRMADO')}
                                     </span>
                                   ) : (
                                     <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-400 mt-1 flex items-center gap-1">
@@ -303,7 +307,15 @@ export default function AdminRequestsPage() {
                                      </div>
                                    </div>
                                 ) : (
-                                   <span className="px-3 py-1.5 bg-zinc-100 text-zinc-400 border border-zinc-200 rounded-full text-[9px] font-black uppercase tracking-widest inline-block pointer-events-none">Validando...</span>
+                                   <div className="flex flex-col gap-2 min-w-[140px]">
+                                      <span className="px-3 py-1.5 bg-indigo-50 text-indigo-600 border border-indigo-200 rounded-full text-[9px] font-black uppercase tracking-widest inline-block text-center animate-pulse">🔄 Sincronizando...</span>
+                                      <button 
+                                        onClick={(e) => { e.stopPropagation(); fetchAllOrders(); fetchOrderRequests(); }}
+                                        className="text-[8px] font-black text-zinc-400 uppercase hover:text-black transition-colors"
+                                      >
+                                        Refrescar Datos
+                                      </button>
+                                   </div>
                                 )}
                               </td>
                             </tr>
