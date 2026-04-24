@@ -180,148 +180,110 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [allUsers, setAllUsers] = useState<Profile[]>([]);
   const [orderRequests, setOrderRequests] = useState<OrderRequest[]>([]);
 
-  // 1. UTILS (TOASTS)
+  // 1. UTILS
   const addToast = useCallback((message: string, type: 'success' | 'error' | 'info' = 'info') => {
     const id = Math.random().toString(36).substr(2, 9);
     setToasts(prev => [...prev, { id, message, type }]);
-    setTimeout(() => {
-      setToasts(prev => prev.filter(t => t.id !== id));
-    }, 4000);
+    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 4000);
   }, []);
 
-  const removeToast = useCallback((id: string) => {
-    setToasts(prev => prev.filter(t => t.id !== id));
-  }, []);
+  const removeToast = useCallback((id: string) => setToasts(prev => prev.filter(t => t.id !== id)), []);
 
-  // 2. FETCHERS (ORDENADOS PARA EVITAR ERRORES DE DECLARACIÓN)
+  // 2. FETCHERS
   const fetchProducts = useCallback(async () => {
-    const { data, error } = await supabase
-      .from('products')
-      .select('*')
-      .order('category', { ascending: true })
-      .order('sub_category', { ascending: true })
-      .order('created_at', { ascending: false });
-    
-    if (data) {
-      setProducts(data.map((p: any) => ({
-        id: p.id,
-        name: p.name,
-        price: p.price,
-        cost: p.cost || 0,
-        stock: p.stock !== null ? p.stock : 1,
-        images: p.image_urls || [],
-        category: p.category,
-        subCategory: p.sub_category,
-        filterTag: p.filter_tag,
-        supplier: p.supplier,
-        delivery_date: p.delivery_date,
-        description: p.description,
-        sizes: p.sizes || []
-      })));
-    }
-  }, []);
-
-  const fetchReservasHorarios = useCallback(async () => {
-    const { data } = await supabase
-      .from('reservas_horarios')
-      .select('*')
-      .order('fecha', { ascending: true })
-      .order('hora_inicio', { ascending: true });
-    if (data) setReservasHorarios(data as ReservaHorario[]);
+    const { data } = await supabase.from('products').select('*').order('created_at', { ascending: false });
+    if (data) setProducts(data.map((p: any) => ({
+      id: p.id, name: p.name, price: p.price, cost: p.cost || 0, stock: p.stock ?? 1,
+      images: p.image_urls || [], category: p.category, subCategory: p.sub_category,
+      filterTag: p.filter_tag, supplier: p.supplier, delivery_date: p.delivery_date,
+      description: p.description, sizes: p.sizes || []
+    })));
   }, []);
 
   const fetchOrderRequests = useCallback(async () => {
-    const { data } = await supabase
-      .from('solicitudes_pedidos')
-      .select('*')
-      .order('created_at', { ascending: false });
-    if (data) setOrderRequests(data || []);
+    const { data } = await supabase.from('solicitudes_pedidos').select('*').order('created_at', { ascending: false });
+    if (data) setOrderRequests(data);
   }, []);
 
   const fetchAllOrders = useCallback(async () => {
-    const { data } = await supabase
-      .from('pedidos')
-      .select('*')
-      .order('created_at', { ascending: false });
-    if (data) setAdminOrders(data || []);
+    const { data } = await supabase.from('pedidos').select('*').order('created_at', { ascending: false });
+    if (data) setAdminOrders(data);
   }, []);
 
   const fetchUserOrders = useCallback(async () => {
     if (!user) return;
-    const { data } = await supabase
-      .from('pedidos')
-      .select('*')
-      .eq('cliente_id', user.id)
-      .order('created_at', { ascending: false });
-    if (data) setUserOrders(data || []);
+    const { data } = await supabase.from('pedidos').select('*').eq('cliente_id', user.id).order('created_at', { ascending: false });
+    if (data) setUserOrders(data);
   }, [user]);
 
   const fetchFinanzas = useCallback(async () => {
-    const { data } = await supabase
-      .from('finanzas')
-      .select('*')
-      .order('created_at', { ascending: false });
-    if (data) setFinanzas(data || []);
+    const { data } = await supabase.from('finanzas').select('*').order('created_at', { ascending: false });
+    if (data) setFinanzas(data);
+  }, []);
+
+  const fetchReservasHorarios = useCallback(async () => {
+    const { data } = await supabase.from('reservas_horarios').select('*').order('fecha', { ascending: true });
+    if (data) setReservasHorarios(data as ReservaHorario[]);
   }, []);
 
   const fetchAllUsers = useCallback(async () => {
-    const { data } = await supabase
-      .from('cliente_perfiles')
-      .select('*')
-      .order('nombre_completo', { ascending: true });
-    if (data) setAllUsers(data || []);
+    const { data } = await supabase.from('cliente_perfiles').select('*').order('nombre_completo', { ascending: true });
+    if (data) setAllUsers(data);
   }, []);
 
   const fetchProfile = useCallback(async (userId: string) => {
-    const { data, error } = await supabase
-      .from('cliente_perfiles')
-      .select('*')
-      .eq('id', userId)
-      .maybeSingle();
-    if (data) {
-      setProfile(data as Profile);
-      setIsAdmin(data.rol === 'admin');
-    }
+    const { data } = await supabase.from('cliente_perfiles').select('*').eq('id', userId).maybeSingle();
+    if (data) { setProfile(data as Profile); setIsAdmin(data.rol === 'admin'); }
   }, []);
 
-  // 3. AUTH ACTIONS
+  // 3. AUTH & PROFILE ACTIONS
   const signIn = useCallback(async (email: string, password: string) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
     if (data.user) await fetchProfile(data.user.id);
   }, [fetchProfile]);
 
-  const signUp = useCallback(async (email: string, password: string, fullName: string, metadata?: Partial<Profile>) => {
+  const signUp = useCallback(async (email: string, password: string, fullName: string, metadata?: any) => {
     const res = await fetch('/api/auth/signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email, password, fullName,
-        celular: (metadata as any)?.celular ?? null,
-        direccion: metadata?.direccion ?? null,
-        punto_encuentro: metadata?.punto_encuentro ?? null,
-      }),
+      body: JSON.stringify({ email, password, fullName, ...metadata }),
     });
-    const result = await res.json();
-    if (!res.ok) throw new Error(result.error);
-    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-    if (signInError) throw signInError;
-  }, []);
+    if (!res.ok) throw new Error("Error en registro");
+    await signIn(email, password);
+  }, [signIn]);
 
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
     setUser(null); setProfile(null); setIsAdmin(false);
   }, []);
 
+  const updateProfile = useCallback(async (updates: any) => {
+    if (!user) return;
+    const { error } = await supabase.from('cliente_perfiles').update(updates).eq('id', user.id);
+    if (!error) await fetchProfile(user.id);
+  }, [user, fetchProfile]);
+
+  const resetPassword = useCallback(async (email: string) => {
+    await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/` });
+  }, []);
+
+  const updateUserPassword = useCallback(async (password: string) => {
+    await supabase.auth.updateUser({ password });
+  }, []);
+
+  const uploadAvatar = useCallback(async (file: File) => {
+    if (!user) return "";
+    const path = `avatars/${user.id}-${Date.now()}`;
+    await supabase.storage.from('avatars').upload(path, file);
+    const { data } = supabase.storage.from('avatars').getPublicUrl(path);
+    await updateProfile({ avatar_url: data.publicUrl });
+    return data.publicUrl;
+  }, [user, updateProfile]);
+
   // 4. PRODUCT ACTIONS
-  const addProduct = useCallback(async (product: Omit<Product, 'id'>) => {
-    const { error } = await supabase.from('products').insert([{
-      name: product.name, price: product.price, cost: product.cost || 0,
-      stock: product.stock, image_urls: product.images, category: product.category,
-      sub_category: product.subCategory, supplier: product.supplier,
-      delivery_date: product.delivery_date, description: product.description, sizes: product.sizes
-    }]);
-    if (error) throw error;
+  const addProduct = useCallback(async (p: any) => {
+    await supabase.from('products').insert([{ ...p, image_urls: p.images, sub_category: p.subCategory, filter_tag: p.filterTag }]);
     await fetchProducts();
   }, [fetchProducts]);
 
@@ -332,95 +294,76 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const uploadProductImages = useCallback(async (files: File[]) => {
     const urls: string[] = [];
-    for (const file of files) {
-      const fileName = `${Date.now()}-${Math.random()}`;
-      const { error } = await supabase.storage.from('products').upload(fileName, file);
-      if (!error) {
-        const { data } = supabase.storage.from('products').getPublicUrl(fileName);
-        urls.push(data.publicUrl);
-      }
+    for (const f of files) {
+      const path = `${Date.now()}-${f.name}`;
+      await supabase.storage.from('products').upload(path, f);
+      urls.push(supabase.storage.from('products').getPublicUrl(path).data.publicUrl);
     }
     return urls;
   }, []);
 
   // 5. ORDER ACTIONS
-  const createOrderRequest = useCallback(async (data: any, reserva?: any) => {
-    try {
-      const { data: insertedData, error } = await supabase.from('solicitudes_pedidos').insert([{ 
-        ...data, user_id: data.user_id || null, estado: 'pendiente', visto: false 
-      }]).select('id').single();
-      if (error) throw error;
-      if (reserva && insertedData) {
-        await supabase.from('reservas_horarios').insert([{ ...reserva, solicitud_id: insertedData.id, estado: 'bloqueado' }]);
-      }
-      await fetchOrderRequests();
-      addToast("✅ Pedido registrado", "success");
-    } catch (err) { throw err; }
+  const createOrderRequest = useCallback(async (data: any, res?: any) => {
+    const { data: ins, error } = await supabase.from('solicitudes_pedidos').insert([{ ...data, estado: 'pendiente', visto: false }]).select('id').single();
+    if (!error && res && ins) await supabase.from('reservas_horarios').insert([{ ...res, solicitud_id: ins.id, estado: 'bloqueado' }]);
+    await fetchOrderRequests();
+    addToast("✅ Pedido registrado", "success");
   }, [fetchOrderRequests, addToast]);
 
-  const approveOrderRequest = useCallback(async (requestId: string) => {
-    const request = orderRequests.find(r => r.id === requestId);
-    if (!request) return;
-
-    const inversionTotal = request.items.reduce((sum: number, item: any) => {
-      const p = products.find(prod => prod.id === item.id);
-      return sum + ((p?.cost || 0) * (item.quantity || 1));
-    }, 0);
-
-    const { error: orderError } = await supabase.from('pedidos').insert([{
-      cliente_id: request.user_id, nombre_cliente: request.cliente_nombre,
-      items: request.items, total: request.total, anticipo: request.anticipo,
-      inversion: inversionTotal, estado: 'recibido', tipo_entrega: request.tipo_entrega,
-      ubicacion_entrega: request.ubicacion, visto: false
+  const approveOrderRequest = useCallback(async (id: string) => {
+    const req = orderRequests.find(r => r.id === id);
+    if (!req) return;
+    const inv = req.items.reduce((s: number, i: any) => s + ((products.find(p => p.id === i.id)?.cost || 0) * i.quantity), 0);
+    const { error } = await supabase.from('pedidos').insert([{
+      cliente_id: req.user_id, nombre_cliente: req.cliente_nombre, items: req.items, total: req.total,
+      anticipo: req.anticipo, inversion: inv, estado: 'recibido', tipo_entrega: req.tipo_entrega,
+      ubicacion_entrega: req.ubicacion, visto: false
     }]);
-
-    if (!orderError) {
-      await supabase.from('solicitudes_pedidos').update({ estado: 'aprobado' }).eq('id', requestId);
-      await fetchOrderRequests();
-      await fetchAllOrders();
+    if (!error) {
+      await supabase.from('solicitudes_pedidos').update({ estado: 'aprobado' }).eq('id', id);
+      await fetchOrderRequests(); await fetchAllOrders();
       addToast("✅ Pedido aprobado", "success");
     }
   }, [orderRequests, products, fetchOrderRequests, fetchAllOrders, addToast]);
 
-  const deleteOrder = useCallback(async (recordId: string) => {
-    await supabase.from('pedidos').delete().eq('id', recordId);
-    await supabase.from('solicitudes_pedidos').delete().eq('id', recordId);
-    await fetchAllOrders();
-    await fetchOrderRequests();
+  const deleteOrder = useCallback(async (id: string) => {
+    await supabase.from('pedidos').delete().eq('id', id);
+    await supabase.from('solicitudes_pedidos').delete().eq('id', id);
+    await fetchAllOrders(); await fetchOrderRequests();
     addToast("🗑️ Registro eliminado", "success");
   }, [fetchAllOrders, fetchOrderRequests, addToast]);
 
-  const updateOrderStatus = useCallback(async (orderId: string, newStatus: string) => {
-    await supabase.from('pedidos').update({ estado: newStatus }).eq('id', orderId);
+  const updateOrderStatus = useCallback(async (id: string, s: string) => {
+    await supabase.from('pedidos').update({ estado: s }).eq('id', id);
     await fetchAllOrders();
   }, [fetchAllOrders]);
 
-  const updateOrderDetails = useCallback(async (orderId: string, updates: any) => {
-    await supabase.from('pedidos').update(updates).eq('id', orderId);
+  const updateOrderDetails = useCallback(async (id: string, u: any) => {
+    await supabase.from('pedidos').update(u).eq('id', id);
     await fetchAllOrders();
   }, [fetchAllOrders]);
 
-  const addFinanza = useCallback(async (f: any) => {
-    await supabase.from('finanzas').insert([f]);
-    await fetchFinanzas();
-  }, [fetchFinanzas]);
+  const markRequestAsSeen = useCallback(async (id: string) => {
+    await supabase.from('solicitudes_pedidos').update({ visto: true }).eq('id', id);
+    await fetchOrderRequests();
+  }, [fetchOrderRequests]);
+
+  const markOrderAsSeen = useCallback(async (id: string) => {
+    await supabase.from('pedidos').update({ visto: true }).eq('id', id);
+    await fetchAllOrders();
+  }, [fetchAllOrders]);
 
   // 6. INITIALIZATION & SUBSCRIPTIONS
   useEffect(() => {
-    fetchProducts();
-    fetchReservasHorarios();
+    fetchProducts(); fetchReservasHorarios();
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       if (session?.user) fetchProfile(session.user.id).finally(() => setAuthLoading(false));
       else setAuthLoading(false);
     });
-
-    const channel = supabase.channel('db_changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'solicitudes_pedidos' }, () => fetchOrderRequests())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos' }, () => fetchAllOrders())
-      .subscribe();
-
-    return () => { supabase.removeChannel(channel); };
+    const ch = supabase.channel('db').on('postgres_changes', { event: '*', schema: 'public', table: 'solicitudes_pedidos' }, () => fetchOrderRequests())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos' }, () => fetchAllOrders()).subscribe();
+    return () => { supabase.removeChannel(ch); };
   }, [fetchProducts, fetchReservasHorarios, fetchProfile, fetchOrderRequests, fetchAllOrders]);
 
   return (
@@ -434,12 +377,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       isProfileModalOpen, setIsProfileModalOpen, isTrackingOpen, setIsTrackingOpen,
       products, fetchProducts, addProduct, updateProduct: async () => {}, deleteProduct, uploadProductImages,
       user, profile, isAdmin, authLoading, signIn, signUp, signOut,
-      updateProfile: async () => {}, resetPassword, uploadAvatar: async () => "", updateUserPassword,
+      updateProfile, resetPassword, uploadAvatar, updateUserPassword,
       createOrder: async () => {}, userOrders, adminOrders, fetchUserOrders, fetchAllOrders,
       updateOrderStatus, updateOrderDetails, deleteOrder, allUsers, fetchAllUsers,
       orderRequests, createOrderRequest, fetchOrderRequests, reservasHorarios, fetchReservasHorarios,
-      approveOrderRequest, rejectOrderRequest: async () => {}, markRequestAsSeen: async () => {},
-      markOrderAsSeen: async () => {}, finanzas, fetchFinanzas, addFinanza,
+      approveOrderRequest, rejectOrderRequest: async () => {}, markRequestAsSeen,
+      markOrderAsSeen, finanzas, fetchFinanzas, addFinanza: async (f: any) => { await supabase.from('finanzas').insert([f]); await fetchFinanzas(); },
       toasts, addToast, removeToast, isInitialLoading: authLoading
     }}>
       {children}
