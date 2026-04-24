@@ -92,6 +92,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
+  
+  // LOGIC: Splash screen only on first visit of the session
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   // Business Data
@@ -104,13 +106,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [reservasHorarios, setReservasHorarios] = useState<any[]>([]);
   const [allUsers, setAllUsers] = useState<Profile[]>([]);
 
-  // 1. HELPER: Admin Check
-  const checkAdminStatus = useCallback((u: User | null, p: Profile | null) => {
-    if (!u) return false;
-    return ADMIN_EMAILS.includes(u.email || "") || p?.rol === 'admin';
-  }, []);
-
-  // 2. UTILS
+  // UTILS
   const addToast = useCallback((message: string, type: 'success'|'error'|'info' = 'info') => {
     const id = Math.random().toString(36).substr(2, 9);
     setToasts(prev => [...prev, { id, message, type }]);
@@ -119,7 +115,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const removeToast = useCallback((id: string) => setToasts(p => p.filter(t => t.id !== id)), []);
 
-  // 3. DATA FETCHERS (Optimized with less frequent calls)
+  // FETCHERS
   const fetchProducts = useCallback(async () => {
     const { data } = await supabase.from('products').select('*').order('created_at', { ascending: false });
     if (data) setProducts(data.map((p: any) => ({
@@ -134,7 +130,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (data) { 
       const p = data as Profile;
       setProfile(p);
-      // Dual check for admin
       setIsAdmin(ADMIN_EMAILS.includes(user?.email || "") || p.rol === 'admin');
     }
   }, [user]);
@@ -174,7 +169,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (data) setAllUsers(data);
   }, [isAdmin]);
 
-  // 4. AUTH ACTIONS
+  // AUTH ACTIONS
   const signIn = useCallback(async (email: string, password: string) => {
     setAuthLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -210,7 +205,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return url;
   }, [user, updateProfile]);
 
-  // 5. PRODUCT ACTIONS
+  // PRODUCT ACTIONS
   const addProduct = useCallback(async (p: any) => {
     await supabase.from('products').insert([{ ...p, image_urls: p.images, sub_category: p.subCategory, filter_tag: p.filterTag }]);
     await fetchProducts();
@@ -236,7 +231,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return urls;
   }, []);
 
-  // 6. ORDER ACTIONS
+  // ORDER ACTIONS
   const createOrderRequest = useCallback(async (data: any, res?: any) => {
     const { data: ins, error } = await supabase.from('solicitudes_pedidos').insert([{ ...data, estado: 'pendiente', visto: false }]).select('id').single();
     if (!error && res && ins) await supabase.from('reservas_horarios').insert([{ ...res, solicitud_id: ins.id, estado: 'bloqueado' }]);
@@ -287,14 +282,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     await fetchAllOrders();
   }, [fetchAllOrders]);
 
-  // 7. INITIALIZATION & RECOVERY (Optimized)
+  // INITIALIZATION
   useEffect(() => {
     let isMounted = true;
+    
+    // CHECK MEMORY: If already loaded in this session, skip splash
+    const alreadyLoaded = typeof window !== 'undefined' && sessionStorage.getItem('bm_loaded');
+    if (alreadyLoaded) setIsInitialLoading(false);
 
     const init = async () => {
-      // Parallel fetch essential data
       await Promise.all([fetchProducts(), fetchReservasHorarios()]);
-      
       const { data: { session } } = await supabase.auth.getSession();
       if (isMounted) {
         setUser(session?.user ?? null);
@@ -308,7 +305,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
     init();
 
-    // Session Listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!isMounted) return;
       setUser(session?.user ?? null);
@@ -321,26 +317,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setAuthLoading(false);
     });
 
-    // Subscriptions (Only for Admin to save resources on mobile)
-    let ch: any = null;
-    if (isAdmin) {
-      ch = supabase.channel('db-admin')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'solicitudes_pedidos' }, () => fetchOrderRequests())
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos' }, () => fetchAllOrders())
-        .subscribe();
-    }
+    const safetyTimer = setTimeout(() => { 
+      if (isMounted) {
+        setIsInitialLoading(false); 
+        sessionStorage.setItem('bm_loaded', 'true'); // Save to memory
+      }
+    }, alreadyLoaded ? 0 : 2000);
 
-    const safetyTimer = setTimeout(() => { if (isMounted) setIsInitialLoading(false); }, 1500);
+    return () => { isMounted = false; subscription.unsubscribe(); clearTimeout(safetyTimer); };
+  }, [fetchProducts, fetchReservasHorarios, fetchProfile]);
 
-    return () => { 
-      isMounted = false;
-      subscription.unsubscribe(); 
-      if (ch) supabase.removeChannel(ch);
-      clearTimeout(safetyTimer);
-    };
-  }, [fetchProducts, fetchReservasHorarios, fetchProfile, fetchOrderRequests, fetchAllOrders, isAdmin]);
-
-  // MEMOIZE CONTEXT VALUE
   const contextValue = useMemo(() => ({
     isLeftSidebarOpen, setIsLeftSidebarOpen, isCartOpen, setIsCartOpen, cart,
     addToCart: (p: any, s?: any) => { setCart(prev => [...prev, { product: p, size: s, quantity: 1 }]); setIsCartOpen(true); },
