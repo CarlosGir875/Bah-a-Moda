@@ -190,30 +190,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const resetPassword = useCallback(async (e: string) => { await supabase.auth.resetPasswordForEmail(e, { redirectTo: `${window.location.origin}/` }); }, []);
   const updateUserPassword = useCallback(async (p: string) => { await supabase.auth.updateUser({ password: p }); }, []);
   
-  // AVATAR UPLOAD WITH TIMEOUT SHIELD
   const uploadAvatar = useCallback(async (f: File) => {
     if (!user) return "";
     const path = `avatars/${user.id}-${Date.now()}`;
-    
-    // Safety Promise with 12s timeout
-    const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error("Tiempo de espera agotado. Reintenta.")), 12000)
-    );
-
+    const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 12000));
     try {
-      // Race between upload and timeout
-      await Promise.race([
-        supabase.storage.from('avatars').upload(path, f),
-        timeoutPromise
-      ]);
-
+      await Promise.race([supabase.storage.from('avatars').upload(path, f), timeoutPromise]);
       const url = supabase.storage.from('avatars').getPublicUrl(path).data.publicUrl;
       await updateProfile({ avatar_url: url });
       return url;
-    } catch (err) {
-      console.error("Avatar upload failed:", err);
-      throw err;
-    }
+    } catch (err) { throw err; }
   }, [user, updateProfile]);
 
   const addProduct = useCallback(async (p: any) => {
@@ -291,21 +277,25 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     await fetchAllOrders();
   }, [fetchAllOrders]);
 
-  // INITIALIZATION
+  // INITIALIZATION (Fixed Sync)
   useEffect(() => {
     let isMounted = true;
-    const alreadyLoaded = typeof window !== 'undefined' && sessionStorage.getItem('bm_loaded');
     
     const safetyTimer = setTimeout(() => {
       if (isMounted && isInitialLoading) {
+        console.warn("Safety trigger: Data taking too long, unlocking UI.");
         setIsInitialLoading(false);
       }
-    }, 4000);
+    }, 4500);
 
     const init = async () => {
       try {
-        await Promise.allSettled([fetchProducts(), fetchReservasHorarios()]);
+        // CRITICAL DATA FIRST
+        await fetchProducts();
+        await fetchReservasHorarios();
+        
         const { data: { session } } = await supabase.auth.getSession();
+        
         if (isMounted) {
           setUser(session?.user ?? null);
           if (session?.user) {
@@ -313,13 +303,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             setIsAdmin(ADMIN_EMAILS.includes(session.user.email || ""));
           }
           setAuthLoading(false);
+          
+          // ONLY UNLOCK AFTER EVERYTHING IS READY
           setTimeout(() => {
             if (isMounted) {
               setIsInitialLoading(false);
-              sessionStorage.setItem('bm_loaded', 'true');
               clearTimeout(safetyTimer);
             }
-          }, 200);
+          }, 300);
         }
       } catch (err) {
         if (isMounted) setIsInitialLoading(false);
