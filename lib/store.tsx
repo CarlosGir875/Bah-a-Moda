@@ -73,7 +73,7 @@ type StoreContextType = {
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
-const ADMIN_EMAILS = ["bahiamodapuerto@gmail.com", "carlosgironmejia@gmail.com"];
+const ADMIN_EMAILS = ["bahiamodapuerto@gmail.com", "bonosito1234@gmail.com", "carlosgironmejia@gmail.com"];
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(false);
