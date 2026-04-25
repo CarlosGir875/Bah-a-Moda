@@ -278,35 +278,41 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     await fetchAllOrders();
   }, [fetchAllOrders]);
 
-  // INITIALIZATION
   useEffect(() => {
     let isMounted = true;
-    
-    const safetyTimer = setTimeout(() => {
-      if (isMounted && isInitialLoading) {
-        setIsInitialLoading(false);
-      }
-    }, 4500);
 
     const init = async () => {
       try {
-        await Promise.allSettled([fetchProducts(), fetchReservasHorarios()]);
+        // 1. OBTENER SESIÓN PRIMERO (Garantiza que las consultas lleven el token de Auth si existe)
         const { data: { session } } = await supabase.auth.getSession();
+        
         if (isMounted) {
           setUser(session?.user ?? null);
-          if (session?.user) {
-            await fetchProfile(session.user.id);
-          }
+        }
+
+        // 2. DESCARGAR TODOS LOS DATOS CON LA SESIÓN YA RESTAURADA
+        const fetchPromises = [
+          fetchProducts(),
+          fetchReservasHorarios()
+        ];
+
+        if (session?.user) {
+          fetchPromises.push(fetchProfile(session.user.id));
+        }
+
+        await Promise.allSettled(fetchPromises);
+
+        // 3. DESBLOQUEAR INTERFAZ SOLO CUANDO TODO ESTÁ LISTO
+        if (isMounted) {
           setAuthLoading(false);
-          setTimeout(() => {
-            if (isMounted) {
-              setIsInitialLoading(false);
-              clearTimeout(safetyTimer);
-            }
-          }, 300);
+          setIsInitialLoading(false);
         }
       } catch (err) {
-        if (isMounted) setIsInitialLoading(false);
+        console.error("Initialization error:", err);
+        if (isMounted) {
+          setAuthLoading(false);
+          setIsInitialLoading(false);
+        }
       }
     };
 
@@ -318,12 +324,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (session?.user) {
         await fetchProfile(session.user.id);
       } else {
-        setProfile(null); setIsAdmin(false);
+        setProfile(null); 
+        setIsAdmin(false);
       }
       setAuthLoading(false);
     });
 
-    return () => { isMounted = false; subscription.unsubscribe(); clearTimeout(safetyTimer); };
+    return () => { 
+      isMounted = false; 
+      subscription.unsubscribe(); 
+    };
   }, [fetchProducts, fetchReservasHorarios, fetchProfile]);
 
   const contextValue = useMemo(() => ({
