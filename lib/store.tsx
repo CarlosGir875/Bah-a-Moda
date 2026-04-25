@@ -73,8 +73,6 @@ type StoreContextType = {
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
-const ADMIN_EMAILS = ["bahiamodapuerto@gmail.com", "bonosito1234@gmail.com", "carlosgironmejia@gmail.com"];
-
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -126,10 +124,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const { data } = await supabase.from('cliente_perfiles').select('*').eq('id', uid).maybeSingle();
       if (data) { 
         setProfile(data as Profile);
-        setIsAdmin(ADMIN_EMAILS.includes(user?.email || "") || data.rol === 'admin');
+        setIsAdmin(data.rol === 'admin'); // RELY ONLY ON DB ROLE
+      } else {
+        setProfile(null);
+        setIsAdmin(false);
       }
     } catch (e) { console.warn("Fetch profile failed", e); }
-  }, [user]);
+  }, []);
 
   const fetchOrderRequests = useCallback(async () => {
     const { data } = await supabase.from('solicitudes_pedidos').select('*').order('created_at', { ascending: false });
@@ -277,34 +278,26 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     await fetchAllOrders();
   }, [fetchAllOrders]);
 
-  // INITIALIZATION (Fixed Sync)
+  // INITIALIZATION
   useEffect(() => {
     let isMounted = true;
     
     const safetyTimer = setTimeout(() => {
       if (isMounted && isInitialLoading) {
-        console.warn("Safety trigger: Data taking too long, unlocking UI.");
         setIsInitialLoading(false);
       }
     }, 4500);
 
     const init = async () => {
       try {
-        // CRITICAL DATA FIRST
-        await fetchProducts();
-        await fetchReservasHorarios();
-        
+        await Promise.allSettled([fetchProducts(), fetchReservasHorarios()]);
         const { data: { session } } = await supabase.auth.getSession();
-        
         if (isMounted) {
           setUser(session?.user ?? null);
           if (session?.user) {
             await fetchProfile(session.user.id);
-            setIsAdmin(ADMIN_EMAILS.includes(session.user.email || ""));
           }
           setAuthLoading(false);
-          
-          // ONLY UNLOCK AFTER EVERYTHING IS READY
           setTimeout(() => {
             if (isMounted) {
               setIsInitialLoading(false);
@@ -323,7 +316,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (!isMounted) return;
       setUser(session?.user ?? null);
       if (session?.user) {
-        setIsAdmin(ADMIN_EMAILS.includes(session.user.email || ""));
         await fetchProfile(session.user.id);
       } else {
         setProfile(null); setIsAdmin(false);
