@@ -9,12 +9,7 @@ export function LoadingScreen() {
   const [fade, setFade] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-       if (sessionStorage.getItem('bahia_has_loaded') === 'true') {
-         setShouldRender(false);
-         setFade(true);
-       }
-    }
+    // Session storage check removed to prevent premature unlocking
   }, []);
 
   useEffect(() => {
