@@ -33,8 +33,19 @@ export async function getCroppedImg(
     throw new Error("No 2d context");
   }
 
-  canvas.width = pixelCrop.width;
-  canvas.height = pixelCrop.height;
+  // LIMITAR TAMAÑO PARA VELOCIDAD EN MÓVILES
+  const MAX_SIZE = 800;
+  let targetWidth = pixelCrop.width;
+  let targetHeight = pixelCrop.height;
+
+  if (targetWidth > MAX_SIZE || targetHeight > MAX_SIZE) {
+    const ratio = Math.min(MAX_SIZE / targetWidth, MAX_SIZE / targetHeight);
+    targetWidth *= ratio;
+    targetHeight *= ratio;
+  }
+
+  canvas.width = targetWidth;
+  canvas.height = targetHeight;
 
   ctx.drawImage(
     image,
@@ -44,8 +55,8 @@ export async function getCroppedImg(
     pixelCrop.height,
     0,
     0,
-    pixelCrop.width,
-    pixelCrop.height
+    targetWidth,
+    targetHeight
   );
 
   return new Promise((resolve, reject) => {
@@ -55,7 +66,7 @@ export async function getCroppedImg(
       } else {
         reject(new Error("Canvas is empty"));
       }
-    }, "image/jpeg", 0.9);
+    }, "image/jpeg", 0.85); // Calidad optimizada
   });
 }
 
@@ -87,7 +98,6 @@ export function ImageCropperModal({ isOpen, imageSrc, onClose, onCropComplete }:
       onClose();
     } catch (e) {
       console.error(e);
-    } finally {
       setIsProcessing(false);
     }
   };
@@ -99,8 +109,7 @@ export function ImageCropperModal({ isOpen, imageSrc, onClose, onCropComplete }:
       <div className="flex items-center justify-between p-4 bg-black/50 z-10">
         <button
           onClick={onClose}
-          disabled={isProcessing}
-          className="text-white bg-white/10 p-2 rounded-full hover:bg-white/20 transition-colors"
+          className="text-white bg-white/10 p-2 rounded-full hover:bg-white/20 transition-colors active:scale-90"
         >
           <X className="w-5 h-5" />
         </button>
