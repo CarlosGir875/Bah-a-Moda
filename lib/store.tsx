@@ -76,6 +76,7 @@ const StoreContext = createContext<StoreContextType | undefined>(undefined);
 const ADMIN_EMAILS = ["bahiamodapuerto@gmail.com", "carlosgironmejia@gmail.com"];
 
 export function StoreProvider({ children }: { children: ReactNode }) {
+  // Navigation UI
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -86,12 +87,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isTrackingOpen, setIsTrackingOpen] = useState(false);
 
+  // Auth & Profile
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
+  // Business Data
   const [products, setProducts] = useState<Product[]>([]);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [userOrders, setUserOrders] = useState<Order[]>([]);
@@ -101,6 +104,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [reservasHorarios, setReservasHorarios] = useState<any[]>([]);
   const [allUsers, setAllUsers] = useState<Profile[]>([]);
 
+  // 1. HELPERS
   const addToast = useCallback((message: string, type: 'success'|'error'|'info' = 'info') => {
     const id = Math.random().toString(36).substr(2, 9);
     setToasts(prev => [...prev, { id, message, type }]);
@@ -109,6 +113,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const removeToast = useCallback((id: string) => setToasts(p => p.filter(t => t.id !== id)), []);
 
+  // 2. FETCHERS
   const fetchProducts = useCallback(async () => {
     try {
       const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
@@ -118,15 +123,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         images: p.image_urls || [], category: p.category, subCategory: p.sub_category,
         filterTag: p.filter_tag, supplier: p.supplier, delivery_date: p.delivery_date, description: p.description, sizes: p.sizes || []
       })));
-    } catch (e) { console.error("Error fetching products:", e); }
+    } catch (e) { console.warn("Failed to fetch products", e); }
   }, []);
 
   const fetchProfile = useCallback(async (uid: string) => {
-    const { data } = await supabase.from('cliente_perfiles').select('*').eq('id', uid).maybeSingle();
-    if (data) { 
-      setProfile(data as Profile);
-      setIsAdmin(ADMIN_EMAILS.includes(user?.email || "") || data.rol === 'admin');
-    }
+    try {
+      const { data } = await supabase.from('cliente_perfiles').select('*').eq('id', uid).maybeSingle();
+      if (data) { 
+        setProfile(data as Profile);
+        setIsAdmin(ADMIN_EMAILS.includes(user?.email || "") || data.rol === 'admin');
+      }
+    } catch (e) { console.warn("Failed to fetch profile", e); }
   }, [user]);
 
   const fetchOrderRequests = useCallback(async () => {
@@ -160,6 +167,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (data) setAllUsers(data);
   }, []);
 
+  // 3. AUTH ACTIONS
   const signIn = useCallback(async (email: string, password: string) => {
     setAuthLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -195,6 +203,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return url;
   }, [user, updateProfile]);
 
+  // 4. PRODUCT ACTIONS
   const addProduct = useCallback(async (p: any) => {
     await supabase.from('products').insert([{ ...p, image_urls: p.images, sub_category: p.subCategory, filter_tag: p.filterTag }]);
     await fetchProducts();
@@ -220,6 +229,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return urls;
   }, []);
 
+  // 5. ORDER ACTIONS
   const createOrderRequest = useCallback(async (data: any, res?: any) => {
     const { data: ins, error } = await supabase.from('solicitudes_pedidos').insert([{ ...data, estado: 'pendiente', visto: false }]).select('id').single();
     if (!error && res && ins) await supabase.from('reservas_horarios').insert([{ ...res, solicitud_id: ins.id, estado: 'bloqueado' }]);
@@ -270,26 +280,46 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     await fetchAllOrders();
   }, [fetchAllOrders]);
 
+  // 6. INITIALIZATION (Bulletproof Logic)
   useEffect(() => {
     let isMounted = true;
     const alreadyLoaded = typeof window !== 'undefined' && sessionStorage.getItem('bm_loaded');
+    
+    // SAFETY TIMEOUT: Force unlock after 3.5 seconds NO MATTER WHAT
+    const safetyTimer = setTimeout(() => {
+      if (isMounted && isInitialLoading) {
+        console.warn("Safety trigger: Unlocking UI due to timeout.");
+        setIsInitialLoading(false);
+      }
+    }, 3500);
 
     const init = async () => {
-      // Priority 1: Data
-      await fetchProducts();
-      await fetchReservasHorarios();
-      
-      // Priority 2: Session
-      const { data: { session } } = await supabase.auth.getSession();
-      if (isMounted) {
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          await fetchProfile(session.user.id);
-          setIsAdmin(ADMIN_EMAILS.includes(session.user.email || ""));
+      try {
+        // Parallel fetch for speed
+        await Promise.allSettled([fetchProducts(), fetchReservasHorarios()]);
+        
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (isMounted) {
+          setUser(session?.user ?? null);
+          if (session?.user) {
+            await fetchProfile(session.user.id);
+            setIsAdmin(ADMIN_EMAILS.includes(session.user.email || ""));
+          }
+          setAuthLoading(false);
+          
+          // Successful Init: Close splash
+          setTimeout(() => {
+            if (isMounted) {
+              setIsInitialLoading(false);
+              sessionStorage.setItem('bm_loaded', 'true');
+              clearTimeout(safetyTimer);
+            }
+          }, 200);
         }
-        setAuthLoading(false);
-        // ONLY HIDE SPLASH AFTER PRODUCTS LOAD
-        setTimeout(() => { if (isMounted) { setIsInitialLoading(false); sessionStorage.setItem('bm_loaded', 'true'); } }, 100);
+      } catch (err) {
+        console.error("Initialization error:", err);
+        if (isMounted) setIsInitialLoading(false);
       }
     };
 
@@ -307,7 +337,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setAuthLoading(false);
     });
 
-    return () => { isMounted = false; subscription.unsubscribe(); };
+    return () => { isMounted = false; subscription.unsubscribe(); clearTimeout(safetyTimer); };
   }, [fetchProducts, fetchReservasHorarios, fetchProfile]);
 
   const contextValue = useMemo(() => ({
