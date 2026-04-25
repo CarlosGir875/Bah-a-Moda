@@ -76,7 +76,6 @@ const StoreContext = createContext<StoreContextType | undefined>(undefined);
 const ADMIN_EMAILS = ["bahiamodapuerto@gmail.com", "carlosgironmejia@gmail.com"];
 
 export function StoreProvider({ children }: { children: ReactNode }) {
-  // Navigation UI
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -87,14 +86,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isTrackingOpen, setIsTrackingOpen] = useState(false);
 
-  // Auth & Profile
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
-  // Business Data
   const [products, setProducts] = useState<Product[]>([]);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [userOrders, setUserOrders] = useState<Order[]>([]);
@@ -104,7 +101,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [reservasHorarios, setReservasHorarios] = useState<any[]>([]);
   const [allUsers, setAllUsers] = useState<Profile[]>([]);
 
-  // 1. HELPERS
   const addToast = useCallback((message: string, type: 'success'|'error'|'info' = 'info') => {
     const id = Math.random().toString(36).substr(2, 9);
     setToasts(prev => [...prev, { id, message, type }]);
@@ -113,7 +109,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const removeToast = useCallback((id: string) => setToasts(p => p.filter(t => t.id !== id)), []);
 
-  // 2. FETCHERS
   const fetchProducts = useCallback(async () => {
     try {
       const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
@@ -123,7 +118,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         images: p.image_urls || [], category: p.category, subCategory: p.sub_category,
         filterTag: p.filter_tag, supplier: p.supplier, delivery_date: p.delivery_date, description: p.description, sizes: p.sizes || []
       })));
-    } catch (e) { console.warn("Failed to fetch products", e); }
+    } catch (e) { console.warn("Fetch products failed", e); }
   }, []);
 
   const fetchProfile = useCallback(async (uid: string) => {
@@ -133,7 +128,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         setProfile(data as Profile);
         setIsAdmin(ADMIN_EMAILS.includes(user?.email || "") || data.rol === 'admin');
       }
-    } catch (e) { console.warn("Failed to fetch profile", e); }
+    } catch (e) { console.warn("Fetch profile failed", e); }
   }, [user]);
 
   const fetchOrderRequests = useCallback(async () => {
@@ -167,7 +162,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (data) setAllUsers(data);
   }, []);
 
-  // 3. AUTH ACTIONS
   const signIn = useCallback(async (email: string, password: string) => {
     setAuthLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -187,23 +181,41 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const updateProfile = useCallback(async (u: any) => {
     if (!user) return;
-    await supabase.from('cliente_perfiles').update(u).eq('id', user.id);
-    await fetchProfile(user.id);
+    try {
+      await supabase.from('cliente_perfiles').update(u).eq('id', user.id);
+      await fetchProfile(user.id);
+    } catch (e) { console.error("Update profile failed", e); }
   }, [user, fetchProfile]);
 
   const resetPassword = useCallback(async (e: string) => { await supabase.auth.resetPasswordForEmail(e, { redirectTo: `${window.location.origin}/` }); }, []);
   const updateUserPassword = useCallback(async (p: string) => { await supabase.auth.updateUser({ password: p }); }, []);
   
+  // AVATAR UPLOAD WITH TIMEOUT SHIELD
   const uploadAvatar = useCallback(async (f: File) => {
     if (!user) return "";
     const path = `avatars/${user.id}-${Date.now()}`;
-    await supabase.storage.from('avatars').upload(path, f);
-    const url = supabase.storage.from('avatars').getPublicUrl(path).data.publicUrl;
-    await updateProfile({ avatar_url: url });
-    return url;
+    
+    // Safety Promise with 12s timeout
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error("Tiempo de espera agotado. Reintenta.")), 12000)
+    );
+
+    try {
+      // Race between upload and timeout
+      await Promise.race([
+        supabase.storage.from('avatars').upload(path, f),
+        timeoutPromise
+      ]);
+
+      const url = supabase.storage.from('avatars').getPublicUrl(path).data.publicUrl;
+      await updateProfile({ avatar_url: url });
+      return url;
+    } catch (err) {
+      console.error("Avatar upload failed:", err);
+      throw err;
+    }
   }, [user, updateProfile]);
 
-  // 4. PRODUCT ACTIONS
   const addProduct = useCallback(async (p: any) => {
     await supabase.from('products').insert([{ ...p, image_urls: p.images, sub_category: p.subCategory, filter_tag: p.filterTag }]);
     await fetchProducts();
@@ -229,7 +241,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return urls;
   }, []);
 
-  // 5. ORDER ACTIONS
   const createOrderRequest = useCallback(async (data: any, res?: any) => {
     const { data: ins, error } = await supabase.from('solicitudes_pedidos').insert([{ ...data, estado: 'pendiente', visto: false }]).select('id').single();
     if (!error && res && ins) await supabase.from('reservas_horarios').insert([{ ...res, solicitud_id: ins.id, estado: 'bloqueado' }]);
@@ -280,26 +291,21 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     await fetchAllOrders();
   }, [fetchAllOrders]);
 
-  // 6. INITIALIZATION (Bulletproof Logic)
+  // INITIALIZATION
   useEffect(() => {
     let isMounted = true;
     const alreadyLoaded = typeof window !== 'undefined' && sessionStorage.getItem('bm_loaded');
     
-    // SAFETY TIMEOUT: Force unlock after 3.5 seconds NO MATTER WHAT
     const safetyTimer = setTimeout(() => {
       if (isMounted && isInitialLoading) {
-        console.warn("Safety trigger: Unlocking UI due to timeout.");
         setIsInitialLoading(false);
       }
-    }, 3500);
+    }, 4000);
 
     const init = async () => {
       try {
-        // Parallel fetch for speed
         await Promise.allSettled([fetchProducts(), fetchReservasHorarios()]);
-        
         const { data: { session } } = await supabase.auth.getSession();
-        
         if (isMounted) {
           setUser(session?.user ?? null);
           if (session?.user) {
@@ -307,8 +313,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             setIsAdmin(ADMIN_EMAILS.includes(session.user.email || ""));
           }
           setAuthLoading(false);
-          
-          // Successful Init: Close splash
           setTimeout(() => {
             if (isMounted) {
               setIsInitialLoading(false);
@@ -318,7 +322,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           }, 200);
         }
       } catch (err) {
-        console.error("Initialization error:", err);
         if (isMounted) setIsInitialLoading(false);
       }
     };
