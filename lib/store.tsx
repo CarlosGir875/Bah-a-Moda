@@ -125,12 +125,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         images: p.image_urls || [], category: p.category, subCategory: p.sub_category,
         filterTag: p.filter_tag, supplier: p.supplier, delivery_date: p.delivery_date, description: p.description, sizes: p.sizes || []
       })));
-    } catch (e) { console.warn("Fetch products failed", e); }
+    } catch (e) { 
+      console.warn("Fetch products failed", e); 
+      throw e; 
+    }
   }, []);
 
   const fetchProfile = useCallback(async (uid: string) => {
     try {
-      const { data } = await supabase.from('cliente_perfiles').select('*').eq('id', uid).maybeSingle();
+      const { data, error } = await supabase.from('cliente_perfiles').select('*').eq('id', uid).maybeSingle();
+      if (error) throw error;
       if (data) { 
         setProfile(data as Profile);
         setIsAdmin(data.rol === 'admin'); // RELY ONLY ON DB ROLE
@@ -138,7 +142,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         setProfile(null);
         setIsAdmin(false);
       }
-    } catch (e) { console.warn("Fetch profile failed", e); }
+    } catch (e) { 
+      console.warn("Fetch profile failed", e); 
+      throw e; 
+    }
   }, []);
 
   const fetchOrderRequests = useCallback(async () => {
@@ -305,9 +312,25 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           setUser(session?.user ?? null);
         }
 
-        // 2. DESCARGAR TODOS LOS DATOS
+        // 2. DESCARGAR TODOS LOS DATOS CON AUTO-REINTENTO PARA MÓVILES
         const fetchPromises = [
-          fetchProducts().catch(e => { throw new Error("Error cargando catálogo."); }),
+          (async () => {
+            for (let i = 0; i < 3; i++) {
+              try {
+                const { data, error } = await supabase.from('products').select('id').limit(1);
+                if (error) throw error;
+                if (data && data.length > 0) {
+                  await fetchProducts();
+                  return; // Éxito
+                }
+              } catch (e) {}
+              // Esperar 800ms antes de reintentar (soluciona la latencia móvil)
+              await new Promise(res => setTimeout(res, 800));
+            }
+            // Si después de 3 intentos falla:
+            await fetchProducts(); // Último intento ciego
+          })().catch(e => { throw new Error("Error cargando catálogo."); }),
+          
           fetchReservasHorarios().catch(e => { throw new Error("Error cargando horarios."); })
         ];
 
