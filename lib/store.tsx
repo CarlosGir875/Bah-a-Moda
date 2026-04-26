@@ -308,57 +308,24 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
     const init = async () => {
       try {
-        setAppError(null);
-
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        
-        if (sessionError) throw new Error("Error verificando sesión: " + sessionError.message);
-
+        // 1. Obtener sesión (rápido, local)
+        const { data: { session } } = await supabase.auth.getSession();
         if (isMounted) setUser(session?.user ?? null);
 
-        const fetchPromises = [
-          (async () => {
-            // Bucle corto de 3 segundos máximo (3 intentos x 1000ms)
-            let retries = 3;
-            while (retries > 0) {
-              try {
-                const { data, error } = await supabase.from('products').select('id').limit(1);
-                if (error) throw error;
-                if (data && data.length > 0) {
-                  await fetchProducts();
-                  return;
-                }
-              } catch (e) {
-                console.warn("Reintento de productos...", e);
-              }
-              await new Promise(res => setTimeout(res, 1000));
-              retries--;
-            }
-            // Último intento
-            await fetchProducts();
-          })().catch(e => { throw new Error("Catálogo inaccesible."); }),
-          fetchReservasHorarios().catch(e => { throw new Error("Error cargando horarios."); })
-        ];
+        // 2. Lanzar TODOS los fetches en paralelo, cada uno es independiente
+        // Ninguno puede bloquear a los demás. Si uno falla, los demás siguen.
+        await Promise.allSettled([
+          fetchProducts().catch(e => console.warn("productos:", e)),
+          fetchReservasHorarios().catch(e => console.warn("horarios:", e)),
+          session?.user 
+            ? fetchProfile(session.user.id).catch(e => console.warn("perfil:", e))
+            : Promise.resolve()
+        ]);
 
-        // 🔥 DESACOPLAMIENTO CRÍTICO: El perfil carga en paralelo pero NO bloquea el catálogo
-        if (session?.user) {
-          fetchProfile(session.user.id).catch(e => { 
-            console.error("El perfil del usuario falló silenciosamente, pero el catálogo seguirá cargando.", e); 
-          });
-        }
-
-        const results = await Promise.allSettled(fetchPromises);
-        
-        const errors = results
-          .filter((r): r is PromiseRejectedResult => r.status === 'rejected')
-          .map(r => r.reason?.message || "Error desconocido");
-
-        if (errors.length > 0) throw new Error(errors.join(" | "));
-
-      } catch (err: any) {
-        console.error("Initialization error:", err);
-        if (isMounted) setAppError(err.message || "Error crítico de conexión.");
+      } catch (e) {
+        console.warn("Init error:", e);
       } finally {
+        // SIEMPRE se ejecuta, sin excepción. La pantalla de carga SIEMPRE se cierra.
         if (isMounted) {
           setAuthLoading(false);
           setIsInitialLoading(false);
@@ -372,11 +339,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (!isMounted) return;
       setUser(session?.user ?? null);
       if (session?.user) {
-        try {
-          await fetchProfile(session.user.id);
-        } catch (e) {
-          console.warn("Error en actualización de sesión en segundo plano:", e);
-        }
+        fetchProfile(session.user.id).catch(e => console.warn("perfil (auth change):", e));
       } else {
         setProfile(null); 
         setIsAdmin(false);
