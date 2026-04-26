@@ -306,14 +306,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let isMounted = true;
 
-    // Temporizador de seguridad ajustado a 8s (suficiente para cold starts normales)
-    const safetyTimer = setTimeout(() => {
-      if (isMounted && isInitialLoading) {
-        setAppError("La base de datos está tardando en responder. Por favor, reintenta.");
-        setIsInitialLoading(false);
-      }
-    }, 8000); 
-
     const init = async () => {
       try {
         setAppError(null);
@@ -370,7 +362,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         if (isMounted) {
           setAuthLoading(false);
           setIsInitialLoading(false);
-          clearTimeout(safetyTimer);
         }
       }
     };
