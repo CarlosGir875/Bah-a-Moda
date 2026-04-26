@@ -119,7 +119,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const fetchProducts = useCallback(async () => {
     try {
       const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
-      if (error) throw error;
+      if (error) {
+        console.log("🚨 ERROR EN PRODUCTOS:", error.message, error.hint, error.details);
+        throw error;
+      }
       if (data) setProducts(data.map((p: any) => ({
         id: p.id, name: p.name, price: p.price, cost: p.cost || 0, stock: p.stock ?? 1,
         images: p.image_urls || [], category: p.category, subCategory: p.sub_category,
@@ -133,12 +136,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const fetchProfile = useCallback(async (uid: string) => {
     try {
+      console.log("🔄 Iniciando carga de perfil para UID:", uid);
       const { data, error } = await supabase.from('cliente_perfiles').select('*').eq('id', uid).maybeSingle();
-      if (error) throw error;
+      if (error) {
+        console.log("🚨 ERROR EN PERFIL (Posible RLS Violation/JWT):", error.message, error.hint, error.details);
+        throw error;
+      }
       if (data) { 
+        console.log("✅ Perfil cargado exitosamente.");
         setProfile(data as Profile);
         setIsAdmin(data.rol === 'admin'); // RELY ONLY ON DB ROLE
       } else {
+        console.log("⚠️ No se encontró el perfil en la base de datos.");
         setProfile(null);
         setIsAdmin(false);
       }
