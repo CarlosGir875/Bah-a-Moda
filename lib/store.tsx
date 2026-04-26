@@ -297,11 +297,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let isMounted = true;
 
+    // Temporizador de seguridad extendido a 20s para permitir que Supabase "despierte" (Cold Start)
     const safetyTimer = setTimeout(() => {
       if (isMounted && isInitialLoading) {
+        setAppError("La base de datos está tardando demasiado en responder (Cold Start). Por favor, reintenta.");
         setIsInitialLoading(false);
       }
-    }, 5000); // 5 segundos máximo de loading screen
+    }, 20000); 
 
     const init = async () => {
       try {
@@ -315,7 +317,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
         const fetchPromises = [
           (async () => {
-            for (let i = 0; i < 3; i++) {
+            // Bucle de reintento de 15 segundos para dar tiempo a Supabase a despertar
+            let retries = 5;
+            while (retries > 0) {
               try {
                 const { data, error } = await supabase.from('products').select('id').limit(1);
                 if (error) throw error;
@@ -323,11 +327,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
                   await fetchProducts();
                   return;
                 }
-              } catch (e) {}
-              await new Promise(res => setTimeout(res, 800));
+              } catch (e) {
+                console.warn("Supabase wake-up attempt failed, retrying...", e);
+              }
+              await new Promise(res => setTimeout(res, 2000)); // Esperar 2 segundos por intento
+              retries--;
             }
+            // Último intento
             await fetchProducts();
-          })().catch(e => { throw new Error("Error cargando catálogo."); }),
+          })().catch(e => { throw new Error("Base de datos dormida o inaccesible."); }),
           fetchReservasHorarios().catch(e => { throw new Error("Error cargando horarios."); })
         ];
 
