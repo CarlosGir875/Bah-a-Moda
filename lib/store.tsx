@@ -297,22 +297,22 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let isMounted = true;
 
+    const safetyTimer = setTimeout(() => {
+      if (isMounted && isInitialLoading) {
+        setIsInitialLoading(false);
+      }
+    }, 5000); // 5 segundos máximo de loading screen
+
     const init = async () => {
       try {
-        setAppError(null); // Limpiar error anterior si es un reintento
+        setAppError(null);
 
-        // 1. OBTENER SESIÓN PRIMERO
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
-        if (sessionError) {
-          throw new Error("Error verificando sesión: " + sessionError.message);
-        }
+        if (sessionError) throw new Error("Error verificando sesión: " + sessionError.message);
 
-        if (isMounted) {
-          setUser(session?.user ?? null);
-        }
+        if (isMounted) setUser(session?.user ?? null);
 
-        // 2. DESCARGAR TODOS LOS DATOS CON AUTO-REINTENTO PARA MÓVILES
         const fetchPromises = [
           (async () => {
             for (let i = 0; i < 3; i++) {
@@ -321,16 +321,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
                 if (error) throw error;
                 if (data && data.length > 0) {
                   await fetchProducts();
-                  return; // Éxito
+                  return;
                 }
               } catch (e) {}
-              // Esperar 800ms antes de reintentar (soluciona la latencia móvil)
               await new Promise(res => setTimeout(res, 800));
             }
-            // Si después de 3 intentos falla:
-            await fetchProducts(); // Último intento ciego
+            await fetchProducts();
           })().catch(e => { throw new Error("Error cargando catálogo."); }),
-          
           fetchReservasHorarios().catch(e => { throw new Error("Error cargando horarios."); })
         ];
 
@@ -344,21 +341,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           .filter((r): r is PromiseRejectedResult => r.status === 'rejected')
           .map(r => r.reason?.message || "Error desconocido");
 
-        if (errors.length > 0) {
-          throw new Error(errors.join(" | "));
-        }
+        if (errors.length > 0) throw new Error(errors.join(" | "));
 
-        // 3. DESBLOQUEAR INTERFAZ SOLO CUANDO TODO ESTÁ LISTO
-        if (isMounted) {
-          setAuthLoading(false);
-          setIsInitialLoading(false);
-        }
       } catch (err: any) {
         console.error("Initialization error:", err);
+        if (isMounted) setAppError(err.message || "Error crítico de conexión.");
+      } finally {
         if (isMounted) {
-          setAppError(err.message || "Error crítico de conexión.");
           setAuthLoading(false);
           setIsInitialLoading(false);
+          clearTimeout(safetyTimer);
         }
       }
     };
