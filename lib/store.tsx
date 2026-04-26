@@ -326,8 +326,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
         const fetchPromises = [
           (async () => {
-            // Bucle de reintento de 15 segundos para dar tiempo a Supabase a despertar
-            let retries = 5;
+            // Bucle corto de 3 segundos máximo (3 intentos x 1000ms)
+            let retries = 3;
             while (retries > 0) {
               try {
                 const { data, error } = await supabase.from('products').select('id').limit(1);
@@ -337,19 +337,22 @@ export function StoreProvider({ children }: { children: ReactNode }) {
                   return;
                 }
               } catch (e) {
-                console.warn("Supabase wake-up attempt failed, retrying...", e);
+                console.warn("Reintento de productos...", e);
               }
-              await new Promise(res => setTimeout(res, 2000)); // Esperar 2 segundos por intento
+              await new Promise(res => setTimeout(res, 1000));
               retries--;
             }
             // Último intento
             await fetchProducts();
-          })().catch(e => { throw new Error("Base de datos dormida o inaccesible."); }),
+          })().catch(e => { throw new Error("Catálogo inaccesible."); }),
           fetchReservasHorarios().catch(e => { throw new Error("Error cargando horarios."); })
         ];
 
+        // 🔥 DESACOPLAMIENTO CRÍTICO: El perfil carga en paralelo pero NO bloquea el catálogo
         if (session?.user) {
-          fetchPromises.push(fetchProfile(session.user.id).catch(e => { throw new Error("Error cargando perfil."); }));
+          fetchProfile(session.user.id).catch(e => { 
+            console.error("El perfil del usuario falló silenciosamente, pero el catálogo seguirá cargando.", e); 
+          });
         }
 
         const results = await Promise.allSettled(fetchPromises);
