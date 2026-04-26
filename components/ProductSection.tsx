@@ -9,21 +9,11 @@ import { useStore } from "@/lib/store";
 import { useEffect } from "react";
 
 export function ProductSection() {
-  const { products, selectedCategory, setSelectedCategory, selectedFilter, setSelectedFilter, searchQuery, fetchProducts } = useStore();
+  const { products, selectedCategory, setSelectedCategory, selectedFilter, setSelectedFilter, searchQuery, isInitialLoading } = useStore();
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    let isMounted = true;
-    const loadData = async () => {
-      // Only show loading if we don't have products yet
-      if (products.length === 0) setLoading(true);
-      await fetchProducts();
-      if (isMounted) setLoading(false);
-    };
-    loadData();
-    return () => { isMounted = false; };
-  }, [fetchProducts, products.length]);
+  // loading depends purely on the global store
+  const loading = isInitialLoading && products.length === 0;
 
   const filteredProducts = products.filter(p => {
     // Search query takes highest priority

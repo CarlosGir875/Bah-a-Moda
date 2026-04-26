@@ -210,7 +210,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const uploadAvatar = useCallback(async (f: File) => {
     if (!user) return "";
     const path = `avatars/${user.id}-${Date.now()}`;
-    const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 12000));
+    const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 60000)); // 60 segundos para móviles con fotos HD
     try {
       await Promise.race([supabase.storage.from('avatars').upload(path, f), timeoutPromise]);
       const url = supabase.storage.from('avatars').getPublicUrl(path).data.publicUrl;
