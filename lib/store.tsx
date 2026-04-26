@@ -69,6 +69,7 @@ type StoreContextType = {
   addFinanza: (f: any) => Promise<void>;
   toasts: Toast[]; addToast: (m: string, t?: 'success'|'error'|'info') => void; removeToast: (id: string) => void;
   isInitialLoading: boolean;
+  appError: string | null; retryInit: () => void;
 };
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
@@ -89,6 +90,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [appError, setAppError] = useState<string | null>(null);
+  const [retryCounter, setRetryCounter] = useState(0);
 
   const [products, setProducts] = useState<Product[]>([]);
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -98,6 +101,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [finanzas, setFinanzas] = useState<any[]>([]);
   const [reservasHorarios, setReservasHorarios] = useState<any[]>([]);
   const [allUsers, setAllUsers] = useState<Profile[]>([]);
+
+  const retryInit = useCallback(() => {
+    setAppError(null);
+    setIsInitialLoading(true);
+    setRetryCounter(c => c + 1);
+  }, []);
 
   const addToast = useCallback((message: string, type: 'success'|'error'|'info' = 'info') => {
     const id = Math.random().toString(36).substr(2, 9);
@@ -283,33 +292,48 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
     const init = async () => {
       try {
-        // 1. OBTENER SESIÓN PRIMERO (Garantiza que las consultas lleven el token de Auth si existe)
-        const { data: { session } } = await supabase.auth.getSession();
+        setAppError(null); // Limpiar error anterior si es un reintento
+
+        // 1. OBTENER SESIÓN PRIMERO
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
+        if (sessionError) {
+          throw new Error("Error verificando sesión: " + sessionError.message);
+        }
+
         if (isMounted) {
           setUser(session?.user ?? null);
         }
 
-        // 2. DESCARGAR TODOS LOS DATOS CON LA SESIÓN YA RESTAURADA
+        // 2. DESCARGAR TODOS LOS DATOS
         const fetchPromises = [
-          fetchProducts(),
-          fetchReservasHorarios()
+          fetchProducts().catch(e => { throw new Error("Error cargando catálogo."); }),
+          fetchReservasHorarios().catch(e => { throw new Error("Error cargando horarios."); })
         ];
 
         if (session?.user) {
-          fetchPromises.push(fetchProfile(session.user.id));
+          fetchPromises.push(fetchProfile(session.user.id).catch(e => { throw new Error("Error cargando perfil."); }));
         }
 
-        await Promise.allSettled(fetchPromises);
+        const results = await Promise.allSettled(fetchPromises);
+        
+        const errors = results
+          .filter((r): r is PromiseRejectedResult => r.status === 'rejected')
+          .map(r => r.reason?.message || "Error desconocido");
+
+        if (errors.length > 0) {
+          throw new Error(errors.join(" | "));
+        }
 
         // 3. DESBLOQUEAR INTERFAZ SOLO CUANDO TODO ESTÁ LISTO
         if (isMounted) {
           setAuthLoading(false);
           setIsInitialLoading(false);
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error("Initialization error:", err);
         if (isMounted) {
+          setAppError(err.message || "Error crítico de conexión.");
           setAuthLoading(false);
           setIsInitialLoading(false);
         }
@@ -322,7 +346,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (!isMounted) return;
       setUser(session?.user ?? null);
       if (session?.user) {
-        await fetchProfile(session.user.id);
+        await fetchProfile(session.user.id).catch(() => {});
       } else {
         setProfile(null); 
         setIsAdmin(false);
@@ -334,7 +358,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       isMounted = false; 
       subscription.unsubscribe(); 
     };
-  }, [fetchProducts, fetchReservasHorarios, fetchProfile]);
+  }, [fetchProducts, fetchReservasHorarios, fetchProfile, retryCounter]);
 
   const contextValue = useMemo(() => ({
     isLeftSidebarOpen, setIsLeftSidebarOpen, isCartOpen, setIsCartOpen, cart,
@@ -350,11 +374,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     rejectOrderRequest: async (id: string) => { await supabase.from('solicitudes_pedidos').update({ estado: 'rechazado' }).eq('id', id); await fetchOrderRequests(); },
     markRequestAsSeen, markOrderAsSeen, finanzas, fetchFinanzas,
     addFinanza: async (f: any) => { await supabase.from('finanzas').insert([f]); await fetchFinanzas(); },
-    toasts, addToast, removeToast, isInitialLoading
+    toasts, addToast, removeToast, isInitialLoading, appError, retryInit
   }), [
     isLeftSidebarOpen, isCartOpen, cart, selectedCategory, selectedFilter, searchQuery, isAuthModalOpen, 
     isProfileModalOpen, isTrackingOpen, products, user, profile, isAdmin, authLoading, userOrders, 
-    adminOrders, allUsers, orderRequests, reservasHorarios, finanzas, toasts, isInitialLoading,
+    adminOrders, allUsers, orderRequests, reservasHorarios, finanzas, toasts, isInitialLoading, appError, retryInit,
     fetchProducts, addProduct, updateProduct, deleteProduct, uploadProductImages, signIn, signUp, 
     signOut, updateProfile, resetPassword, uploadAvatar, updateUserPassword, fetchUserOrders, 
     fetchAllOrders, updateOrderStatus, updateOrderDetails, deleteOrder, fetchAllUsers, 

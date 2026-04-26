@@ -12,6 +12,7 @@ import { ProfileModal } from "@/components/ProfileModal";
 import { FloatingStatus } from "@/components/FloatingStatus";
 import { Toaster } from "@/components/Toaster";
 import { PackageTrackerPremium } from "@/components/PackageTrackerPremium";
+import { CrashScreen } from "@/components/CrashScreen";
 import type { Viewport } from 'next';
 
 const inter = Inter({ subsets: ["latin"] });
@@ -48,6 +49,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-white text-black selection:bg-gray-200 overflow-x-hidden w-full">
         <StoreProvider>
           <DisableInspect />
+          <CrashScreen />
           <LoadingScreen />
           <SidebarLeft />
           <CartSidebar />
