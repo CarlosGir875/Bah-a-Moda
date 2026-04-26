@@ -369,7 +369,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (!isMounted) return;
       setUser(session?.user ?? null);
       if (session?.user) {
-        await fetchProfile(session.user.id).catch(() => {});
+        try {
+          await fetchProfile(session.user.id);
+        } catch (e) {
+          console.warn("Error en actualización de sesión en segundo plano:", e);
+        }
       } else {
         setProfile(null); 
         setIsAdmin(false);
