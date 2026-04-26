@@ -297,13 +297,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let isMounted = true;
 
-    // Temporizador de seguridad extendido a 20s para permitir que Supabase "despierte" (Cold Start)
+    // Temporizador de seguridad ajustado a 8s (suficiente para cold starts normales)
     const safetyTimer = setTimeout(() => {
       if (isMounted && isInitialLoading) {
-        setAppError("La base de datos está tardando demasiado en responder (Cold Start). Por favor, reintenta.");
+        setAppError("La base de datos está tardando en responder. Por favor, reintenta.");
         setIsInitialLoading(false);
       }
-    }, 20000); 
+    }, 8000); 
 
     const init = async () => {
       try {
