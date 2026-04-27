@@ -145,7 +145,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (data) { 
         console.log("✅ Perfil cargado exitosamente.");
         setProfile(data as Profile);
-        setIsAdmin(data.rol === 'admin'); // RELY ONLY ON DB ROLE
+        const isAdm = data.rol === 'admin';
+        setIsAdmin(isAdm); 
+        
+        // Si es admin, cargar datos administrativos de inmediato
+        if (isAdm) {
+          fetchOrderRequests();
+          fetchAllOrders();
+          fetchAllUsers();
+          fetchFinanzas();
+        }
       } else {
         console.log("⚠️ No se encontró el perfil en la base de datos.");
         setProfile(null);
@@ -317,6 +326,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         await Promise.allSettled([
           fetchProducts().catch(e => console.warn("productos:", e)),
           fetchReservasHorarios().catch(e => console.warn("horarios:", e)),
+          fetchOrderRequests().catch(e => console.warn("solicitudes:", e)),
+          fetchAllOrders().catch(e => console.warn("pedidos:", e)),
           session?.user 
             ? fetchProfile(session.user.id).catch(e => console.warn("perfil:", e))
             : Promise.resolve()
