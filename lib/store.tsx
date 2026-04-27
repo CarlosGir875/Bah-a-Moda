@@ -318,8 +318,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const init = async () => {
       try {
         // 1. Obtener sesión (rápido, local)
-        const { data: { session } } = await supabase.auth.getSession();
-        if (isMounted) setUser(session?.user ?? null);
+        try {
+          const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+          if (sessionError && sessionError.message.includes("Refresh Token Not Found")) {
+            console.warn("Sesión corrupta detectada, limpiando...");
+            await supabase.auth.signOut();
+            if (isMounted) setUser(null);
+          } else if (isMounted) {
+            setUser(session?.user ?? null);
+          }
+        } catch (authErr) {
+          console.warn("Auth check failed", authErr);
+        }
 
         // 2. Lanzar TODOS los fetches en paralelo, cada uno es independiente
         // Ninguno puede bloquear a los demás. Si uno falla, los demás siguen.

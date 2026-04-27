@@ -23,22 +23,27 @@ export function FloatingStatus() {
   // Admin: Count pending requests
   const pendingCount = orderRequests.filter(r => r.estado === 'pendiente').length;
   
-  // User: Latest active request status
-  const userRequest = user ? orderRequests.find(r => r.user_id === user.id && r.estado !== 'rechazado') : null;
+  // User: Prioritize active orders over pending requests
+  const activeOrder = user ? userOrders.find(o => !['listo_entrega', 'cancelado'].includes(o.estado)) : null;
+  const pendingRequest = user && !activeOrder ? orderRequests.find(r => r.user_id === user.id && r.estado === 'pendiente') : null;
 
-  // Auto-open on confirmation
+  // Auto-open on state changes
   useEffect(() => {
-    if (userRequest?.estado === 'aprobado' && !userRequest.visto) {
+    if (activeOrder || pendingRequest) {
        setIsOpen(true);
     }
-  }, [userRequest?.estado, userRequest?.visto]);
+  }, [activeOrder?.estado, pendingRequest?.estado]);
 
-  if (!isAdmin && !userRequest) return null;
+  if (!isAdmin && !activeOrder && !pendingRequest) return null;
 
   const getStatusColor = () => {
-    if (isAdmin) return 'bg-[#6366f1]';
-    if (userRequest?.estado === 'aprobado') return 'bg-[#10b981]';
-    if (userRequest?.estado === 'pendiente') return 'bg-[#f59e0b]';
+    if (isAdmin) return 'bg-indigo-600';
+    if (activeOrder) {
+      if (activeOrder.estado === 'recibido') return 'bg-emerald-500';
+      if (activeOrder.estado === 'preparacion') return 'bg-orange-500';
+      if (activeOrder.estado === 'en_transito') return 'bg-violet-600';
+    }
+    if (pendingRequest) return 'bg-amber-500';
     return 'bg-black';
   };
 
@@ -94,39 +99,45 @@ export function FloatingStatus() {
                      Gestionar Inbox <ArrowRight className="w-3 h-3" />
                    </button>
                  </div>
-              ) : userRequest && (
-                 <div className="space-y-4">
-                   {userRequest.estado === 'pendiente' ? (
-                     <div className="bg-gradient-to-br from-amber-50 to-orange-50/30 p-5 rounded-[2rem] border border-amber-100 flex gap-4 items-center">
-                       <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-amber-500 shadow-sm animate-bounce duration-[2000ms]">
-                         <Clock className="w-6 h-6" />
-                       </div>
-                       <div>
-                         <p className="text-[10px] font-black text-amber-700 uppercase tracking-widest leading-none mb-1">En Revisión</p>
-                         <p className="text-[11px] font-medium text-amber-900/70 leading-tight">Bahía Moda está verificando tu solicitud...</p>
-                       </div>
-                     </div>
-                   ) : userRequest.estado === 'aprobado' ? (
-                     <div className="space-y-4 animate-in zoom-in-95 duration-500">
-                       <div className="bg-gradient-to-br from-green-50 to-emerald-50/30 p-5 rounded-[2rem] border border-green-100 text-center">
-                         <div className="w-14 h-14 bg-white rounded-3xl flex items-center justify-center text-green-500 mx-auto mb-3 shadow-md">
-                           <CheckCircle2 className="w-8 h-8" />
-                         </div>
-                         <p className="text-xs font-black text-green-700 uppercase tracking-widest mb-1">¡Pedido Confirmado!</p>
-                         <p className="text-[11px] font-medium text-green-900/60 leading-relaxed">
-                           Tu reserva es oficial. El envío está siendo preparado.
-                         </p>
-                       </div>
-                       <button 
-                         onClick={() => { setIsTrackingOpen(true); setIsOpen(false); }}
-                         className="w-full bg-[#10b981] text-white py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.2em] shadow-xl hover:shadow-green-200 transition-all flex items-center justify-center gap-3 active:scale-95"
-                       >
-                         <Truck className="w-4 h-4" /> Seguir Mi Paquete
-                       </button>
-                     </div>
-                   ) : null}
-                 </div>
-              )}
+               ) : activeOrder ? (
+                  <div className="space-y-4 animate-in zoom-in-95 duration-500">
+                    <div className="bg-white p-5 rounded-[2rem] border border-gray-100 shadow-sm text-center">
+                      <div className={`w-14 h-14 rounded-3xl flex items-center justify-center mx-auto mb-3 shadow-md text-white ${getStatusColor()}`}>
+                        {activeOrder.estado === 'recibido' && <CheckCircle2 className="w-8 h-8" />}
+                        {activeOrder.estado === 'preparacion' && <Package className="w-8 h-8 animate-pulse" />}
+                        {activeOrder.estado === 'en_transito' && <Truck className="w-8 h-8 animate-bounce" />}
+                      </div>
+                      <p className="text-xs font-black uppercase tracking-widest mb-1">
+                        {activeOrder.estado === 'recibido' ? '¡Pedido Aceptado!' : 
+                         activeOrder.estado === 'preparacion' ? 'Empaquetando Pedido' : 
+                         activeOrder.estado === 'en_transito' ? 'Pedido en Camino' : 'Procesando'}
+                      </p>
+                      <p className="text-[11px] font-medium text-gray-500 leading-relaxed">
+                        {activeOrder.estado === 'recibido' ? 'Tu reserva ha sido aprobada con éxito.' : 
+                         activeOrder.estado === 'preparacion' ? 'Estamos preparando tu paquete con elegancia.' : 
+                         activeOrder.estado === 'en_transito' ? 'Tu pedido va rumbo a su destino final.' : 'Estamos trabajando en tu pedido.'}
+                      </p>
+                    </div>
+                    <button 
+                      onClick={() => { setIsTrackingOpen(true); setIsOpen(false); }}
+                      className={`w-full text-white py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.2em] shadow-xl transition-all flex items-center justify-center gap-3 active:scale-95 ${getStatusColor()}`}
+                    >
+                      <Truck className="w-4 h-4" /> Seguir Mi Paquete
+                    </button>
+                  </div>
+                ) : pendingRequest && (
+                  <div className="space-y-4">
+                    <div className="bg-gradient-to-br from-amber-50 to-orange-50/30 p-5 rounded-[2rem] border border-amber-100 flex gap-4 items-center">
+                      <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-amber-500 shadow-sm animate-bounce duration-[2000ms]">
+                        <Clock className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-black text-amber-700 uppercase tracking-widest leading-none mb-1">En Revisión</p>
+                        <p className="text-[11px] font-medium text-amber-900/70 leading-tight">Bahía Moda está verificando tu solicitud...</p>
+                      </div>
+                    </div>
+                  </div>
+                )}      )}
             </div>
           </div>
         </div>
