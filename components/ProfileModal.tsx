@@ -1,6 +1,6 @@
 "use client";
 
-import { X, LogOut, User, ShieldCheck, Mail, ArrowRight, ArrowLeft, Check, Phone, MapPin, Map, Package, Clock, CheckCircle2, Calendar } from "lucide-react";
+import { X, LogOut, User, ShieldCheck, Mail, ArrowRight, ArrowLeft, Check, Phone, MapPin, Map, Package, Clock, CheckCircle2, Calendar, MessageSquareShare } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useStore } from "@/lib/store";
 import { useEffect, useState, useRef } from "react";
