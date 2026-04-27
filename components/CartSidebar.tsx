@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Trash2, ShoppingBag, ArrowLeft, Send } from "lucide-react";
+import { X, Trash2, ShoppingBag, ArrowLeft, Send, Check, Package } from "lucide-react";
 import { useStore } from "@/lib/store";
 
 // Eliminado generateTimeSlots para simplificar el flujo
