@@ -101,9 +101,9 @@ export function Navbar() {
                   className="flex items-center gap-2 pl-2 pr-2.5 py-1.5 text-black bg-gray-50 hover:bg-gray-100 rounded-full transition-all hover:scale-[1.02] border border-gray-200 shadow-sm active:scale-95"
                   aria-label="Perfil"
                 >
-                  <div className="w-7 h-7 bg-black text-white rounded-full flex items-center justify-center shadow-inner overflow-hidden border border-gray-200">
+                  <div className="w-8 h-8 aspect-square shrink-0 bg-black text-white rounded-full flex items-center justify-center shadow-inner overflow-hidden border-2 border-white ring-1 ring-gray-200">
                     {profile?.avatar_url || user?.user_metadata?.avatar_url || user?.user_metadata?.picture ? (
-                      <img src={profile?.avatar_url || user?.user_metadata?.avatar_url || user?.user_metadata?.picture} alt="Profile" className="w-full h-full object-cover" />
+                      <img src={profile?.avatar_url || user?.user_metadata?.avatar_url || user?.user_metadata?.picture} alt="Profile" className="w-full h-full object-cover rounded-full" />
                     ) : (
                       <User className="h-4 w-4" strokeWidth={2.5} />
                     )}

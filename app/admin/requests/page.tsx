@@ -195,7 +195,14 @@ export default function AdminRequestsPage() {
                                 ) : (
                                   <div className="flex items-center justify-center gap-2" onClick={e => e.stopPropagation()}>
                                     <button 
-                                      onClick={() => generateInvoicePDF(req)}
+                                      onClick={() => {
+                                        try {
+                                          generateInvoicePDF(req);
+                                        } catch (e) {
+                                          console.error("PDF error:", e);
+                                          addToast("❌ Error al generar PDF", "error");
+                                        }
+                                      }}
                                       className="flex items-center gap-2 px-3 py-1.5 bg-zinc-900 text-white rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-black transition-all"
                                       title="Descargar PDF"
                                     >

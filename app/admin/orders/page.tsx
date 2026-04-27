@@ -2,9 +2,10 @@
 
 import { useStore } from "@/lib/store";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Package, TrendingUp, Wallet, Clock, CheckCircle, XCircle, User, MapPin, Check, Truck } from "lucide-react";
+import { ArrowLeft, Package, TrendingUp, Wallet, Clock, CheckCircle, XCircle, User, MapPin, Check, Truck, Download } from "lucide-react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import { generateInvoicePDF } from "@/lib/invoiceGenerator";
 
 export default function AdminOrdersPage() {
   const { adminOrders, fetchAllOrders, updateOrderStatus, markOrderAsSeen } = useStore();
@@ -155,10 +156,18 @@ export default function AdminOrdersPage() {
                       onClick={() => updateOrderStatus(order.id, 'recibido')}
                       className="flex-1 bg-black text-white py-5 rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.2em] transition-all shadow-xl hover:bg-zinc-800 flex items-center justify-center gap-3 hover:scale-[1.01]"
                     >
-                      <CheckCircle className="w-5 h-5 text-emerald-400" /> Confirmar Pedido (Generar ID)
+                      <CheckCircle className="w-5 h-5 text-emerald-400" /> Confirmar Pedido
                     </button>
                   )}
                   {order.estado === 'recibido' && (
+                    <button 
+                      onClick={() => updateOrderStatus(order.id, 'preparacion')}
+                      className="flex-1 bg-amber-500 hover:bg-amber-600 text-white py-5 rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.2em] transition-all shadow-xl flex items-center justify-center gap-3"
+                    >
+                      <Clock className="w-5 h-5" /> Empaquetando Pedido
+                    </button>
+                  )}
+                  {order.estado === 'preparacion' && (
                     <button 
                       onClick={() => updateOrderStatus(order.id, 'en_transito')}
                       className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-5 rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.2em] transition-all shadow-xl flex items-center justify-center gap-3"
@@ -166,28 +175,35 @@ export default function AdminOrdersPage() {
                       <Truck className="w-5 h-5" /> Despachar (En Camino)
                     </button>
                   )}
-
-
-
-
-
-
-
-
                   {order.estado === 'en_transito' && (
                     <button 
                       onClick={() => updateOrderStatus(order.id, 'listo_entrega')}
                       className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-5 rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.2em] transition-all shadow-xl flex items-center justify-center gap-3"
                     >
-                      <div className="flex items-center relative">
-                        <Truck className="w-5 h-5 mr-1" />
-                        <CheckCircle className="w-3 h-3 absolute -right-1 -top-1" />
-                      </div> Marcar como Entregado
+                      <CheckCircle className="w-5 h-5" /> Marcar como Entregado
                     </button>
                   )}
+
+                  <button 
+                    onClick={() => {
+                      const invoiceData = {
+                        id: order.id,
+                        cliente_nombre: order.nombre_cliente,
+                        cliente_telefono: order.cliente_telefono || "N/A",
+                        ubicacion_entrega: order.ubicacion_entrega,
+                        items: order.items,
+                        total: order.total,
+                        anticipo: order.anticipo || (order.total * 0.5)
+                      };
+                      generateInvoicePDF(invoiceData);
+                    }}
+                    className="flex-none bg-zinc-100 hover:bg-zinc-200 text-zinc-900 px-6 py-5 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2"
+                  >
+                    <Download className="w-5 h-5" /> PDF
+                  </button>
                 </div>
                 
-                {['pendiente', 'recibido'].includes(order.estado) && (
+                {['pendiente', 'recibido', 'preparacion'].includes(order.estado) && (
                   <button 
                     onClick={() => updateOrderStatus(order.id, 'cancelado')}
                     className="w-full bg-slate-50 hover:bg-rose-50 text-slate-400 hover:text-rose-600 py-4 rounded-[1.2rem] text-[8px] font-black uppercase tracking-[0.2em] transition-all border border-transparent hover:border-rose-100 flex items-center justify-center gap-2"
@@ -217,12 +233,12 @@ export default function AdminOrdersPage() {
             <CheckCircle className="w-3.5 h-3.5" /> Confirmado
           </span>
         );
-
-
-
-
-
-
+      case 'preparacion': 
+        return (
+          <span className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-100 text-orange-900 text-[10px] font-black uppercase tracking-widest border border-orange-200 shadow-sm">
+            <Clock className="w-3.5 h-3.5" /> Empaquetando
+          </span>
+        );
       case 'en_transito': 
         return (
           <span className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-violet-100 text-violet-900 text-[10px] font-black uppercase tracking-widest border border-violet-200 shadow-sm animate-pulse">

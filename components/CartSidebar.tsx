@@ -266,15 +266,18 @@ export function CartSidebar() {
                    <input required type="tel" placeholder="Ej. 4567 8910" value={formData.celular} onChange={e => setFormData({...formData, celular: e.target.value})} className="w-full border border-gray-100 bg-gray-50 px-5 py-4 rounded-2xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-black transition-all" />
                  </div>
                  
-                  <div className="bg-indigo-50 border border-indigo-100 p-6 rounded-[2rem] mt-8 text-center shadow-inner">
-                    <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
-                      <Send className="w-6 h-6 text-indigo-500" />
-                    </div>
-                    <h4 className="text-xs font-black uppercase tracking-widest text-indigo-900 mb-2">Entrega Inteligente</h4>
-                    <p className="text-[10px] font-bold text-indigo-600 leading-relaxed uppercase tracking-tight">
-                      Estamos preparando tu selección. Mantente atento a las notificaciones para conocer tu entrega exclusiva.
-                    </p>
-                  </div>
+                   <div className="mt-8 bg-slate-900 border border-white/10 p-6 rounded-[2rem] text-center shadow-2xl relative overflow-hidden">
+                     <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
+                     <div className="relative z-10">
+                       <div className="w-12 h-12 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                         <Send className="w-6 h-6 text-indigo-400" />
+                       </div>
+                       <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400 mb-2">Protocolo de Seguridad</h4>
+                       <p className="text-[11px] font-bold text-white/60 leading-relaxed">
+                         TU PEDIDO SERÁ VALIDADO POR NUESTRO EQUIPO. MANTENTE ATENTO A LAS NOTIFICACIONES PARA COMPLETAR TU ENTREGA EXCLUSIVA.
+                       </p>
+                     </div>
+                   </div>
               </form>
             </div>
 

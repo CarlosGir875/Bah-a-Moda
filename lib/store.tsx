@@ -347,11 +347,29 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setAuthLoading(false);
     });
 
+    // Realtime subscriptions
+    const pedidosSub = supabase
+      .channel('realtime_pedidos')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos' }, () => {
+        fetchAllOrders();
+        fetchUserOrders();
+      })
+      .subscribe();
+
+    const solicitudesSub = supabase
+      .channel('realtime_solicitudes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'solicitudes_pedidos' }, () => {
+        fetchOrderRequests();
+      })
+      .subscribe();
+
     return () => { 
       isMounted = false; 
       subscription.unsubscribe(); 
+      supabase.removeChannel(pedidosSub);
+      supabase.removeChannel(solicitudesSub);
     };
-  }, [fetchProducts, fetchReservasHorarios, fetchProfile, retryCounter]);
+  }, [fetchProducts, fetchReservasHorarios, fetchProfile, fetchAllOrders, fetchUserOrders, fetchOrderRequests, retryCounter]);
 
   const contextValue = useMemo(() => ({
     isLeftSidebarOpen, setIsLeftSidebarOpen, isCartOpen, setIsCartOpen, cart,
