@@ -676,7 +676,7 @@ export default function AdminDashboard() {
                    </div>
                    <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-1">Activos en Bodega</p>
                    <h3 className="text-2xl font-black text-black">
-                      Q {products.reduce((s, p) => s + ((p.cost || 0) * (p.stock && p.stock !== -1 ? p.stock : 0)), 0).toLocaleString()}
+                      Q {products.reduce((s, p) => s + ((p.cost || 0) * ((p.stock !== undefined && p.stock !== -1) ? p.stock : 0)), 0).toLocaleString()}
                    </h3>
                    <p className="text-[9px] text-gray-400 mt-2 font-bold uppercase tracking-tighter">Valor total de tu mercancía</p>
                 </div>
@@ -685,19 +685,19 @@ export default function AdminDashboard() {
                 <button 
                   onClick={() => { setActiveTab('inventory'); setSearchTerm("!!!LOW!!!"); }}
                   className={`p-6 rounded-[2rem] shadow-sm relative overflow-hidden group text-left transition-all hover:shadow-xl hover:-translate-y-1 border-2 ${
-                    products.filter(p => p.stock !== -1 && p.stock < 3).length > 0 ? 'bg-orange-50 border-orange-100' : 'bg-white border-zinc-100'
+                    products.filter(p => (p.stock ?? 0) !== -1 && (p.stock ?? 0) < 3).length > 0 ? 'bg-orange-50 border-orange-100' : 'bg-white border-zinc-100'
                   }`}
                 >
                    <div className={`absolute right-0 top-0 p-3 rounded-bl-2xl ${
-                     products.filter(p => p.stock !== -1 && p.stock < 3).length > 0 ? 'bg-orange-500 text-white' : 'bg-zinc-50 text-zinc-400'
+                     products.filter(p => (p.stock ?? 0) !== -1 && (p.stock ?? 0) < 3).length > 0 ? 'bg-orange-500 text-white' : 'bg-zinc-50 text-zinc-400'
                    }`}>
                      <ShieldAlert className="w-5 h-5" />
                    </div>
                    <p className={`text-[10px] font-black uppercase tracking-widest mb-1 ${
-                     products.filter(p => p.stock !== -1 && p.stock < 3).length > 0 ? 'text-orange-600' : 'text-zinc-400'
+                     products.filter(p => (p.stock ?? 0) !== -1 && (p.stock ?? 0) < 3).length > 0 ? 'text-orange-600' : 'text-zinc-400'
                    }`}>Stock Crítico</p>
                    <h3 className="text-2xl font-black text-black">
-                      {products.filter(p => p.stock !== -1 && p.stock < 3).length} Items
+                      {products.filter(p => (p.stock ?? 0) !== -1 && (p.stock ?? 0) < 3).length} Items
                    </h3>
                    <p className="text-[9px] text-zinc-400 mt-2 font-bold uppercase tracking-tighter">Productos por agotarse</p>
                 </button>
@@ -822,7 +822,7 @@ export default function AdminDashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {products
                 .filter(p => {
-                  if (searchTerm === "!!!LOW!!!") return p.stock !== -1 && p.stock < 3;
+                  if (searchTerm === "!!!LOW!!!") return (p.stock ?? 0) !== -1 && (p.stock ?? 0) < 3;
                   return p.name.toLowerCase().includes(searchTerm.toLowerCase()) || p.category.toLowerCase().includes(searchTerm.toLowerCase());
                 })
                 .map(product => {
