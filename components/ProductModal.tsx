@@ -95,7 +95,7 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-6 bg-black/90 backdrop-blur-md">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/95 backdrop-blur-lg">
       {/* Backdrop */}
       <motion.div
         initial={{ opacity: 0 }}
@@ -110,7 +110,7 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
         initial={{ scale: 0.92, opacity: 0, y: 24 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="bg-white w-full max-w-2xl flex flex-col shadow-[0_40px_120px_-20px_rgba(0,0,0,0.6)] overflow-hidden rounded-[2.5rem] relative z-10 max-h-[95vh] overflow-y-auto"
+        className="bg-white w-full max-w-2xl flex flex-col shadow-[0_40px_120px_-20px_rgba(0,0,0,0.6)] overflow-hidden rounded-[2.5rem] relative z-10 max-h-[92vh] overflow-y-auto"
       >
         {/* Close Button */}
         <button
@@ -220,7 +220,7 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
         )}
 
         {/* ═══ PRODUCT INFO ═══ */}
-        <div className="px-6 pt-6 pb-8 flex flex-col gap-4">
+        <div className="px-7 sm:px-10 pt-7 pb-10 flex flex-col gap-5">
 
           {/* Category & Stock */}
           <div className="flex items-center gap-3">

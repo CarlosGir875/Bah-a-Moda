@@ -453,7 +453,7 @@ export function AuthModal() {
                       placeholder="••••••••"
                       value={formData.password}
                       onChange={e => setFormData({ ...formData, password: e.target.value })}
-                      className="w-full border border-gray-200 bg-gray-50 px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black transition-all pr-12 cursor-text"
+                      className="w-full border border-gray-200 bg-gray-50 px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black transition-all pr-12 cursor-text font-bold"
                     />
                     <button
                       type="button"
@@ -463,6 +463,11 @@ export function AuthModal() {
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
+                  {mode === "register" && (
+                    <p className="mt-2 text-[9px] font-black uppercase text-indigo-600 bg-indigo-50/50 px-3 py-2 rounded-lg border border-indigo-100/50 leading-tight">
+                      🛡️ RECOMENDACIÓN: Guarda bien tu contraseña en un lugar seguro. ¡Es tu llave personal a Bahía Moda!
+                    </p>
+                  )}
                 </div>
               )}
 
@@ -507,7 +512,7 @@ export function AuthModal() {
       }
 
           {/* Beneficios de tener cuenta */}
-          {mode === "register" && (
+          {mode === "register" && !welcomeName && (
             <div className="px-6 pb-5">
               <div className="bg-gray-50 border border-gray-100 rounded-2xl p-4">
                 <p className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-3">Beneficios gratuitos</p>
@@ -523,22 +528,24 @@ export function AuthModal() {
           )}
 
           {/* Toggle */}
-          <div className="px-6 pb-6 text-center">
-            <p className="text-xs text-gray-500">
-              {mode === "login" ? "¿No tienes cuenta?" : mode === "register" ? "¿Ya tienes cuenta?" : "¿Ya recordaste?"}
-              {" "}
-              <button
-                type="button"
-                onClick={() => {
-                  setMode(mode === "login" ? "register" : "login");
-                  setResetSent(false);
-                }}
-                className="font-black text-black underline underline-offset-2 hover:no-underline transition-all"
-              >
-                {mode === "login" ? "Crear una gratis" : "Inicia sesión"}
-              </button>
-            </p>
-          </div>
+          {!welcomeName && (
+            <div className="px-6 pb-6 text-center">
+              <p className="text-xs text-gray-500">
+                {mode === "login" ? "¿No tienes cuenta?" : mode === "register" ? "¿Ya tienes cuenta?" : "¿Ya recordaste?"}
+                {" "}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode(mode === "login" ? "register" : "login");
+                    setResetSent(false);
+                  }}
+                  className="font-black text-black underline underline-offset-2 hover:no-underline transition-all"
+                >
+                  {mode === "login" ? "Crear una gratis" : "Inicia sesión"}
+                </button>
+              </p>
+            </div>
+          )}
           
           </div> {/* End of Scrollable Body */}
         </div>

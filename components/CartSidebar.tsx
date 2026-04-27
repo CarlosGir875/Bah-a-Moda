@@ -10,7 +10,7 @@ export function CartSidebar() {
   const { isCartOpen, setIsCartOpen, cart, removeFromCart, user, profile, createOrderRequest, clearCart, addToast, setIsProfileModalOpen } = useStore();
   const [checkoutStep, setCheckoutStep] = useState<"cart" | "form" | "success">("cart");
   const [isProcessing, setIsProcessing] = useState(false);
-  const [deliveryType, setDeliveryType] = useState<"domicilio" | "punto">("domicilio");
+  const deliveryType = "domicilio";
   
   const [formData, setFormData] = useState({
     nombre: "",
@@ -79,8 +79,7 @@ export function CartSidebar() {
       const rawMessage = `🌟 *NUEVO PEDIDO - BAHÍA MODA* 🌟\n\n` +
         `👤 *Cliente:* ${formData.nombre}\n` +
         `📱 *Celular:* ${formData.celular}\n` +
-        `📍 *Modalidad:* ${deliveryType === 'domicilio' ? 'Envío a Domicilio' : 'Punto de Encuentro'}\n` +
-        `🗺️ *Ubicación:* ${formData.ubicacion}\n\n` +
+        `📍 *Dirección:* ${formData.ubicacion}\n\n` +
         `🛍️ *RESUMEN DE COMPRA:*\n${itemsList}\n\n` +
         `💰 *Total:* Q${cartTotal.toFixed(2)}\n` +
         `💳 *Anticipo Reserva (50%):* Q${depositAmount.toFixed(2)}\n` +
@@ -225,28 +224,11 @@ export function CartSidebar() {
               </div>
 
               <form id="checkout-form" onSubmit={confirmAndSendRequest} className="space-y-6">
-                 <div>
-                   <label className="block text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-3">Modo de Entrega</label>
-                   <div className="grid grid-cols-2 gap-2">
-                     <button 
-                        type="button"
-                        onClick={() => setDeliveryType("domicilio")}
-                        className={`py-3 px-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${
-                          deliveryType === 'domicilio' ? 'bg-black text-white border-black shadow-lg' : 'bg-white text-gray-400 border-gray-100'
-                        }`}
-                     >
-                       A Domicilio
-                     </button>
-                     <button 
-                        type="button"
-                        onClick={() => setDeliveryType("punto")}
-                        className={`py-3 px-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${
-                          deliveryType === 'punto' ? 'bg-black text-white border-black shadow-lg' : 'bg-white text-gray-400 border-gray-100'
-                        }`}
-                     >
-                       📍 Punto Seguro
-                     </button>
-                   </div>
+                 <div className="bg-gray-50 border border-gray-100 p-4 rounded-2xl">
+                   <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Tipo de Entrega</p>
+                   <p className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                     🏠 Envío a Domicilio (Puerto San José)
+                   </p>
                  </div>
 
                  <div>
