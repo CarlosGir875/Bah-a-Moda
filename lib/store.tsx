@@ -53,6 +53,7 @@ type StoreContextType = {
   updateProfile: (u: any) => Promise<void>;
   resetPassword: (e: string) => Promise<void>;
   uploadAvatar: (f: File) => Promise<string>;
+  uploadOrderReceipt: (orderId: string, f: File) => Promise<string>;
   updateUserPassword: (p: string) => Promise<void>;
   userOrders: Order[]; adminOrders: Order[]; fetchUserOrders: () => Promise<void>; fetchAllOrders: () => Promise<void>;
   updateOrderStatus: (id: string, s: string) => Promise<void>;
@@ -228,7 +229,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const uploadAvatar = useCallback(async (f: File) => {
     if (!user) return "";
     const path = `avatars/${user.id}-${Date.now()}`;
-    const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 60000)); // 60 segundos para móviles con fotos HD
+    const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 60000));
     try {
       await Promise.race([supabase.storage.from('avatars').upload(path, f), timeoutPromise]);
       const url = supabase.storage.from('avatars').getPublicUrl(path).data.publicUrl;
@@ -236,6 +237,31 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       return url;
     } catch (err) { throw err; }
   }, [user, updateProfile]);
+
+  const uploadOrderReceipt = useCallback(async (orderId: string, f: File) => {
+    if (!user) throw new Error("Debes iniciar sesión");
+    const path = `comprobantes/${orderId}-${Date.now()}.jpg`;
+    try {
+      // 1. Upload to storage
+      const { error: uploadError } = await supabase.storage.from('comprobantes').upload(path, f);
+      if (uploadError) throw uploadError;
+
+      const url = supabase.storage.from('comprobantes').getPublicUrl(path).data.publicUrl;
+
+      // 2. Update DB (Try in both tables just in case)
+      await Promise.all([
+        supabase.from('pedidos').update({ comprobante_url: url }).eq('id', orderId),
+        supabase.from('solicitudes_pedidos').update({ comprobante_url: url }).eq('id', orderId)
+      ]);
+
+      await fetchUserOrders();
+      await fetchOrderRequests();
+      return url;
+    } catch (err) { 
+      console.error("Error al subir comprobante:", err);
+      throw err; 
+    }
+  }, [user, fetchUserOrders, fetchOrderRequests]);
 
   const addProduct = useCallback(async (p: any) => {
     await supabase.from('products').insert([{ ...p, image_urls: p.images, sub_category: p.subCategory, filter_tag: p.filterTag }]);
@@ -409,7 +435,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     searchQuery, setSearchQuery, isAuthModalOpen, setIsAuthModalOpen, isProfileModalOpen, setIsProfileModalOpen,
     isTrackingOpen, setIsTrackingOpen, products, fetchProducts, addProduct, updateProduct, deleteProduct,
     uploadProductImages, user, profile, isAdmin, authLoading, signIn, signUp, signOut, updateProfile, resetPassword,
-    uploadAvatar, updateUserPassword, createOrder: async () => {}, userOrders, adminOrders, fetchUserOrders, fetchAllOrders,
+    uploadAvatar, uploadOrderReceipt, updateUserPassword, createOrder: async () => {}, userOrders, adminOrders, fetchUserOrders, fetchAllOrders,
     updateOrderStatus, updateOrderDetails, deleteOrder, allUsers, fetchAllUsers, orderRequests, createOrderRequest,
     fetchOrderRequests, reservasHorarios, fetchReservasHorarios, approveOrderRequest,
     rejectOrderRequest: async (id: string) => { await supabase.from('solicitudes_pedidos').update({ estado: 'rechazado' }).eq('id', id); await fetchOrderRequests(); },

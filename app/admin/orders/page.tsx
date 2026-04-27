@@ -118,9 +118,19 @@ export default function AdminOrdersPage() {
               </div>
 
               <div className="flex flex-wrap items-center justify-between gap-8 mb-10 px-4">
-                  <div>
-                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-2">Total Pedido</p>
-                    <p className="text-2xl font-black text-zinc-950">Q{order.total}</p>
+                  <div className="flex items-center gap-6">
+                    <div>
+                      <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-2">Total Pedido</p>
+                      <p className="text-2xl font-black text-zinc-950">Q{order.total}</p>
+                    </div>
+                    {(order as any).comprobante_url && (
+                      <button 
+                        onClick={() => window.open((order as any).comprobante_url, '_blank')}
+                        className="flex items-center gap-2 bg-emerald-500 text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest shadow-lg hover:bg-emerald-600 transition-all"
+                      >
+                        <Download className="w-4 h-4" /> Ver Recibo
+                      </button>
+                    )}
                   </div>
                   <div className="bg-indigo-50/50 p-6 rounded-3xl border border-indigo-100/50 flex items-center gap-8">
                     <div>

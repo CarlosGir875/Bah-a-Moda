@@ -6,6 +6,7 @@ import { useStore } from "@/lib/store";
 import { useEffect, useState, useRef } from "react";
 import { ImageCropperModal } from "./ImageCropperModal";
 import { LuxuryTicket } from "./LuxuryTicket";
+import { compressImage } from "@/lib/imageUtils";
 
 export function ProfileModal() {
   const { isProfileModalOpen, setIsProfileModalOpen, isTrackingOpen, setIsTrackingOpen, user, profile, isAdmin, signOut, updateProfile, uploadAvatar, userOrders, fetchUserOrders, addToast } = useStore();
@@ -16,6 +17,10 @@ export function ProfileModal() {
   const [cropperOpen, setCropperOpen] = useState(false);
   const [imageFileUrl, setImageFileUrl] = useState<string | null>(null);
   const [selectedTicketOrder, setSelectedTicketOrder] = useState<any>(null);
+  
+  const [isUploadingReceipt, setIsUploadingReceipt] = useState<string | null>(null); // orderId
+  const receiptInputRef = useRef<HTMLInputElement>(null);
+  const [activeOrderId, setActiveOrderId] = useState<string | null>(null);
 
   useEffect(() => {
     if (isProfileModalOpen && user) {
@@ -156,6 +161,30 @@ export function ProfileModal() {
     }
   };
 
+  const { uploadOrderReceipt } = useStore();
+
+  const handleReceiptUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !activeOrderId) return;
+
+    setIsUploadingReceipt(activeOrderId);
+    try {
+      // 1. Comprimir para ahorrar espacio en Supabase (Gratis 1GB)
+      const compressed = await compressImage(file, 1200, 0.7);
+      
+      // 2. Subir
+      await uploadOrderReceipt(activeOrderId, compressed);
+      
+      addToast("✅ Comprobante enviado con éxito", "success");
+    } catch (err: any) {
+      addToast("❌ Error al subir: " + err.message, "error");
+    } finally {
+      setIsUploadingReceipt(null);
+      setActiveOrderId(null);
+      if (receiptInputRef.current) receiptInputRef.current.value = '';
+    }
+  };
+
   return (
     <div 
       className={`fixed inset-0 z-[100] flex items-center justify-center p-4 transition-all duration-500 overflow-hidden ${
@@ -186,6 +215,7 @@ export function ProfileModal() {
           )}
         </AnimatePresence>
         <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
+        <input type="file" ref={receiptInputRef} onChange={handleReceiptUpload} className="hidden" accept="image/*" />
 
         <div className="flex-1 overflow-y-auto custom-scrollbar relative">
           {/* Header move inside scroll */}
@@ -369,13 +399,45 @@ export function ProfileModal() {
                              </div>
                            ))}
                         </div>
-                        
-                        <div className="flex flex-col md:flex-row justify-between items-end gap-6 pt-4">
-                           <div className="flex flex-col md:flex-row gap-8">
+                                   <div className="flex flex-col md:flex-row justify-between items-end gap-6 pt-4">
+                           <div className="flex flex-col md:flex-row gap-8 w-full md:w-auto">
                               <div className="text-left bg-zinc-100 p-4 rounded-xl border border-zinc-200">
                                 <p className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] mb-1">Abonado / Reserva</p>
                                 <p className="text-xl font-black text-emerald-600 font-mono">Q{o.anticipo}</p>
                               </div>
+                              
+                              {/* SECCIÓN DE COMPROBANTE */}
+                              <div className="flex-1 flex flex-col justify-center">
+                                {(o as any).comprobante_url ? (
+                                  <div className="flex items-center gap-3 bg-emerald-50 px-4 py-2 rounded-xl border border-emerald-100">
+                                    <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                                    <div>
+                                      <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Pago en Validación</p>
+                                      <p className="text-[8px] font-bold text-emerald-400 uppercase">Comprobante Registrado</p>
+                                    </div>
+                                  </div>
+                                ) : o.estado !== 'cancelado' && (
+                                  <button 
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setActiveOrderId(o.id);
+                                      receiptInputRef.current?.click();
+                                    }}
+                                    disabled={isUploadingReceipt === o.id}
+                                    className="flex items-center gap-3 bg-indigo-600 hover:bg-black text-white px-5 py-3 rounded-xl transition-all shadow-lg active:scale-95 disabled:opacity-50"
+                                  >
+                                    {isUploadingReceipt === o.id ? (
+                                      <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                                    ) : (
+                                      <Package className="w-4 h-4" /> 
+                                    )}
+                                    <span className="text-[10px] font-black uppercase tracking-widest">
+                                      {isUploadingReceipt === o.id ? 'Subiendo...' : 'Adjuntar Comprobante'}
+                                    </span>
+                                  </button>
+                                )}
+                              </div>
+
                               {o.fecha_entrega && (
                                 <div className="text-left bg-indigo-50 p-4 rounded-xl border border-indigo-100">
                                   <p className="text-[10px] font-black text-indigo-500 uppercase tracking-[0.2em] mb-1 flex items-center gap-2">

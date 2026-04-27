@@ -24,7 +24,8 @@ import {
   ReceiptText,
   Download,
   Send,
-  MessageSquareShare
+  MessageSquareShare,
+  Eye
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
@@ -180,7 +181,19 @@ export default function AdminRequestsPage() {
                                 </div>
                               </td>
 
-                              <td className="p-4 text-right align-middle font-mono font-black">Q{req.total.toFixed(0)}</td>
+                              <td className="p-4 text-right align-middle font-mono font-black">
+                                <div className="flex flex-col items-end">
+                                  <span>Q{req.total.toFixed(0)}</span>
+                                  {(req as any).comprobante_url && (
+                                    <button 
+                                      onClick={(e) => { e.stopPropagation(); window.open((req as any).comprobante_url, '_blank'); }}
+                                      className="mt-1 flex items-center gap-1 text-[8px] font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100 hover:bg-emerald-600 hover:text-white transition-all uppercase tracking-widest"
+                                    >
+                                      <Eye className="w-2.5 h-2.5" /> Ver Recibo
+                                    </button>
+                                  )}
+                                </div>
+                              </td>
 
                               <td className="p-4 text-center align-middle">
                                 {!isApproved ? (
@@ -242,6 +255,14 @@ export default function AdminRequestsPage() {
                                                   <span>Anticipo (50%):</span>
                                                   <span>Q{req.anticipo.toFixed(0)}</span>
                                                </div>
+                                               {(req as any).comprobante_url && (
+                                                 <button 
+                                                   onClick={() => window.open((req as any).comprobante_url, '_blank')}
+                                                   className="mt-4 w-full flex items-center justify-center gap-2 bg-emerald-500/20 hover:bg-emerald-500 text-emerald-400 hover:text-white border border-emerald-500/30 p-3 rounded-xl transition-all text-[10px] font-black uppercase tracking-widest"
+                                                 >
+                                                   <Eye className="w-4 h-4" /> Inspeccionar Recibo VIP
+                                                 </button>
+                                               )}
                                             </div>
                                          </div>
 
