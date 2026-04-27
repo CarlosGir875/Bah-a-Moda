@@ -10,13 +10,14 @@ import {
   Truck,
   Inbox,
   Sparkles,
-  ArrowRight
+  ArrowRight,
+  Package
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export function FloatingStatus() {
-  const { isAdmin, orderRequests, user, setIsProfileModalOpen, setIsTrackingOpen, markRequestAsSeen } = useStore();
+  const { isAdmin, orderRequests, user, userOrders, setIsProfileModalOpen, setIsTrackingOpen, markRequestAsSeen } = useStore();
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
 
@@ -49,8 +50,12 @@ export function FloatingStatus() {
 
   const getAuraColor = () => {
     if (isAdmin) return 'shadow-[0_0_50px_-12px_rgba(99,102,241,0.5)]';
-    if (userRequest?.estado === 'aprobado') return 'shadow-[0_0_50px_-12px_rgba(16,185,129,0.5)]';
-    if (userRequest?.estado === 'pendiente') return 'shadow-[0_0_50px_-12px_rgba(245,158,11,0.5)]';
+    if (activeOrder) {
+      if (activeOrder.estado === 'recibido') return 'shadow-[0_0_50px_-12px_rgba(16,185,129,0.5)]';
+      if (activeOrder.estado === 'preparacion') return 'shadow-[0_0_50px_-12px_rgba(245,158,11,0.5)]';
+      if (activeOrder.estado === 'en_transito') return 'shadow-[0_0_50px_-12px_rgba(124,58,237,0.5)]';
+    }
+    if (pendingRequest) return 'shadow-[0_0_50px_-12px_rgba(245,158,11,0.5)]';
     return 'shadow-2xl';
   };
 
@@ -99,45 +104,45 @@ export function FloatingStatus() {
                      Gestionar Inbox <ArrowRight className="w-3 h-3" />
                    </button>
                  </div>
-               ) : activeOrder ? (
-                  <div className="space-y-4 animate-in zoom-in-95 duration-500">
-                    <div className="bg-white p-5 rounded-[2rem] border border-gray-100 shadow-sm text-center">
-                      <div className={`w-14 h-14 rounded-3xl flex items-center justify-center mx-auto mb-3 shadow-md text-white ${getStatusColor()}`}>
-                        {activeOrder.estado === 'recibido' && <CheckCircle2 className="w-8 h-8" />}
-                        {activeOrder.estado === 'preparacion' && <Package className="w-8 h-8 animate-pulse" />}
-                        {activeOrder.estado === 'en_transito' && <Truck className="w-8 h-8 animate-bounce" />}
-                      </div>
-                      <p className="text-xs font-black uppercase tracking-widest mb-1">
-                        {activeOrder.estado === 'recibido' ? '¡Pedido Aceptado!' : 
-                         activeOrder.estado === 'preparacion' ? 'Empaquetando Pedido' : 
-                         activeOrder.estado === 'en_transito' ? 'Pedido en Camino' : 'Procesando'}
-                      </p>
-                      <p className="text-[11px] font-medium text-gray-500 leading-relaxed">
-                        {activeOrder.estado === 'recibido' ? 'Tu reserva ha sido aprobada con éxito.' : 
-                         activeOrder.estado === 'preparacion' ? 'Estamos preparando tu paquete con elegancia.' : 
-                         activeOrder.estado === 'en_transito' ? 'Tu pedido va rumbo a su destino final.' : 'Estamos trabajando en tu pedido.'}
-                      </p>
+              ) : activeOrder ? (
+                <div className="space-y-4 animate-in zoom-in-95 duration-500">
+                  <div className="bg-white p-5 rounded-[2rem] border border-gray-100 shadow-sm text-center">
+                    <div className={`w-14 h-14 rounded-3xl flex items-center justify-center mx-auto mb-3 shadow-md text-white ${getStatusColor()}`}>
+                      {activeOrder.estado === 'recibido' && <CheckCircle2 className="w-8 h-8" />}
+                      {activeOrder.estado === 'preparacion' && <Package className="w-8 h-8 animate-pulse" />}
+                      {activeOrder.estado === 'en_transito' && <Truck className="w-8 h-8 animate-bounce" />}
                     </div>
-                    <button 
-                      onClick={() => { setIsTrackingOpen(true); setIsOpen(false); }}
-                      className={`w-full text-white py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.2em] shadow-xl transition-all flex items-center justify-center gap-3 active:scale-95 ${getStatusColor()}`}
-                    >
-                      <Truck className="w-4 h-4" /> Seguir Mi Paquete
-                    </button>
+                    <p className="text-xs font-black uppercase tracking-widest mb-1">
+                      {activeOrder.estado === 'recibido' ? '¡Pedido Aceptado!' : 
+                       activeOrder.estado === 'preparacion' ? 'Empaquetando Pedido' : 
+                       activeOrder.estado === 'en_transito' ? 'Pedido en Camino' : 'Procesando'}
+                    </p>
+                    <p className="text-[11px] font-medium text-gray-500 leading-relaxed">
+                      {activeOrder.estado === 'recibido' ? 'Tu reserva ha sido aprobada con éxito.' : 
+                       activeOrder.estado === 'preparacion' ? 'Estamos preparando tu paquete con elegancia.' : 
+                       activeOrder.estado === 'en_transito' ? 'Tu pedido va rumbo a su destino final.' : 'Estamos trabajando en tu pedido.'}
+                    </p>
                   </div>
-                ) : pendingRequest && (
-                  <div className="space-y-4">
-                    <div className="bg-gradient-to-br from-amber-50 to-orange-50/30 p-5 rounded-[2rem] border border-amber-100 flex gap-4 items-center">
-                      <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-amber-500 shadow-sm animate-bounce duration-[2000ms]">
-                        <Clock className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <p className="text-[10px] font-black text-amber-700 uppercase tracking-widest leading-none mb-1">En Revisión</p>
-                        <p className="text-[11px] font-medium text-amber-900/70 leading-tight">Bahía Moda está verificando tu solicitud...</p>
-                      </div>
+                  <button 
+                    onClick={() => { setIsTrackingOpen(true); setIsOpen(false); }}
+                    className={`w-full text-white py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.2em] shadow-xl transition-all flex items-center justify-center gap-3 active:scale-95 ${getStatusColor()}`}
+                  >
+                    <Truck className="w-4 h-4" /> Seguir Mi Paquete
+                  </button>
+                </div>
+              ) : pendingRequest && (
+                <div className="space-y-4">
+                  <div className="bg-gradient-to-br from-amber-50 to-orange-50/30 p-5 rounded-[2rem] border border-amber-100 flex gap-4 items-center">
+                    <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-amber-500 shadow-sm animate-bounce duration-[2000ms]">
+                      <Clock className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-black text-amber-700 uppercase tracking-widest leading-none mb-1">En Revisión</p>
+                      <p className="text-[11px] font-medium text-amber-900/70 leading-tight">Bahía Moda está verificando tu solicitud...</p>
                     </div>
                   </div>
-                )}      )}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -147,8 +152,8 @@ export function FloatingStatus() {
       <button 
         onClick={() => {
           setIsOpen(!isOpen);
-          if (!isOpen && !isAdmin && userRequest?.estado === 'aprobado' && !userRequest.visto) {
-            markRequestAsSeen(userRequest.id);
+          if (!isOpen && !isAdmin && pendingRequest && !pendingRequest.visto) {
+            markRequestAsSeen(pendingRequest.id);
           }
         }}
         className={`pointer-events-auto p-4 sm:p-5 rounded-[2.2rem] transition-all transform hover:-translate-y-1 active:scale-90 group relative border-[6px] border-white ring-1 ring-gray-100 ${getStatusColor()} ${getAuraColor()}`}
@@ -167,12 +172,12 @@ export function FloatingStatus() {
           </div>
         ) : (
           <div className="relative">
-            {userRequest?.estado === 'aprobado' ? (
+            {activeOrder ? (
                <Truck className="w-6 h-6 sm:w-8 sm:h-8 text-white animate-in zoom-in-75 duration-300" />
             ) : (
                <MessageSquare className="w-6 h-6 sm:w-8 sm:h-8 text-white group-hover:scale-110 transition-transform" />
             )}
-            {!isOpen && (userRequest?.estado === 'pendiente' || (userRequest?.estado === 'aprobado' && !userRequest.visto)) && (
+            {!isOpen && (pendingRequest || (activeOrder && !activeOrder.visto)) && (
               <span className="absolute -top-2 -right-2 bg-white text-black text-[10px] font-black w-6 h-6 rounded-full flex items-center justify-center border-2 border-white animate-pulse shadow-lg">
                 !
               </span>
