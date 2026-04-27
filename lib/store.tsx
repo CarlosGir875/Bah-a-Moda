@@ -376,8 +376,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
     const solicitudesSub = supabase
       .channel('realtime_solicitudes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'solicitudes_pedidos' }, () => {
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'solicitudes_pedidos' }, (payload) => {
         fetchOrderRequests();
+        // Si es una inserción nueva y soy admin, avisar con un toast
+        if (payload.eventType === 'INSERT' && isAdmin) {
+          addToast("🔔 ¡Nuevo pedido recibido!", "info");
+        }
       })
       .subscribe();
 
@@ -385,7 +389,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       supabase.removeChannel(pedidosSub);
       supabase.removeChannel(solicitudesSub);
     };
-  }, [fetchAllOrders, fetchUserOrders, fetchOrderRequests]);
+  }, [fetchAllOrders, fetchUserOrders, fetchOrderRequests, isAdmin, addToast]);
 
   const contextValue = useMemo(() => ({
     isLeftSidebarOpen, setIsLeftSidebarOpen, isCartOpen, setIsCartOpen, cart,

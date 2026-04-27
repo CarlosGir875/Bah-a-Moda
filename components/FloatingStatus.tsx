@@ -148,8 +148,9 @@ export function FloatingStatus() {
           <div className="relative">
             <Inbox className="w-6 h-6 sm:w-8 sm:h-8 text-white transition-transform group-hover:rotate-12" />
             {pendingCount > 0 && (
-              <span className="absolute -top-3 -left-3 bg-red-500 text-white text-[10px] font-black min-w-[24px] h-6 px-1.5 rounded-full flex items-center justify-center border-4 border-white shadow-xl animate-bounce">
+              <span className="absolute -top-3 -left-3 bg-red-600 text-white text-[11px] font-black min-w-[26px] h-7 px-2 rounded-full flex items-center justify-center border-[3px] border-white shadow-2xl animate-bounce group-hover:scale-110 transition-transform">
                 {pendingCount}
+                <span className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-75" />
               </span>
             )}
           </div>
