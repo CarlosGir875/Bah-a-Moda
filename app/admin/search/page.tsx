@@ -47,7 +47,7 @@ export default function AdminSearchPage() {
     return allRecords.filter(item => {
       const idStr = item.id.toLowerCase();
       const shortId = item.id.split('-')[0].toLowerCase();
-      const nombre = (item.nombre_cliente || item.cliente_nombre || "").toLowerCase();
+      const nombre = (item.cliente_nombre || "").toLowerCase();
       const telefono = (item.cliente_telefono || "").toLowerCase();
       
       return idStr.includes(query) || 
@@ -130,7 +130,7 @@ export default function AdminSearchPage() {
                             <h3 className="text-xl font-black uppercase tracking-tighter">#BM-{shortId}</h3>
                             {getStatusBadge(item.estado)}
                           </div>
-                          <p className="text-sm font-bold text-zinc-500 mb-4">{item.nombre_cliente || item.cliente_nombre}</p>
+                          <p className="text-sm font-bold text-zinc-500 mb-4">{item.cliente_nombre}</p>
                           
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="flex items-center gap-2 text-[10px] font-black text-zinc-400 uppercase">
