@@ -347,7 +347,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setAuthLoading(false);
     });
 
-    // Realtime subscriptions
+    return () => { 
+      isMounted = false; 
+      subscription.unsubscribe(); 
+    };
+  }, [fetchProducts, fetchReservasHorarios, fetchProfile, retryCounter]);
+
+  // Realtime subscriptions in a separate useEffect
+  useEffect(() => {
     const pedidosSub = supabase
       .channel('realtime_pedidos')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos' }, () => {
@@ -363,13 +370,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       })
       .subscribe();
 
-    return () => { 
-      isMounted = false; 
-      subscription.unsubscribe(); 
+    return () => {
       supabase.removeChannel(pedidosSub);
       supabase.removeChannel(solicitudesSub);
     };
-  }, [fetchProducts, fetchReservasHorarios, fetchProfile, fetchAllOrders, fetchUserOrders, fetchOrderRequests, retryCounter]);
+  }, [fetchAllOrders, fetchUserOrders, fetchOrderRequests]);
 
   const contextValue = useMemo(() => ({
     isLeftSidebarOpen, setIsLeftSidebarOpen, isCartOpen, setIsCartOpen, cart,

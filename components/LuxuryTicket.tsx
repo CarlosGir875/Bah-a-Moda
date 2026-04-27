@@ -57,9 +57,21 @@ export function LuxuryTicket({ order, onClose }: LuxuryTicketProps) {
         </div>
 
         {/* Personalized Message */}
-        <div className="mb-10 text-center">
+        <div className="mb-10 text-center relative">
           <p className="text-sm font-medium text-slate-500 italic">"Preparado exclusivamente para ti,"</p>
           <p className="text-2xl font-serif font-black text-slate-900 mt-1">{order.nombre_cliente}</p>
+          
+          {/* Status Badge in Ticket */}
+          <div className="mt-4 inline-flex items-center gap-2 px-4 py-1.5 bg-slate-900 text-[#d4af37] rounded-full border border-[#d4af37]/30 shadow-lg">
+             <div className={`w-1.5 h-1.5 rounded-full bg-[#d4af37] ${['preparacion', 'en_transito'].includes(order.estado) ? 'animate-pulse' : ''}`} />
+             <span className="text-[9px] font-black uppercase tracking-[0.2em]">
+                {order.estado === 'pendiente' ? 'Esperando Validación' : 
+                 order.estado === 'recibido' ? 'Pedido Aceptado' :
+                 order.estado === 'preparacion' ? 'Empaquetando con Cuidado' :
+                 order.estado === 'en_transito' ? 'En Ruta Exclusiva' :
+                 order.estado === 'listo_entrega' ? 'Entrega Completada' : 'Confirmado'}
+             </span>
+          </div>
         </div>
 
         {/* Order Details */}
