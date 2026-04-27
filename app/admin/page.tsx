@@ -281,6 +281,15 @@ export default function AdminDashboard() {
              )}
 
              <button 
+               onClick={() => router.push('/admin/search')}
+               className="p-3 bg-zinc-100 text-black rounded-2xl hover:bg-black hover:text-white transition-all flex items-center gap-2 group"
+               title="Buscador Maestro de Recibos"
+             >
+                <Search className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">Buscador</span>
+             </button>
+
+             <button 
                onClick={() => router.push('/admin/requests')}
                className="relative p-3 bg-indigo-50 text-indigo-600 rounded-2xl hover:bg-indigo-100 transition-colors group flex items-center gap-2"
                title="Ver Solicitudes Pendientes"

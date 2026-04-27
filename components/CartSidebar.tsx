@@ -254,7 +254,7 @@ export function CartSidebar() {
                            formData.planPago === "50" ? 'bg-indigo-50 border-indigo-600 shadow-md' : 'bg-white border-gray-100'
                          }`}
                        >
-                         <span className={`text-[10px] font-black uppercase tracking-widest ${formData.planPago === "50" ? 'text-indigo-600' : 'text-gray-400'}`}>Reserva 50/50</span>
+                         <span className={`text-[10px] font-black uppercase tracking-widest ${formData.planPago === "50" ? 'text-indigo-600' : 'text-gray-400'}`}>Depósito / Transferencia 50%</span>
                          <span className="text-sm font-bold text-gray-900">Q{pendingBalance.toFixed(2)} Hoy</span>
                        </button>
                        <button 
@@ -264,8 +264,8 @@ export function CartSidebar() {
                            formData.planPago === "100" ? 'bg-emerald-50 border-emerald-600 shadow-md' : 'bg-white border-gray-100'
                          }`}
                        >
-                         <span className={`text-[10px] font-black uppercase tracking-widest ${formData.planPago === "100" ? 'text-emerald-600' : 'text-gray-400'}`}>Pago Total VIP</span>
-                         <span className="text-sm font-bold text-gray-900">100% Pagado</span>
+                         <span className={`text-[10px] font-black uppercase tracking-widest ${formData.planPago === "100" ? 'text-emerald-600' : 'text-gray-400'}`}>Total / Transferencia 100%</span>
+                         <span className="text-sm font-bold text-gray-900">VIP Prioritario</span>
                        </button>
                     </div>
                   </div>

@@ -175,7 +175,26 @@ export function ProfileModal() {
       // 2. Subir
       await uploadOrderReceipt(activeOrderId, compressed);
       
+      // 3. Encontrar el pedido para el mensaje de WhatsApp
+      const order = userOrders.find(o => o.id === activeOrderId);
+      
       addToast("✅ Comprobante enviado con éxito", "success");
+
+      // 4. AVISAR POR WHATSAPP AUTOMÁTICAMENTE
+      if (order) {
+        const shortId = order.id.substring(0, 5).toUpperCase();
+        const message = `✅ *COMPROBANTE REGISTRADO - BAHÍA MODA*\n` +
+          `------------------------------------------\n` +
+          `🆔 *ID Pedido:* #BM-${shortId}\n` +
+          `👤 *Cliente:* ${displayName}\n` +
+          `💰 *Monto:* Q${order.total}\n` +
+          `------------------------------------------\n` +
+          `_Hola Bahía Moda, acabo de subir mi comprobante de depósito/transferencia a la plataforma. ¡Por favor confirmad mi pedido!_`;
+        
+        const encoded = encodeURIComponent(message);
+        window.open(`https://wa.me/50242721798?text=${encoded}`, '_blank');
+      }
+      
     } catch (err: any) {
       addToast("❌ Error al subir: " + err.message, "error");
     } finally {
@@ -407,14 +426,31 @@ export function ProfileModal() {
                               </div>
                               
                               {/* SECCIÓN DE COMPROBANTE */}
-                              <div className="flex-1 flex flex-col justify-center">
+                              <div className="flex-1 flex flex-col justify-center gap-2">
                                 {(o as any).comprobante_url ? (
-                                  <div className="flex items-center gap-3 bg-emerald-50 px-4 py-2 rounded-xl border border-emerald-100">
-                                    <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                                    <div>
-                                      <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Pago en Validación</p>
-                                      <p className="text-[8px] font-bold text-emerald-400 uppercase">Comprobante Registrado</p>
+                                  <div className="flex flex-col gap-2">
+                                    <div className="flex items-center gap-3 bg-emerald-50 px-4 py-2 rounded-xl border border-emerald-100">
+                                      <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                                      <div>
+                                        <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Pago en Validación</p>
+                                        <p className="text-[8px] font-bold text-emerald-400 uppercase">Comprobante Registrado</p>
+                                      </div>
                                     </div>
+                                    <button 
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        const shortId = o.id.substring(0, 5).toUpperCase();
+                                        const message = `✅ *RECORDATORIO DE COMPROBANTE - BAHÍA MODA*\n` +
+                                          `🆔 *ID:* #BM-${shortId}\n` +
+                                          `👤 *Cliente:* ${displayName}\n` +
+                                          `💰 *Monto:* Q${o.total}\n\n` +
+                                          `_Ya subí mi comprobante a la web. ¡Espero vuestra validación!_`;
+                                        window.open(`https://wa.me/50242721798?text=${encodeURIComponent(message)}`, '_blank');
+                                      }}
+                                      className="flex items-center justify-center gap-2 text-[8px] font-black uppercase text-indigo-600 hover:text-indigo-800 transition-colors"
+                                    >
+                                      <MessageSquareShare className="w-3 h-3" /> Re-avisar por WhatsApp
+                                    </button>
                                   </div>
                                 ) : o.estado !== 'cancelado' && (
                                   <button 
@@ -429,10 +465,10 @@ export function ProfileModal() {
                                     {isUploadingReceipt === o.id ? (
                                       <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
                                     ) : (
-                                      <Package className="w-4 h-4" /> 
+                                      <CheckCircle2 className="w-4 h-4" /> 
                                     )}
                                     <span className="text-[10px] font-black uppercase tracking-widest">
-                                      {isUploadingReceipt === o.id ? 'Subiendo...' : 'Adjuntar Comprobante'}
+                                      {isUploadingReceipt === o.id ? 'Subiendo...' : 'Adjuntar Depósito / Transferencia'}
                                     </span>
                                   </button>
                                 )}
