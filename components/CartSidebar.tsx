@@ -312,21 +312,20 @@ export function CartSidebar() {
                     <label className="block text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Celular de Contacto</label>
                     <input required type="tel" placeholder="Ej. 4567 8910" value={formData.celular} onChange={e => setFormData({...formData, celular: e.target.value})} className="w-full border border-gray-100 bg-gray-50 px-5 py-4 rounded-2xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-black transition-all" />
                   </div>
-                </div>
-                
-                <div className="mt-8 bg-slate-900 border border-white/10 p-6 rounded-[2rem] text-center shadow-2xl relative overflow-hidden">
-                     <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
-                     <div className="relative z-10">
-                       <div className="w-12 h-12 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                         <Send className="w-6 h-6 text-indigo-400" />
-                       </div>
-                       <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400 mb-2">Protocolo de Seguridad</h4>
-                       <p className="text-[11px] font-bold text-white/60 leading-relaxed">
-                         TU PEDIDO SERÁ VALIDADO POR NUESTRO EQUIPO. MANTENTE ATENTO A LAS NOTIFICACIONES PARA COMPLETAR TU ENTREGA EXCLUSIVA.
-                       </p>
-                     </div>
-                   </div>
-              </form>
+                  
+                  <div className="mt-8 bg-slate-900 border border-white/10 p-6 rounded-[2rem] text-center shadow-2xl relative overflow-hidden">
+                    <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
+                    <div className="relative z-10">
+                      <div className="w-12 h-12 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <Send className="w-6 h-6 text-indigo-400" />
+                      </div>
+                      <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400 mb-2">Protocolo de Seguridad</h4>
+                      <p className="text-[11px] font-bold text-white/60 leading-relaxed">
+                        TU PEDIDO SERÁ VALIDADO POR NUESTRO EQUIPO. MANTENTE ATENTO A LAS NOTIFICACIONES PARA COMPLETAR TU ENTREGA EXCLUSIVA.
+                      </p>
+                    </div>
+                  </div>
+               </form>
             </div>
 
             <div className="p-4 sm:p-6 border-t border-gray-100 bg-gray-50 relative">
