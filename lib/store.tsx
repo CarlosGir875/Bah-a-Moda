@@ -342,10 +342,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     let isMounted = true;
 
     const init = async () => {
+      let currentSession = null;
       try {
         // 1. Obtener sesión (rápido, local)
         try {
           const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+          currentSession = session;
           if (sessionError && sessionError.message.includes("Refresh Token Not Found")) {
             console.warn("Sesión corrupta detectada, limpiando...");
             await supabase.auth.signOut();
@@ -364,8 +366,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           fetchReservasHorarios().catch(e => console.warn("horarios:", e)),
           fetchOrderRequests().catch(e => console.warn("solicitudes:", e)),
           fetchAllOrders().catch(e => console.warn("pedidos:", e)),
-          session?.user 
-            ? fetchProfile(session.user.id).catch(e => console.warn("perfil:", e))
+          currentSession?.user 
+            ? fetchProfile(currentSession.user.id).catch(e => console.warn("perfil:", e))
             : Promise.resolve()
         ]);
 
