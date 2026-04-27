@@ -6,10 +6,12 @@ import { ArrowLeft, Package, TrendingUp, Wallet, Clock, CheckCircle, XCircle, Us
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { generateInvoicePDF } from "@/lib/invoiceGenerator";
+import { useRouter } from "next/navigation";
 
 export default function AdminOrdersPage() {
   const { adminOrders, fetchAllOrders, updateOrderStatus, markOrderAsSeen } = useStore();
   const [filter, setFilter] = useState("todos");
+  const router = useRouter();
 
   useEffect(() => {
     fetchAllOrders();
@@ -310,18 +312,55 @@ export default function AdminOrdersPage() {
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
           {[
-            { label: "Ventas Totales", val: `Q${stats.totalRevenue.toFixed(0)}`, icon: TrendingUp, color: "text-emerald-600", bg: "bg-emerald-50" },
-            { label: "Inversión Admin", val: `Q${stats.totalInvestment.toFixed(0)}`, icon: Wallet, color: "text-indigo-600", bg: "bg-indigo-50" },
-            { label: "Ganancia Real", val: `Q${stats.totalProfit.toFixed(0)}`, icon: Package, color: "text-blue-600", bg: "bg-blue-50" },
-            { label: "Nuevas Solicitudes", val: stats.pendingOrders, icon: Clock, color: "text-slate-600", bg: "bg-slate-50" }
+            { 
+              label: "Ventas (Caja Real)", 
+              val: `Q${stats.totalRevenue.toFixed(0)}`, 
+              icon: TrendingUp, 
+              color: "text-emerald-600", 
+              bg: "bg-emerald-50",
+              action: () => setFilter('listo_entrega'),
+              desc: "Dinero ya cobrado y entregado"
+            },
+            { 
+              label: "Dinero en Ruta", 
+              val: `Q${adminOrders.filter(o => o.estado === 'en_transito').reduce((acc, curr) => acc + Number(curr.total), 0).toFixed(0)}`, 
+              icon: Truck, 
+              color: "text-indigo-600", 
+              bg: "bg-indigo-50",
+              action: () => setFilter('en_transito'),
+              desc: "Pedidos enviados por cobrar"
+            },
+            { 
+              label: "Ganancia Neta", 
+              val: `Q${stats.totalProfit.toFixed(0)}`, 
+              icon: Package, 
+              color: "text-blue-600", 
+              bg: "bg-blue-50",
+              action: () => setFilter('todos'),
+              desc: "Beneficio libre de inversión"
+            },
+            { 
+              label: "Por Aprobar", 
+              val: stats.pendingOrders, 
+              icon: Clock, 
+              color: "text-amber-600", 
+              bg: "bg-amber-50",
+              action: () => router.push('/admin/requests'),
+              desc: "Nuevas solicitudes esperando"
+            }
           ].map((s, i) => (
-            <div key={i} className="bg-white p-10 rounded-[3rem] shadow-sm border border-slate-100 hover:shadow-xl transition-all">
-               <div className={`${s.bg} ${s.color} w-16 h-16 rounded-[1.5rem] flex items-center justify-center mb-8 shadow-inner`}>
+            <button 
+              key={i} 
+              onClick={s.action}
+              className="bg-white p-10 rounded-[3rem] shadow-sm border border-slate-100 hover:shadow-2xl hover:-translate-y-2 transition-all text-left group w-full"
+            >
+               <div className={`${s.bg} ${s.color} w-16 h-16 rounded-[1.5rem] flex items-center justify-center mb-8 shadow-inner group-hover:scale-110 transition-transform`}>
                   <s.icon className="w-8 h-8" />
                </div>
                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-2">{s.label}</p>
-               <p className="text-4xl font-black text-black tracking-tighter italic">{s.val}</p>
-            </div>
+               <p className="text-4xl font-black text-black tracking-tighter italic mb-2">{s.val}</p>
+               <p className="text-[9px] font-bold text-zinc-300 uppercase tracking-widest">{s.desc}</p>
+            </button>
           ))}
         </div>
 

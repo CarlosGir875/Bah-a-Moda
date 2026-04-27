@@ -312,9 +312,9 @@ export function CartSidebar() {
                     <label className="block text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Celular de Contacto</label>
                     <input required type="tel" placeholder="Ej. 4567 8910" value={formData.celular} onChange={e => setFormData({...formData, celular: e.target.value})} className="w-full border border-gray-100 bg-gray-50 px-5 py-4 rounded-2xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-black transition-all" />
                   </div>
-                 </div>
-                 
-                   <div className="mt-8 bg-slate-900 border border-white/10 p-6 rounded-[2rem] text-center shadow-2xl relative overflow-hidden">
+                </div>
+                
+                <div className="mt-8 bg-slate-900 border border-white/10 p-6 rounded-[2rem] text-center shadow-2xl relative overflow-hidden">
                      <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
                      <div className="relative z-10">
                        <div className="w-12 h-12 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center mx-auto mb-4">

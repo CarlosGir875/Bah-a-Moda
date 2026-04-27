@@ -649,51 +649,75 @@ export default function AdminDashboard() {
           <div className="p-6 sm:p-10 space-y-10 animate-in fade-in slide-in-from-right-4 duration-500">
             
             {/* DASHBOARD FINANCIERO ERP */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-               {/* 1. Ingresos Brutos */}
-               <div className="bg-white border-2 border-green-100 p-6 rounded-[2rem] shadow-sm relative overflow-hidden group">
-                  <div className="absolute right-0 top-0 p-3 bg-green-50 text-green-500 rounded-bl-2xl">
-                    <ArrowUpRight className="w-5 h-5" />
-                  </div>
-                  <p className="text-[10px] font-black text-green-600 uppercase tracking-widest mb-1">Ingresos Totales</p>
-                  <h3 className="text-2xl font-black text-black">
-                     Q {finanzas.filter(f => f.tipo === 'ingreso').reduce((s, f) => s + f.monto, 0).toLocaleString()}
-                  </h3>
-                  <div className="mt-4 flex items-center gap-2">
-                     <div className="w-full h-1 bg-green-100 rounded-full overflow-hidden">
-                        <div className="h-full bg-green-500 w-[70%]" />
-                     </div>
-                  </div>
-               </div>
+             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* 1. Ingresos Brutos (Caja Real) */}
+                <button 
+                  onClick={() => router.push('/admin/orders')}
+                  className="bg-white border-2 border-green-100 p-6 rounded-[2rem] shadow-sm relative overflow-hidden group text-left transition-all hover:shadow-xl hover:-translate-y-1"
+                >
+                   <div className="absolute right-0 top-0 p-3 bg-green-50 text-green-500 rounded-bl-2xl group-hover:scale-110 transition-transform">
+                     <ArrowUpRight className="w-5 h-5" />
+                   </div>
+                   <p className="text-[10px] font-black text-green-600 uppercase tracking-widest mb-1">Caja Real (Cobrado)</p>
+                   <h3 className="text-2xl font-black text-black">
+                      Q {finanzas.filter(f => f.tipo === 'ingreso').reduce((s, f) => s + f.monto, 0).toLocaleString()}
+                   </h3>
+                   <div className="mt-4 flex items-center gap-2">
+                      <div className="w-full h-1 bg-green-100 rounded-full overflow-hidden">
+                         <div className="h-full bg-green-500 w-[70%]" />
+                      </div>
+                   </div>
+                </button>
 
-               {/* 2. Inversión en Bodega (Activos) */}
-               <div className="bg-white border-2 border-indigo-100 p-6 rounded-[2rem] shadow-sm relative overflow-hidden group">
-                  <div className="absolute right-0 top-0 p-3 bg-indigo-50 text-indigo-500 rounded-bl-2xl">
-                    <Package className="w-5 h-5" />
-                  </div>
-                  <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-1">Valor en Inventario</p>
-                  <h3 className="text-2xl font-black text-black">
-                     Q {products.reduce((s, p) => s + ((p.cost || 0) * (p.stock && p.stock !== -1 ? p.stock : 0)), 0).toLocaleString()}
-                  </h3>
-                  <p className="text-[9px] text-gray-400 mt-2 font-bold uppercase tracking-tighter">Inversión dormida en fotos/productos</p>
-               </div>
+                {/* 2. Inversión en Bodega (Activos) */}
+                <div className="bg-white border-2 border-indigo-100 p-6 rounded-[2rem] shadow-sm relative overflow-hidden group">
+                   <div className="absolute right-0 top-0 p-3 bg-indigo-50 text-indigo-500 rounded-bl-2xl">
+                     <Package className="w-5 h-5" />
+                   </div>
+                   <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-1">Activos en Bodega</p>
+                   <h3 className="text-2xl font-black text-black">
+                      Q {products.reduce((s, p) => s + ((p.cost || 0) * (p.stock && p.stock !== -1 ? p.stock : 0)), 0).toLocaleString()}
+                   </h3>
+                   <p className="text-[9px] text-gray-400 mt-2 font-bold uppercase tracking-tighter">Valor total de tu mercancía</p>
+                </div>
 
-               {/* 3. Ganancia NETA Real */}
-               <div className="bg-black p-6 rounded-[2rem] shadow-2xl relative overflow-hidden group">
-                  <div className="absolute right-0 top-0 p-3 bg-white/10 text-white rounded-bl-2xl">
-                    <Sparkles className="w-5 h-5 animate-pulse" />
-                  </div>
-                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Ganancia Neta</p>
-                  <h3 className="text-2xl font-black text-white">
-                     Q {(
-                       finanzas.filter(f => f.tipo === 'ingreso').reduce((s, f) => s + f.monto, 0) - 
-                       finanzas.filter(f => f.tipo === 'egreso').reduce((s, f) => s + f.monto, 0) -
-                       orderRequests.filter(r => r.estado === 'aprobado').reduce((s, r) => s + r.items.reduce((ss, i) => ss + ((i.product?.cost || 0) * (i.quantity || 1)), 0), 0)
-                     ).toLocaleString()}
-                  </h3>
-                  <p className="text-[9px] text-green-400 mt-2 font-bold uppercase tracking-tighter">¡Dinerito libre directo al bolsillo! 🚀</p>
-               </div>
-            </div>
+                {/* 3. ALERTA STOCK BAJO (FUNCIONAL) */}
+                <button 
+                  onClick={() => { setActiveTab('inventory'); setSearchTerm("!!!LOW!!!"); }}
+                  className={`p-6 rounded-[2rem] shadow-sm relative overflow-hidden group text-left transition-all hover:shadow-xl hover:-translate-y-1 border-2 ${
+                    products.filter(p => p.stock !== -1 && p.stock < 3).length > 0 ? 'bg-orange-50 border-orange-100' : 'bg-white border-zinc-100'
+                  }`}
+                >
+                   <div className={`absolute right-0 top-0 p-3 rounded-bl-2xl ${
+                     products.filter(p => p.stock !== -1 && p.stock < 3).length > 0 ? 'bg-orange-500 text-white' : 'bg-zinc-50 text-zinc-400'
+                   }`}>
+                     <ShieldAlert className="w-5 h-5" />
+                   </div>
+                   <p className={`text-[10px] font-black uppercase tracking-widest mb-1 ${
+                     products.filter(p => p.stock !== -1 && p.stock < 3).length > 0 ? 'text-orange-600' : 'text-zinc-400'
+                   }`}>Stock Crítico</p>
+                   <h3 className="text-2xl font-black text-black">
+                      {products.filter(p => p.stock !== -1 && p.stock < 3).length} Items
+                   </h3>
+                   <p className="text-[9px] text-zinc-400 mt-2 font-bold uppercase tracking-tighter">Productos por agotarse</p>
+                </button>
+
+                {/* 4. Ganancia NETA Real */}
+                <div className="bg-black p-6 rounded-[2rem] shadow-2xl relative overflow-hidden group">
+                   <div className="absolute right-0 top-0 p-3 bg-white/10 text-white rounded-bl-2xl">
+                     <Sparkles className="w-5 h-5 animate-pulse" />
+                   </div>
+                   <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Utilidad Neta</p>
+                   <h3 className="text-2xl font-black text-white">
+                      Q {(
+                        finanzas.filter(f => f.tipo === 'ingreso').reduce((s, f) => s + f.monto, 0) - 
+                        finanzas.filter(f => f.tipo === 'egreso').reduce((s, f) => s + f.monto, 0) -
+                        orderRequests.filter(r => r.estado === 'aprobado').reduce((s, r) => s + r.items.reduce((ss, i) => ss + ((i.product?.cost || 0) * (i.quantity || 1)), 0), 0)
+                      ).toLocaleString()}
+                   </h3>
+                   <p className="text-[9px] text-green-400 mt-2 font-bold uppercase tracking-tighter">¡Ganancia libre real! 🚀</p>
+                </div>
+             </div>
 
             {/* SECCIÓN DE EGRESOS (GASTOS) */}
             <div className="bg-gray-50 border border-gray-200 rounded-[2.5rem] p-6 sm:p-8">
@@ -797,7 +821,10 @@ export default function AdminDashboard() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {products
-                .filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()) || p.category.toLowerCase().includes(searchTerm.toLowerCase()))
+                .filter(p => {
+                  if (searchTerm === "!!!LOW!!!") return p.stock !== -1 && p.stock < 3;
+                  return p.name.toLowerCase().includes(searchTerm.toLowerCase()) || p.category.toLowerCase().includes(searchTerm.toLowerCase());
+                })
                 .map(product => {
                   const hasImage = product.images && product.images.length > 0;
                   return (
