@@ -16,7 +16,8 @@ export function CartSidebar() {
     nombre: "",
     celular: "",
     ubicacion: "",
-    horario: "Pendiente" 
+    horario: "Pendiente",
+    planPago: "50" as "50" | "100" 
   });
 
   // Auto-fill form if user is logged in
@@ -32,8 +33,9 @@ export function CartSidebar() {
   }, [user, profile, isCartOpen]);
 
   const cartTotal = cart.reduce((acc, item) => acc + (item.product.price * item.quantity), 0);
-  const depositAmount = cartTotal * 0.5;
-  const pendingBalance = cartTotal * 0.5;
+  const isVipPlan = formData.planPago === "100";
+  const depositAmount = isVipPlan ? cartTotal : cartTotal * 0.5;
+  const pendingBalance = isVipPlan ? 0 : cartTotal * 0.5;
 
   const confirmAndSendRequest = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,15 +78,25 @@ export function CartSidebar() {
         `▪ ${item.quantity}x ${item.product.name} ${item.size ? `(Talla: ${item.size})` : ''} - Q${(item.product.price * item.quantity).toFixed(2)}`
       ).join('\n');
 
-      const rawMessage = `🌟 *NUEVO PEDIDO - BAHÍA MODA* 🌟\n\n` +
+      const shortId = (user?.id || 'GUEST').substring(0, 4).toUpperCase();
+      const orderId = `#BM-${shortId}${Math.floor(Math.random() * 100)}`;
+
+      const rawMessage = `${isVipPlan ? '🚀 *[PEDIDO PRIORITARIO - PAGO TOTAL]* 🚀' : '🌟 *SOLICITUD DE RESERVA - BAHÍA MODA* 🌟'}\n` +
+        `------------------------------------------\n` +
+        `🆔 *ID:* ${orderId}\n` +
         `👤 *Cliente:* ${formData.nombre}\n` +
-        `📱 *Celular:* ${formData.celular}\n` +
-        `📍 *Dirección:* ${formData.ubicacion}\n\n` +
-        `🛍️ *RESUMEN DE COMPRA:*\n${itemsList}\n\n` +
-        `💰 *Total:* Q${cartTotal.toFixed(2)}\n` +
-        `💳 *Anticipo Reserva (50%):* Q${depositAmount.toFixed(2)}\n` +
-        `💵 *Saldo Contra Entrega:* Q${pendingBalance.toFixed(2)}\n\n` +
-        `_Nota: Ya ingresé mi solicitud. ¡Quedo atento a las notificaciones para conocer mi fecha de entrega exclusiva!_`;
+        `${user?.email ? `✉️ *Correo:* ${user.email}\n` : ''}` +
+        `📱 *WhatsApp:* ${formData.celular}\n` +
+        `🏠 *Dirección:* ${formData.ubicacion}\n` +
+        `💳 *Plan:* ${isVipPlan ? 'PAGO TOTAL (100%)' : 'RESERVA (50%)'}\n` +
+        `------------------------------------------\n\n` +
+        `🛍️ *PRODUCTOS:* \n${itemsList}\n\n` +
+        `💰 *INVERSIÓN:* \n` +
+        `*   *Total a Depositar:* Q${depositAmount.toFixed(2)}\n` +
+        `*   *Saldo Contra Entrega:* Q${pendingBalance.toFixed(2)}${isVipPlan ? ' (¡Pagado!)' : ''}\n\n` +
+        `------------------------------------------\n` +
+        `⚠️ *ACCIÓN REQUERIDA:* Favor enviar fotografía del comprobante de depósito/transferencia para validar su pedido.\n\n` +
+        `_Hola Bahía Moda, acabo de enviar mi solicitud desde la web. ¡Espero vuestra confirmación!_`;
 
       const encodedMessage = encodeURIComponent(rawMessage);
       
@@ -224,28 +236,82 @@ export function CartSidebar() {
               </div>
 
               <form id="checkout-form" onSubmit={confirmAndSendRequest} className="space-y-6">
-                 <div className="bg-gray-50 border border-gray-100 p-4 rounded-2xl">
-                   <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Tipo de Entrega</p>
-                   <p className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                     🏠 Envío a Domicilio (Puerto San José)
-                   </p>
-                 </div>
+                  <div className="bg-gray-50 border border-gray-100 p-4 rounded-2xl">
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Tipo de Entrega</p>
+                    <p className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                      🏠 Envío a Domicilio (Puerto San José)
+                    </p>
+                  </div>
 
-                 <div>
-                   <label className="block text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Nombre Completo</label>
-                   <input required type="text" placeholder="Ej. Ana Pérez" value={formData.nombre} onChange={e => setFormData({...formData, nombre: e.target.value})} className="w-full border border-gray-100 bg-gray-50 px-5 py-4 rounded-2xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-black transition-all" />
-                 </div>
-                 
-                 <div>
-                   <label className="block text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-2">
-                     Ubicación / Punto de Encuentro
-                   </label>
-                   <textarea required placeholder="Indica tu dirección o punto de encuentro..." rows={2} value={formData.ubicacion} onChange={e => setFormData({...formData, ubicacion: e.target.value})} className="w-full border border-gray-100 bg-gray-50 px-5 py-4 rounded-2xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-black resize-none transition-all" />
-                 </div>
+                  {/* PLAN DE PAGO SELECTION */}
+                  <div className="pt-2">
+                    <label className="block text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-3">Plan de Pago</label>
+                    <div className="grid grid-cols-2 gap-3">
+                       <button 
+                         type="button"
+                         onClick={() => setFormData({...formData, planPago: "50"})}
+                         className={`p-4 rounded-2xl border-2 transition-all flex flex-col gap-1 items-start ${
+                           formData.planPago === "50" ? 'bg-indigo-50 border-indigo-600 shadow-md' : 'bg-white border-gray-100'
+                         }`}
+                       >
+                         <span className={`text-[10px] font-black uppercase tracking-widest ${formData.planPago === "50" ? 'text-indigo-600' : 'text-gray-400'}`}>Reserva 50/50</span>
+                         <span className="text-sm font-bold text-gray-900">Q{pendingBalance.toFixed(2)} Hoy</span>
+                       </button>
+                       <button 
+                         type="button"
+                         onClick={() => setFormData({...formData, planPago: "100"})}
+                         className={`p-4 rounded-2xl border-2 transition-all flex flex-col gap-1 items-start ${
+                           formData.planPago === "100" ? 'bg-emerald-50 border-emerald-600 shadow-md' : 'bg-white border-gray-100'
+                         }`}
+                       >
+                         <span className={`text-[10px] font-black uppercase tracking-widest ${formData.planPago === "100" ? 'text-emerald-600' : 'text-gray-400'}`}>Pago Total VIP</span>
+                         <span className="text-sm font-bold text-gray-900">100% Pagado</span>
+                       </button>
+                    </div>
+                  </div>
 
-                 <div>
-                   <label className="block text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Celular de Contacto</label>
-                   <input required type="tel" placeholder="Ej. 4567 8910" value={formData.celular} onChange={e => setFormData({...formData, celular: e.target.value})} className="w-full border border-gray-100 bg-gray-50 px-5 py-4 rounded-2xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-black transition-all" />
+                  {/* FICHA ELEGANTE DINÁMICA */}
+                  <div className={`p-6 rounded-[2rem] border-2 transition-all duration-500 animate-in slide-in-from-top-2 ${
+                    isVipPlan 
+                    ? 'bg-gradient-to-br from-emerald-900 to-black border-emerald-500 shadow-2xl' 
+                    : 'bg-white border-indigo-100 shadow-lg'
+                  }`}>
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-lg ${isVipPlan ? 'bg-emerald-500 text-white' : 'bg-indigo-600 text-white'}`}>
+                        {isVipPlan ? <Check className="w-6 h-6" /> : <Package className="w-5 h-5" />}
+                      </div>
+                      <div>
+                        <h4 className={`text-[10px] font-black uppercase tracking-[0.2em] ${isVipPlan ? 'text-emerald-400' : 'text-indigo-600'}`}>
+                          {isVipPlan ? 'Despacho Prioritario' : 'Reserva Garantizada'}
+                        </h4>
+                        <p className={`text-[11px] font-bold ${isVipPlan ? 'text-white' : 'text-gray-900'}`}>
+                          {isVipPlan ? 'Protocolo Cliente VIP' : 'Protocolo Estándar'}
+                        </p>
+                      </div>
+                    </div>
+                    <p className={`text-[11px] font-medium leading-relaxed ${isVipPlan ? 'text-emerald-100/60' : 'text-gray-500'}`}>
+                      {isVipPlan 
+                        ? 'Tu pedido será procesado inmediatamente. Al terminar, envía tu comprobante para validar tu prioridad.' 
+                        : 'Tu pedido será reservado con el 50%. Envía tu comprobante para iniciar la gestión.'}
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Nombre Completo</label>
+                    <input required type="text" placeholder="Ej. Ana Pérez" value={formData.nombre} onChange={e => setFormData({...formData, nombre: e.target.value})} className="w-full border border-gray-100 bg-gray-50 px-5 py-4 rounded-2xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-black transition-all" />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-2">
+                      Ubicación / Punto de Encuentro
+                    </label>
+                    <textarea required placeholder="Indica tu dirección o punto de encuentro..." rows={2} value={formData.ubicacion} onChange={e => setFormData({...formData, ubicacion: e.target.value})} className="w-full border border-gray-100 bg-gray-50 px-5 py-4 rounded-2xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-black resize-none transition-all" />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Celular de Contacto</label>
+                    <input required type="tel" placeholder="Ej. 4567 8910" value={formData.celular} onChange={e => setFormData({...formData, celular: e.target.value})} className="w-full border border-gray-100 bg-gray-50 px-5 py-4 rounded-2xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-black transition-all" />
+                  </div>us:ring-black transition-all" />
                  </div>
                  
                    <div className="mt-8 bg-slate-900 border border-white/10 p-6 rounded-[2rem] text-center shadow-2xl relative overflow-hidden">
