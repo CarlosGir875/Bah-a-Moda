@@ -1,14 +1,11 @@
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
-
-// Extend jsPDF type to include autotable
-interface jsPDFWithPlugin extends jsPDF {
-  autoTable: (options: any) => jsPDF;
-}
+import autoTable from 'jspdf-autotable';
 
 export const generateInvoicePDF = (order: any) => {
   try {
-    const doc = new jsPDF() as jsPDFWithPlugin;
+    console.log("Iniciando generación de PDF para el pedido:", order.id);
+    
+    const doc = new jsPDF();
     const companyName = "BAHÍA MODA";
     const companySlogan = "Estilo & Exclusividad";
     const date = new Date().toLocaleDateString('es-GT');
@@ -66,7 +63,8 @@ export const generateInvoicePDF = (order: any) => {
       `Q${(Number(item.price || 0) * (item.quantity || 1)).toFixed(2)}`
     ]);
 
-    doc.autoTable({
+    // Use autoTable as a function, not a doc method
+    autoTable(doc, {
       startY: 85,
       head: [['Descripción del Producto', 'Talla', 'Cant.', 'Precio Unit.', 'Subtotal']],
       body: tableRows,
@@ -83,29 +81,30 @@ export const generateInvoicePDF = (order: any) => {
     });
 
     // --- FINANCIAL SUMMARY ---
-    const finalY = (doc as any).lastAutoTable.finalY + 10;
+    // Get final Y after table
+    const finalY = (doc as any).lastAutoTable?.finalY || 150;
     
     doc.setFontSize(11);
     doc.setFont("helvetica", "bold");
-    doc.text(`TOTAL A PAGAR:`, 140, finalY + 5);
-    doc.text(`Q${total.toFixed(2)}`, 185, finalY + 5, { align: 'right' });
+    doc.text(`TOTAL A PAGAR:`, 140, finalY + 10);
+    doc.text(`Q${total.toFixed(2)}`, 185, finalY + 10, { align: 'right' });
 
     // Luxury Divider
     doc.setDrawColor(200, 200, 200);
-    doc.line(130, finalY + 10, 195, finalY + 10);
+    doc.line(130, finalY + 15, 195, finalY + 15);
 
     // Anticipo Highlight
     doc.setFillColor(240, 240, 240);
-    doc.rect(130, finalY + 13, 65, 12, 'F');
+    doc.rect(130, finalY + 18, 65, 12, 'F');
     doc.setTextColor(0, 0, 0);
-    doc.text(`ANTICIPO (50%):`, 135, finalY + 21);
+    doc.text(`ANTICIPO (50%):`, 135, finalY + 26);
     doc.setTextColor(0, 100, 0); // Dark Green
-    doc.text(`Q${anticipo.toFixed(2)}`, 185, finalY + 21, { align: 'right' });
+    doc.text(`Q${anticipo.toFixed(2)}`, 185, finalY + 26, { align: 'right' });
 
     doc.setTextColor(0, 0, 0);
     doc.setFontSize(10);
-    doc.text(`SALDO PENDIENTE:`, 135, finalY + 32);
-    doc.text(`Q${(total - anticipo).toFixed(2)}`, 185, finalY + 32, { align: 'right' });
+    doc.text(`SALDO PENDIENTE:`, 135, finalY + 37);
+    doc.text(`Q${(total - anticipo).toFixed(2)}`, 185, finalY + 37, { align: 'right' });
 
     // --- FOOTER ---
     doc.setFontSize(9);
@@ -116,8 +115,9 @@ export const generateInvoicePDF = (order: any) => {
 
     // Save the PDF
     doc.save(`${invoiceId}_BahiaModa.pdf`);
+    console.log("PDF generado y descargado exitosamente.");
   } catch (error) {
-    console.error("Error generating PDF:", error);
+    console.error("Error crítico en generateInvoicePDF:", error);
     throw error;
   }
 };
