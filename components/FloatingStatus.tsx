@@ -25,8 +25,12 @@ export function FloatingStatus() {
   const pendingCount = orderRequests.filter(r => r.estado === 'pendiente').length;
   
   // User: Logic to find the absolute latest activity (Order or Request)
-  const latestOrder = user && userOrders.length > 0 ? userOrders[0] : null;
-  const latestRequest = user && orderRequests.length > 0 ? orderRequests.find(r => r.user_id === user.id) : null;
+  // Ensure we sort by date to get the REAL latest one
+  const sortedOrders = [...userOrders].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  const sortedRequests = [...orderRequests].filter(r => r.user_id === user?.id).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+  const latestOrder = user && sortedOrders.length > 0 ? sortedOrders[0] : null;
+  const latestRequest = user && sortedRequests.length > 0 ? sortedRequests[0] : null;
 
   // Decision logic: Which one is newer?
   let activeOrder = null;
@@ -46,10 +50,11 @@ export function FloatingStatus() {
     pendingRequest = latestRequest?.estado === 'pendiente' ? latestRequest : null;
   }
 
-  // Auto-open on state changes
+  // Auto-open on state changes with a "Wow" effect
   useEffect(() => {
     if (activeOrder || pendingRequest) {
        setIsOpen(true);
+       // Pulse effect logic could be added here if we had a state for it
     }
   }, [activeOrder?.estado, pendingRequest?.estado]);
 
