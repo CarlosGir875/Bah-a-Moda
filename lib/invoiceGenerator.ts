@@ -171,8 +171,9 @@ export const generateInvoicePDF = async (order: any) => {
     doc.text(`Q${saldo.toFixed(2)}`, 187, finalY + 33, { align: 'right' });
 
     // --- REAL QR CODE GENERATION ---
+    // Pointing to the new PUBLIC verification page
     const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://bahiamoda.com';
-    const qrData = `${baseUrl}/admin/search?q=${invoiceId}`;
+    const qrData = `${baseUrl}/verify/${invoiceId}`;
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrData)}`;
     
     try {
@@ -192,7 +193,7 @@ export const generateInvoicePDF = async (order: any) => {
 
     doc.setFontSize(6);
     doc.setTextColor(100, 116, 139);
-    doc.text("ESCANEÉ PARA VALIDAR ORIGINALIDAD", 15, 238);
+    doc.text("CERTIFICADO DE AUTENTICIDAD DIGITAL", 15, 238);
 
     // PIE DE PÁGINA LIMPIO
     doc.setDrawColor(...champagneGold);
