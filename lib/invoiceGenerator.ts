@@ -23,12 +23,6 @@ export const generateInvoicePDF = async (order: any) => {
     const goldDark = [156, 124, 88] as const;
     const softGrey = [241, 245, 249] as const;
 
-    // --- PRE-CALCULAR URL DE LA CAJA FUERTE (Para el QR) ---
-    // Esta es la URL donde guardaremos el PDF original en Supabase
-    const bucketName = 'receipts';
-    const fileName = `${invoiceId}_${order.id}.pdf`;
-    const publicPdfUrl = `https://jfxgjlswbvbzaqtsnany.supabase.co/storage/v1/object/public/${bucketName}/${fileName}`;
-
     // --- PAGE BACKGROUND ---
     doc.setFillColor(255, 255, 255);
     doc.rect(0, 0, 210, 297, 'F');
@@ -177,8 +171,10 @@ export const generateInvoicePDF = async (order: any) => {
     doc.text("SALDO A PAGAR:", 135, finalY + 33);
     doc.text(`Q${saldo.toFixed(2)}`, 187, finalY + 33, { align: 'right' });
 
-    // --- REAL QR CODE GENERATION (Linking to the Vault PDF) ---
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(publicPdfUrl)}`;
+    // --- REAL QR CODE GENERATION (Linking to Digital Twin) ---
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://bahiamoda.com';
+    const qrData = `${baseUrl}/verify/${invoiceId}`;
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrData)}`;
     
     try {
       const response = await fetch(qrUrl);
@@ -197,7 +193,7 @@ export const generateInvoicePDF = async (order: any) => {
 
     doc.setFontSize(6);
     doc.setTextColor(100, 116, 139);
-    doc.text("CERTIFICADO DE AUTENTICIDAD (ESCANEE PARA VER ORIGINAL)", 15, 238);
+    doc.text("CERTIFICADO DE AUTENTICIDAD DIGITAL (QR)", 15, 238);
 
     // PIE DE PÁGINA LIMPIO
     doc.setDrawColor(...champagneGold);
@@ -221,26 +217,11 @@ export const generateInvoicePDF = async (order: any) => {
     const disclaimer = "Este documento es una orden de compra oficial de Bahía Moda. Verifique su autenticidad mediante el código QR.";
     doc.text(disclaimer, 105, 285, { align: 'center' });
 
-    // --- UPLOAD TO VAULT (Supabase) ---
-    const pdfBlob = doc.output('blob');
-    const uploadResult = await supabase.storage
-      .from(bucketName)
-      .upload(fileName, pdfBlob, {
-        upsert: true,
-        contentType: 'application/pdf'
-      });
-
-    if (uploadResult.error) {
-      console.error("Error al guardar en la Caja Fuerte:", uploadResult.error);
-    } else {
-      console.log("PDF guardado con éxito en la Caja Fuerte:", fileName);
-    }
-
     // Save/Download for the user
     doc.save(`${invoiceId}_BahiaModa_Official.pdf`);
     
   } catch (error) {
-    console.error("Error generating/vaulting PDF:", error);
+    console.error("Error generating PDF:", error);
     alert("Error al generar factura premium. Intente de nuevo.");
   }
 };
