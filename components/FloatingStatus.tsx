@@ -40,6 +40,7 @@ export function FloatingStatus() {
   const getStatusColor = () => {
     if (isAdmin) return 'bg-indigo-600';
     if (activeOrder) {
+      if (activeOrder.estado === 'pendiente') return 'bg-amber-500';
       if (activeOrder.estado === 'recibido') return 'bg-emerald-500';
       if (activeOrder.estado === 'preparacion') return 'bg-orange-500';
       if (activeOrder.estado === 'en_transito') return 'bg-violet-600';
@@ -51,6 +52,7 @@ export function FloatingStatus() {
   const getAuraColor = () => {
     if (isAdmin) return 'shadow-[0_0_50px_-12px_rgba(99,102,241,0.5)]';
     if (activeOrder) {
+      if (activeOrder.estado === 'pendiente') return 'shadow-[0_0_50px_-12px_rgba(245,158,11,0.5)]';
       if (activeOrder.estado === 'recibido') return 'shadow-[0_0_50px_-12px_rgba(16,185,129,0.5)]';
       if (activeOrder.estado === 'preparacion') return 'shadow-[0_0_50px_-12px_rgba(245,158,11,0.5)]';
       if (activeOrder.estado === 'en_transito') return 'shadow-[0_0_50px_-12px_rgba(124,58,237,0.5)]';
@@ -111,14 +113,17 @@ export function FloatingStatus() {
                       {activeOrder.estado === 'recibido' && <CheckCircle2 className="w-8 h-8" />}
                       {activeOrder.estado === 'preparacion' && <Package className="w-8 h-8 animate-pulse" />}
                       {activeOrder.estado === 'en_transito' && <Truck className="w-8 h-8 animate-bounce" />}
+                      {activeOrder.estado === 'pendiente' && <Clock className="w-8 h-8 animate-pulse" />}
                     </div>
                     <p className="text-xs font-black uppercase tracking-widest mb-1">
-                      {activeOrder.estado === 'recibido' ? '¡Pedido Aceptado!' : 
+                      {activeOrder.estado === 'pendiente' ? 'Solicitud en Revisión' :
+                       activeOrder.estado === 'recibido' ? '¡Pedido Aceptado!' : 
                        activeOrder.estado === 'preparacion' ? 'Empaquetando Pedido' : 
                        activeOrder.estado === 'en_transito' ? 'Pedido en Camino' : 'Procesando'}
                     </p>
                     <p className="text-[11px] font-medium text-gray-500 leading-relaxed">
-                      {activeOrder.estado === 'recibido' ? 'Tu reserva ha sido aprobada con éxito.' : 
+                      {activeOrder.estado === 'pendiente' ? 'Estamos validando tu comprobante de reserva.' :
+                       activeOrder.estado === 'recibido' ? 'Tu reserva ha sido aprobada con éxito.' : 
                        activeOrder.estado === 'preparacion' ? 'Estamos preparando tu paquete con elegancia.' : 
                        activeOrder.estado === 'en_transito' ? 'Tu pedido va rumbo a su destino final.' : 'Estamos trabajando en tu pedido.'}
                     </p>
