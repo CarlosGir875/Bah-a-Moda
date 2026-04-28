@@ -24,9 +24,27 @@ export function FloatingStatus() {
   // Admin: Count pending requests
   const pendingCount = orderRequests.filter(r => r.estado === 'pendiente').length;
   
-  // User: Prioritize active orders over pending requests
-  const activeOrder = user ? userOrders.find(o => !['listo_entrega', 'cancelado'].includes(o.estado)) : null;
-  const pendingRequest = user && !activeOrder ? orderRequests.find(r => r.user_id === user.id && r.estado === 'pendiente') : null;
+  // User: Logic to find the absolute latest activity (Order or Request)
+  const latestOrder = user && userOrders.length > 0 ? userOrders[0] : null;
+  const latestRequest = user && orderRequests.length > 0 ? orderRequests.find(r => r.user_id === user.id) : null;
+
+  // Decision logic: Which one is newer?
+  let activeOrder = null;
+  let pendingRequest = null;
+
+  if (latestOrder && latestRequest) {
+    const orderTime = new Date(latestOrder.created_at).getTime();
+    const requestTime = new Date(latestRequest.created_at).getTime();
+    
+    if (requestTime > orderTime && latestRequest.estado === 'pendiente') {
+      pendingRequest = latestRequest;
+    } else {
+      activeOrder = latestOrder;
+    }
+  } else {
+    activeOrder = latestOrder;
+    pendingRequest = latestRequest?.estado === 'pendiente' ? latestRequest : null;
+  }
 
   // Auto-open on state changes
   useEffect(() => {
