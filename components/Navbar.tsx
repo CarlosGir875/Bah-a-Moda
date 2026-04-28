@@ -98,12 +98,12 @@ export function Navbar() {
               {user ? (
                 <button 
                   onClick={() => setIsProfileModalOpen(true)}
-                  className="flex items-center gap-2 pl-2 pr-2.5 py-1.5 text-black bg-gray-50 hover:bg-gray-100 rounded-full transition-all hover:scale-[1.02] border border-gray-200 shadow-sm active:scale-95"
+                  className="flex items-center gap-2 p-1 text-black bg-white hover:bg-zinc-50 rounded-full transition-all border border-zinc-200 shadow-sm active:scale-95"
                   aria-label="Perfil"
                 >
-                  <div className="w-8 h-8 aspect-square shrink-0 bg-black text-white rounded-full flex items-center justify-center shadow-inner overflow-hidden border-2 border-white ring-1 ring-gray-200">
+                  <div className="w-8 h-8 aspect-square shrink-0 bg-zinc-100 text-slate-900 rounded-full flex items-center justify-center overflow-hidden border border-zinc-200/50">
                     {profile?.avatar_url || user?.user_metadata?.avatar_url || user?.user_metadata?.picture ? (
-                      <img src={profile?.avatar_url || user?.user_metadata?.avatar_url || user?.user_metadata?.picture} alt="Profile" className="w-full h-full object-cover rounded-full" />
+                      <img src={profile?.avatar_url || user?.user_metadata?.avatar_url || user?.user_metadata?.picture} alt="Profile" className="w-full h-full object-cover" />
                     ) : (
                       <User className="h-4 w-4" strokeWidth={2.5} />
                     )}
