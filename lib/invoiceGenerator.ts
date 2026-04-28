@@ -177,6 +177,16 @@ export const generateInvoicePDF = (order: any) => {
     doc.text("SALDO A PAGAR:", 135, finalY + 33);
     doc.text(`Q${saldo.toFixed(2)}`, 187, finalY + 33, { align: 'right' });
 
+    // --- WATERMARK (Escudo de Autenticidad) ---
+    // Drawing a large, ultra-subtle BM logo in the center
+    doc.saveGraphicsState();
+    doc.setGState(new (doc as any).GState({ opacity: 0.04 })); // 4% opacity
+    doc.setTextColor(...nightBlue);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(150);
+    doc.text("BM", 105, 160, { align: 'center', angle: 45 });
+    doc.restoreGraphicsState();
+
     // --- FOOTER SECTION ---
     // Barcode Aesthetics
     doc.setFillColor(...nightBlue);
@@ -188,25 +198,52 @@ export const generateInvoicePDF = (order: any) => {
     doc.setTextColor(148, 163, 184);
     doc.text(`VERIFICATION_TOKEN: ${order.id}`, 15, 276);
 
+    // QR CODE (Functional-looking area)
+    doc.setFillColor(...nightBlue);
+    doc.roundedRect(15, 240, 22, 22, 2, 2, 'F');
+    doc.setFillColor(255, 255, 255);
+    // Draw some blocks to simulate a QR code
+    for(let i=0; i<6; i++) {
+        for(let j=0; j<6; j++) {
+            if (Math.random() > 0.4) {
+                doc.rect(17 + (i*3.3), 242 + (j*3.3), 2.5, 2.5, 'F');
+            }
+        }
+    }
+    doc.setFontSize(5);
+    doc.setTextColor(100, 116, 139);
+    doc.text("ESCANEÉ PARA VALIDAR", 15, 238);
+
+    // SOCIAL MEDIA & CONTACT
+    doc.setTextColor(...nightBlue);
+    doc.setFontSize(7);
+    doc.setFont("helvetica", "bold");
+    doc.text("CONTACTO Y REDES", 80, 245);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(6);
+    doc.text("WhatsApp: +502 32353835", 80, 250);
+    doc.text("Instagram: @bahiamoda_oficial", 80, 254);
+    doc.text("Web: www.bahiamoda.com", 80, 258);
+
     // STAMP (Complex Luxury Stamp)
     doc.setDrawColor(...champagneGold);
     doc.setLineWidth(0.5);
-    doc.circle(175, 260, 18, 'D');
+    doc.circle(175, 255, 18, 'D');
     doc.setLineWidth(0.1);
-    doc.circle(175, 260, 16, 'D');
+    doc.circle(175, 255, 16, 'D');
     doc.setDrawColor(...nightBlue);
-    doc.circle(175, 260, 14, 'D');
+    doc.circle(175, 255, 14, 'D');
     
     doc.setTextColor(...nightBlue);
     doc.setFontSize(6);
     doc.setFont("helvetica", "bold");
-    doc.text("BAHÍA MODA", 175, 258, { align: 'center' });
+    doc.text("BAHÍA MODA", 175, 253, { align: 'center' });
     doc.setFontSize(4);
-    doc.text("GARANTÍA DE EXCLUSIVIDAD", 175, 262, { align: 'center' });
-    doc.text("AUTHENTIC DOCUMENT", 175, 265, { align: 'center' });
+    doc.text("GARANTÍA DE EXCLUSIVIDAD", 175, 257, { align: 'center' });
+    doc.text("DOCUMENTO OFICIAL", 175, 260, { align: 'center' });
 
     // Final Disclaimer
-    doc.setFontSize(7);
+    doc.setFontSize(6);
     doc.setTextColor(148, 163, 184);
     doc.setFont("helvetica", "italic");
     const disclaimer = "Este documento es una orden de compra oficial de Bahía Moda. Su validez está sujeta a la confirmación del anticipo.";
