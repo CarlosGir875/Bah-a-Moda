@@ -1,9 +1,9 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
-export const generateInvoicePDF = (order: any) => {
+export const generateInvoicePDF = async (order: any) => {
   try {
-    console.log("Iniciando generación de PDF Ultra-Premium para el pedido:", order.id);
+    console.log("Iniciando generación de PDF Seguro para el pedido:", order.id);
     
     const doc = new jsPDF();
     const date = new Date().toLocaleDateString('es-GT');
@@ -26,8 +26,16 @@ export const generateInvoicePDF = (order: any) => {
     doc.setFillColor(255, 255, 255);
     doc.rect(0, 0, 210, 297, 'F');
 
+    // --- WATERMARK (Escudo de Autenticidad) ---
+    doc.saveGraphicsState();
+    doc.setGState(new (doc as any).GState({ opacity: 0.04 }));
+    doc.setTextColor(...nightBlue);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(150);
+    doc.text("BM", 105, 160, { align: 'center', angle: 45 });
+    doc.restoreGraphicsState();
+
     // --- HEADER SECTION ---
-    // LOGO CIRCLE (Double border for luxury feel)
     doc.setFillColor(...nightBlue);
     doc.setDrawColor(...champagneGold);
     doc.setLineWidth(0.8);
@@ -40,7 +48,6 @@ export const generateInvoicePDF = (order: any) => {
     doc.setFontSize(16);
     doc.text("BM", 30, 32, { align: 'center' });
 
-    // BRAND NAME (Elegant Spacing)
     doc.setTextColor(...nightBlue);
     doc.setFontSize(26);
     doc.setFont("helvetica", "bold");
@@ -51,7 +58,6 @@ export const generateInvoicePDF = (order: any) => {
     doc.setTextColor(...goldDark);
     doc.text("E X C L U S I V I D A D   &   E S T I L O   E N   C A D A   D E T A L L E", 55, 34);
 
-    // ORDEN DE COMPRA BOX (Faux Gradient Gold)
     doc.setFillColor(...goldDark);
     doc.rect(145, 15, 50, 9, 'F');
     doc.setFillColor(...champagneGold);
@@ -69,7 +75,6 @@ export const generateInvoicePDF = (order: any) => {
     doc.setTextColor(100, 116, 139);
     doc.text(`EMITIDO: ${date}`, 170, 38, { align: 'center' });
 
-    // --- METALLIC DIVIDER LINE ---
     doc.setDrawColor(...goldDark);
     doc.setLineWidth(0.6);
     doc.line(15, 48, 195, 48);
@@ -77,7 +82,6 @@ export const generateInvoicePDF = (order: any) => {
     doc.setLineWidth(0.2);
     doc.line(15, 48.8, 195, 48.8);
 
-    // --- CLIENT INFO (SOFT PREMIUM BOX) ---
     doc.setFillColor(...softGrey);
     doc.roundedRect(15, 58, 180, 32, 4, 4, 'F');
     
@@ -88,25 +92,23 @@ export const generateInvoicePDF = (order: any) => {
     
     doc.setFontSize(8);
     doc.setTextColor(100, 116, 139);
-    doc.text("NOMBRE DEL CLIENTE:", 25, 75);
-    doc.text("CONTACTO / TELÉFONO:", 25, 80);
-    doc.text("PUNTO DE ENTREGA:", 25, 85);
+    doc.text("CLIENTE:", 25, 75);
+    doc.text("CONTACTO:", 25, 80);
+    doc.text("ENTREGA:", 25, 85);
 
     doc.setTextColor(...nightBlue);
     doc.setFont("helvetica", "bold");
-    doc.text(`${order.cliente_nombre || 'Invitado'}`, 70, 75);
-    doc.text(`+502 ${order.cliente_telefono || 'N/A'}`, 70, 80);
+    doc.text(`${order.cliente_nombre || 'Invitado'}`, 55, 75);
+    doc.text(`+502 ${order.cliente_telefono || 'N/A'}`, 55, 80);
     
-    const splitUbicacion = doc.splitTextToSize(`${order.ubicacion || order.ubicacion_entrega || 'Puerto San José'}`, 120);
-    doc.text(splitUbicacion, 70, 85);
+    const splitUbicacion = doc.splitTextToSize(`${order.ubicacion || order.ubicacion_entrega || 'Puerto San José'}`, 125);
+    doc.text(splitUbicacion, 55, 85);
 
-    // --- STRIP BRAND FROM PRODUCT NAME ---
     const stripBrand = (name: string) => {
       if (!name) return 'Artículo Exclusivo';
       return name.replace(/\s+de\s+(arabela|l'bel|lbel|scentia|esika|cyzone|avon|natura|mary kay)/i, '').trim();
     };
 
-    // --- LUXURY TABLE ---
     const items = Array.isArray(order.items) ? order.items : [];
     const tableRows = items.map((item: any) => [
       stripBrand(item.name),
@@ -119,7 +121,7 @@ export const generateInvoicePDF = (order: any) => {
     autoTable(doc, {
       startY: 98,
       margin: { left: 15, right: 15 },
-      head: [['ARTÍCULO / DESCRIPCIÓN', 'TALLA', 'CANT.', 'P. UNITARIO', 'SUBTOTAL']],
+      head: [['ARTÍCULO', 'TALLA', 'CANT.', 'P. UNITARIO', 'SUBTOTAL']],
       body: tableRows,
       theme: 'plain',
       headStyles: { 
@@ -130,15 +132,8 @@ export const generateInvoicePDF = (order: any) => {
         halign: 'center',
         cellPadding: 5
       },
-      bodyStyles: {
-        fontSize: 8,
-        textColor: [30, 41, 59],
-        cellPadding: 4,
-        font: 'helvetica'
-      },
-      alternateRowStyles: {
-        fillColor: [248, 250, 252]
-      },
+      bodyStyles: { fontSize: 8, textColor: [30, 41, 59], cellPadding: 4 },
+      alternateRowStyles: { fillColor: [248, 250, 252] },
       columnStyles: {
         0: { cellWidth: 80, halign: 'left', fontStyle: 'bold' },
         1: { halign: 'center' },
@@ -153,7 +148,6 @@ export const generateInvoicePDF = (order: any) => {
     doc.setLineWidth(0.5);
     doc.line(15, finalY + 2, 195, finalY + 2);
 
-    // --- SUMMARY SECTION ---
     doc.setFontSize(9);
     doc.setTextColor(100, 116, 139);
     doc.setFont("helvetica", "bold");
@@ -161,11 +155,10 @@ export const generateInvoicePDF = (order: any) => {
     doc.setTextColor(...nightBlue);
     doc.text(`Q${total.toFixed(2)}`, 190, finalY + 12, { align: 'right' });
 
-    doc.setTextColor(34, 197, 94); // Emerald Green
+    doc.setTextColor(34, 197, 94);
     doc.text("ANTICIPO VALIDADO:", 140, finalY + 19);
     doc.text(`- Q${anticipo.toFixed(2)}`, 190, finalY + 19, { align: 'right' });
 
-    // PREMIUM GOLD BALANCE BOX
     doc.setFillColor(...goldDark);
     doc.roundedRect(130, finalY + 25, 65, 12, 2, 2, 'F');
     doc.setFillColor(...champagneGold);
@@ -177,62 +170,37 @@ export const generateInvoicePDF = (order: any) => {
     doc.text("SALDO A PAGAR:", 135, finalY + 33);
     doc.text(`Q${saldo.toFixed(2)}`, 187, finalY + 33, { align: 'right' });
 
-    // --- WATERMARK (Escudo de Autenticidad) ---
-    // Drawing a large, ultra-subtle BM logo in the center
-    doc.saveGraphicsState();
-    doc.setGState(new (doc as any).GState({ opacity: 0.04 })); // 4% opacity
-    doc.setTextColor(...nightBlue);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(150);
-    doc.text("BM", 105, 160, { align: 'center', angle: 45 });
-    doc.restoreGraphicsState();
-
-    // --- FOOTER SECTION ---
-    // Barcode Aesthetics
-    doc.setFillColor(...nightBlue);
-    for(let i=0; i<40; i++) {
-        const w = Math.random() * 1.2;
-        doc.rect(15 + (i*1), 265, w, 8, 'F');
+    // --- REAL QR CODE GENERATION ---
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://bahiamoda.com';
+    const qrData = `${baseUrl}/admin/search?q=${invoiceId}`;
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrData)}`;
+    
+    try {
+      const response = await fetch(qrUrl);
+      const blob = await response.blob();
+      const reader = new FileReader();
+      const qrBase64 = await new Promise<string>((resolve) => {
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.readAsDataURL(blob);
+      });
+      doc.addImage(qrBase64, 'PNG', 15, 240, 25, 25);
+    } catch (qrError) {
+      console.warn("No se pudo generar el QR real, usando respaldo visual", qrError);
+      doc.setFillColor(...nightBlue);
+      doc.rect(15, 240, 25, 25, 'F');
     }
-    doc.setFontSize(5);
-    doc.setTextColor(148, 163, 184);
-    doc.text(`VERIFICATION_TOKEN: ${order.id}`, 15, 276);
 
-    // QR CODE (Functional-looking area)
-    doc.setFillColor(...nightBlue);
-    doc.roundedRect(15, 240, 22, 22, 2, 2, 'F');
-    doc.setFillColor(255, 255, 255);
-    // Draw some blocks to simulate a QR code
-    for(let i=0; i<6; i++) {
-        for(let j=0; j<6; j++) {
-            if (Math.random() > 0.4) {
-                doc.rect(17 + (i*3.3), 242 + (j*3.3), 2.5, 2.5, 'F');
-            }
-        }
-    }
-    doc.setFontSize(5);
-    doc.setTextColor(100, 116, 139);
-    doc.text("ESCANEÉ PARA VALIDAR", 15, 238);
-
-    // SOCIAL MEDIA & CONTACT
-    doc.setTextColor(...nightBlue);
-    doc.setFontSize(7);
-    doc.setFont("helvetica", "bold");
-    doc.text("CONTACTO Y REDES", 80, 245);
-    doc.setFont("helvetica", "normal");
     doc.setFontSize(6);
-    doc.text("WhatsApp: +502 32353835", 80, 250);
-    doc.text("Instagram: @bahiamoda_oficial", 80, 254);
-    doc.text("Web: www.bahiamoda.com", 80, 258);
+    doc.setTextColor(100, 116, 139);
+    doc.text("ESCANEÉ PARA VALIDAR ORIGINALIDAD", 15, 238);
 
-    // STAMP (Complex Luxury Stamp)
+    // PIE DE PÁGINA LIMPIO
     doc.setDrawColor(...champagneGold);
     doc.setLineWidth(0.5);
     doc.circle(175, 255, 18, 'D');
+    doc.setDrawColor(...nightBlue);
     doc.setLineWidth(0.1);
     doc.circle(175, 255, 16, 'D');
-    doc.setDrawColor(...nightBlue);
-    doc.circle(175, 255, 14, 'D');
     
     doc.setTextColor(...nightBlue);
     doc.setFontSize(6);
@@ -242,14 +210,12 @@ export const generateInvoicePDF = (order: any) => {
     doc.text("GARANTÍA DE EXCLUSIVIDAD", 175, 257, { align: 'center' });
     doc.text("DOCUMENTO OFICIAL", 175, 260, { align: 'center' });
 
-    // Final Disclaimer
     doc.setFontSize(6);
     doc.setTextColor(148, 163, 184);
     doc.setFont("helvetica", "italic");
-    const disclaimer = "Este documento es una orden de compra oficial de Bahía Moda. Su validez está sujeta a la confirmación del anticipo.";
+    const disclaimer = "Este documento es una orden de compra oficial de Bahía Moda. Verifique su autenticidad mediante el código QR.";
     doc.text(disclaimer, 105, 285, { align: 'center' });
 
-    // Save
     doc.save(`${invoiceId}_BahiaModa_Official.pdf`);
     
   } catch (error) {

@@ -264,7 +264,6 @@ export function ProfileModal() {
                     <span className="text-5xl md:text-6xl font-black text-slate-900 uppercase tracking-tighter">{displayName?.charAt(0)}</span>
                   </div>
                 )}
-              </div>
               <button 
                 onClick={() => fileInputRef.current?.click()}
                 className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10 cursor-pointer"

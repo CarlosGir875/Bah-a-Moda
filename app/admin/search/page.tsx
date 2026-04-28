@@ -145,7 +145,7 @@ export default function AdminSearchPage() {
 
                       <div className="flex flex-wrap md:flex-col justify-end gap-2">
                         <button 
-                          onClick={() => generateInvoicePDF(item)}
+                          onClick={async () => await generateInvoicePDF(item)}
                           className="flex items-center gap-2 bg-zinc-100 hover:bg-black hover:text-white px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
                         >
                           <Download className="w-4 h-4" /> Recibo PDF

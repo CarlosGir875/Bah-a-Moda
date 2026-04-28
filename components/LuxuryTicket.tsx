@@ -1,7 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Package, Calendar, MapPin, CheckCircle2, QrCode } from "lucide-react";
+import { Package, Calendar, MapPin, CheckCircle2, QrCode, Download } from "lucide-react";
+import { generateInvoicePDF } from "@/lib/invoiceGenerator";
 
 interface LuxuryTicketProps {
   order: any;
@@ -131,13 +132,22 @@ export function LuxuryTicket({ order, onClose }: LuxuryTicketProps) {
           <p className="text-[8px] font-black text-slate-300 uppercase tracking-[0.5em]">BM-AUTH-{order.id.slice(0,8).toUpperCase()}</p>
         </div>
 
-        {/* Close Button */}
-        <button 
-          onClick={onClose}
-          className="mt-12 w-full py-5 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.4em] hover:bg-[#d4af37] transition-all shadow-xl active:scale-95"
-        >
-          Cerrar Ticket de Gala
-        </button>
+        {/* Action Buttons */}
+        <div className="mt-12 flex flex-col gap-3">
+          <button 
+            onClick={async () => await generateInvoicePDF(order)}
+            className="w-full py-5 bg-emerald-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.4em] hover:bg-emerald-700 transition-all shadow-xl active:scale-95 flex items-center justify-center gap-3"
+          >
+            <Download className="w-4 h-4" /> Descargar Recibo PDF
+          </button>
+          
+          <button 
+            onClick={onClose}
+            className="w-full py-5 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.4em] hover:bg-zinc-800 transition-all shadow-xl active:scale-95"
+          >
+            Cerrar Ticket de Gala
+          </button>
+        </div>
       </div>
     </motion.div>
   );
