@@ -289,8 +289,8 @@ export function CartSidebar() {
                         </p>
                       </div>
                     </div>
-                    <p className={`text-[11px] font-medium leading-relaxed ${isVipPlan ? 'text-emerald-100/60' : 'text-gray-500'}`}>
-                      {isVipPlan 
+                    <p className={`text-[11px] font-medium leading-relaxed ${isGalaPlan ? 'text-emerald-100/60' : 'text-gray-500'}`}>
+                      {isGalaPlan 
                         ? 'Tu pedido será procesado inmediatamente. Al terminar, envía tu comprobante para validar tu prioridad.' 
                         : 'Tu pedido será reservado con el 50%. Envía tu comprobante para iniciar la gestión.'}
                     </p>
