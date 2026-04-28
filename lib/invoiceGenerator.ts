@@ -173,14 +173,19 @@ export const generateInvoicePDF = async (order: any) => {
 
     // --- PRE-CALCULAR URL DIRECTA AL PDF (Caja Fuerte) ---
     const bucketName = 'receipts';
-    const fileName = `${invoiceId}_${order.id}.pdf`;
-    const publicPdfUrl = `https://jfxgjlswbvbzaqtsnany.supabase.co/storage/v1/object/public/${bucketName}/${fileName}`;
+    const fileName = `R-${order.id.slice(0, 10)}.pdf`;
+    
+    // Obtener la URL pública dinámicamente
+    const { data: { publicUrl } } = supabase.storage
+      .from(bucketName)
+      .getPublicUrl(fileName);
 
     // --- REAL QR CODE GENERATION (Linking DIRECTLY to the PDF file) ---
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(publicPdfUrl)}`;
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(publicUrl)}`;
     
     try {
       const response = await fetch(qrUrl);
+      if (!response.ok) throw new Error("QR API error");
       const blob = await response.blob();
       const reader = new FileReader();
       const qrBase64 = await new Promise<string>((resolve) => {
@@ -220,16 +225,26 @@ export const generateInvoicePDF = async (order: any) => {
     const disclaimer = "Este documento es una orden de compra oficial de Bahía Moda. Verifique su autenticidad mediante el código QR.";
     doc.text(disclaimer, 105, 285, { align: 'center' });
 
-    // --- SUBIR PDF A LA CAJA FUERTE ANTES DE DESCARGAR ---
-    const pdfBlob = doc.output('blob');
-    await supabase.storage
-      .from(bucketName)
-      .upload(fileName, pdfBlob, {
-        upsert: true,
-        contentType: 'application/pdf'
-      });
+    // --- SUBIR PDF A LA CAJA FUERTE ---
+    try {
+      const pdfBlob = doc.output('blob');
+      const { error: uploadError } = await supabase.storage
+        .from(bucketName)
+        .upload(fileName, pdfBlob, {
+          upsert: true,
+          contentType: 'application/pdf'
+        });
+      
+      if (uploadError) {
+        console.error("Error al subir a la Caja Fuerte:", uploadError.message);
+      } else {
+        console.log("PDF asegurado en la Caja Fuerte correctamente.");
+      }
+    } catch (err) {
+      console.error("Fallo crítico en subida:", err);
+    }
 
-    // Descargar para el cliente
+    // Descargar siempre para el cliente, pase lo que pase con la subida
     doc.save(`${invoiceId}_BahiaModa_Official.pdf`);
     
   } catch (error) {
