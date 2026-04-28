@@ -1,9 +1,10 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { supabase } from './supabase';
 
 export const generateInvoicePDF = async (order: any) => {
   try {
-    console.log("Iniciando generación de PDF Seguro para el pedido:", order.id);
+    console.log("Iniciando generación de PDF Seguro (Caja Fuerte) para el pedido:", order.id);
     
     const doc = new jsPDF();
     const date = new Date().toLocaleDateString('es-GT');
@@ -21,6 +22,12 @@ export const generateInvoicePDF = async (order: any) => {
     const goldLight = [230, 190, 150] as const;
     const goldDark = [156, 124, 88] as const;
     const softGrey = [241, 245, 249] as const;
+
+    // --- PRE-CALCULAR URL DE LA CAJA FUERTE (Para el QR) ---
+    // Esta es la URL donde guardaremos el PDF original en Supabase
+    const bucketName = 'receipts';
+    const fileName = `${invoiceId}_${order.id}.pdf`;
+    const publicPdfUrl = `https://jfxgjlswbvbzaqtsnany.supabase.co/storage/v1/object/public/${bucketName}/${fileName}`;
 
     // --- PAGE BACKGROUND ---
     doc.setFillColor(255, 255, 255);
@@ -170,11 +177,8 @@ export const generateInvoicePDF = async (order: any) => {
     doc.text("SALDO A PAGAR:", 135, finalY + 33);
     doc.text(`Q${saldo.toFixed(2)}`, 187, finalY + 33, { align: 'right' });
 
-    // --- REAL QR CODE GENERATION ---
-    // Pointing to the new PUBLIC verification page
-    const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://bahiamoda.com';
-    const qrData = `${baseUrl}/verify/${invoiceId}`;
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrData)}`;
+    // --- REAL QR CODE GENERATION (Linking to the Vault PDF) ---
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(publicPdfUrl)}`;
     
     try {
       const response = await fetch(qrUrl);
@@ -186,14 +190,14 @@ export const generateInvoicePDF = async (order: any) => {
       });
       doc.addImage(qrBase64, 'PNG', 15, 240, 25, 25);
     } catch (qrError) {
-      console.warn("No se pudo generar el QR real, usando respaldo visual", qrError);
+      console.warn("No se pudo generar el QR real", qrError);
       doc.setFillColor(...nightBlue);
       doc.rect(15, 240, 25, 25, 'F');
     }
 
     doc.setFontSize(6);
     doc.setTextColor(100, 116, 139);
-    doc.text("CERTIFICADO DE AUTENTICIDAD DIGITAL", 15, 238);
+    doc.text("CERTIFICADO DE AUTENTICIDAD (ESCANEE PARA VER ORIGINAL)", 15, 238);
 
     // PIE DE PÁGINA LIMPIO
     doc.setDrawColor(...champagneGold);
@@ -217,12 +221,26 @@ export const generateInvoicePDF = async (order: any) => {
     const disclaimer = "Este documento es una orden de compra oficial de Bahía Moda. Verifique su autenticidad mediante el código QR.";
     doc.text(disclaimer, 105, 285, { align: 'center' });
 
+    // --- UPLOAD TO VAULT (Supabase) ---
+    const pdfBlob = doc.output('blob');
+    const uploadResult = await supabase.storage
+      .from(bucketName)
+      .upload(fileName, pdfBlob, {
+        upsert: true,
+        contentType: 'application/pdf'
+      });
+
+    if (uploadResult.error) {
+      console.error("Error al guardar en la Caja Fuerte:", uploadResult.error);
+    } else {
+      console.log("PDF guardado con éxito en la Caja Fuerte:", fileName);
+    }
+
+    // Save/Download for the user
     doc.save(`${invoiceId}_BahiaModa_Official.pdf`);
     
   } catch (error) {
-    console.error("Error en PDF Ultra-Premium:", error);
-    throw error;
+    console.error("Error generating/vaulting PDF:", error);
+    alert("Error al generar factura premium. Intente de nuevo.");
   }
 };
-
-
