@@ -272,7 +272,8 @@ export function ProfileModal() {
               </button>
             </div>
           </div>
-          <div className="px-5 md:px-12 pb-6 pt-2 text-center">
+        </div>
+        <div className="px-5 md:px-12 pb-6 pt-2 text-center">
             
             {view === "overview" ? (
               <div className="animate-in fade-in slide-in-from-bottom-6 duration-700 max-w-5xl mx-auto">
