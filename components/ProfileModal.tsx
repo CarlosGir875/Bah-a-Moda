@@ -359,7 +359,15 @@ export function ProfileModal() {
                              </div>
                              <div className="min-w-0">
                                <p className="text-sm font-black text-zinc-900 truncate">Q{o.total}</p>
-                               <p className="text-[9px] font-bold text-zinc-400 uppercase mt-0.5 truncate">{new Date(o.created_at).toLocaleDateString('es-GT', { day: 'numeric', month: 'short' })}</p>
+                               <div className="mt-1 flex flex-wrap gap-1">
+                                  {o.items?.slice(0, 2).map((item: any, idx: number) => (
+                                    <span key={idx} className="text-[7px] font-bold bg-zinc-100 px-1.5 py-0.5 rounded uppercase text-zinc-500">
+                                      {item.quantity}x {item.name.split(' ')[0]}
+                                    </span>
+                                  ))}
+                                  {o.items?.length > 2 && <span className="text-[7px] font-bold text-zinc-400">+{o.items.length - 2} más</span>}
+                                </div>
+                               <p className="text-[9px] font-bold text-zinc-400 uppercase mt-1 truncate">{new Date(o.created_at).toLocaleDateString('es-GT', { day: 'numeric', month: 'short' })}</p>
                              </div>
                            </div>
                            <div className="flex flex-col items-end gap-1.5 shrink-0 pl-2">

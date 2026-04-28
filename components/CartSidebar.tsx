@@ -33,9 +33,9 @@ export function CartSidebar() {
   }, [user, profile, isCartOpen]);
 
   const cartTotal = cart.reduce((acc, item) => acc + (item.product.price * item.quantity), 0);
-  const isVipPlan = formData.planPago === "100";
-  const depositAmount = isVipPlan ? cartTotal : cartTotal * 0.5;
-  const pendingBalance = isVipPlan ? 0 : cartTotal * 0.5;
+  const isGalaPlan = formData.planPago === "100";
+  const depositAmount = isGalaPlan ? cartTotal : cartTotal * 0.5;
+  const pendingBalance = isGalaPlan ? 0 : cartTotal * 0.5;
 
   const confirmAndSendRequest = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,19 +81,19 @@ export function CartSidebar() {
       const shortId = (user?.id || 'GUEST').substring(0, 4).toUpperCase();
       const orderId = `#BM-${shortId}${Math.floor(Math.random() * 100)}`;
 
-      const rawMessage = `${isVipPlan ? '🚀 *[PEDIDO PRIORITARIO - PAGO TOTAL]* 🚀' : '🌟 *SOLICITUD DE RESERVA - BAHÍA MODA* 🌟'}\n` +
+      const rawMessage = `${isGalaPlan ? '🚀 *[PEDIDO GALA - PAGO TOTAL]* 🚀' : '🌟 *SOLICITUD DE RESERVA - BAHÍA MODA* 🌟'}\n` +
         `------------------------------------------\n` +
         `🆔 *ID:* ${orderId}\n` +
         `👤 *Cliente:* ${formData.nombre}\n` +
         `${user?.email ? `✉️ *Correo:* ${user.email}\n` : ''}` +
         `📱 *WhatsApp:* ${formData.celular}\n` +
         `🏠 *Dirección:* ${formData.ubicacion}\n` +
-        `💳 *Plan:* ${isVipPlan ? 'PAGO TOTAL (100%)' : 'RESERVA (50%)'}\n` +
+        `💳 *Plan:* ${isGalaPlan ? 'PAGO TOTAL (100%)' : 'RESERVA (50%)'}\n` +
         `------------------------------------------\n\n` +
         `🛍️ *PRODUCTOS:* \n${itemsList}\n\n` +
         `💰 *INVERSIÓN:* \n` +
         `*   *Total a Depositar:* Q${depositAmount.toFixed(2)}\n` +
-        `*   *Saldo Contra Entrega:* Q${pendingBalance.toFixed(2)}${isVipPlan ? ' (¡Pagado!)' : ''}\n\n` +
+        `*   *Saldo Contra Entrega:* Q${pendingBalance.toFixed(2)}${isGalaPlan ? ' (¡Pagado!)' : ''}\n\n` +
         `------------------------------------------\n` +
         `⚠️ *ACCIÓN REQUERIDA:* Favor enviar fotografía del comprobante de depósito/transferencia para validar su pedido.\n\n` +
         `_Hola Bahía Moda, acabo de enviar mi solicitud desde la web. ¡Espero vuestra confirmación!_`;
@@ -265,27 +265,27 @@ export function CartSidebar() {
                          }`}
                        >
                          <span className={`text-[10px] font-black uppercase tracking-widest ${formData.planPago === "100" ? 'text-emerald-600' : 'text-gray-400'}`}>Total / Transferencia 100%</span>
-                         <span className="text-sm font-bold text-gray-900">VIP Prioritario</span>
+                         <span className="text-sm font-bold text-gray-900">Pago Único Gala</span>
                        </button>
                     </div>
                   </div>
 
                   {/* FICHA ELEGANTE DINÁMICA */}
                   <div className={`p-6 rounded-[2rem] border-2 transition-all duration-500 animate-in slide-in-from-top-2 ${
-                    isVipPlan 
+                    isGalaPlan 
                     ? 'bg-gradient-to-br from-emerald-900 to-black border-emerald-500 shadow-2xl' 
                     : 'bg-white border-indigo-100 shadow-lg'
                   }`}>
                     <div className="flex items-center gap-3 mb-3">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-lg ${isVipPlan ? 'bg-emerald-500 text-white' : 'bg-indigo-600 text-white'}`}>
-                        {isVipPlan ? <Check className="w-6 h-6" /> : <Package className="w-5 h-5" />}
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-lg ${isGalaPlan ? 'bg-emerald-500 text-white' : 'bg-indigo-600 text-white'}`}>
+                        {isGalaPlan ? <Check className="w-6 h-6" /> : <Package className="w-5 h-5" />}
                       </div>
                       <div>
-                        <h4 className={`text-[10px] font-black uppercase tracking-[0.2em] ${isVipPlan ? 'text-emerald-400' : 'text-indigo-600'}`}>
-                          {isVipPlan ? 'Despacho Prioritario' : 'Reserva Garantizada'}
+                        <h4 className={`text-[10px] font-black uppercase tracking-[0.2em] ${isGalaPlan ? 'text-emerald-400' : 'text-indigo-600'}`}>
+                          {isGalaPlan ? 'Despacho Gala' : 'Reserva Garantizada'}
                         </h4>
-                        <p className={`text-[11px] font-bold ${isVipPlan ? 'text-white' : 'text-gray-900'}`}>
-                          {isVipPlan ? 'Protocolo Cliente VIP' : 'Protocolo Estándar'}
+                        <p className={`text-[11px] font-bold ${isGalaPlan ? 'text-white' : 'text-gray-900'}`}>
+                          {isGalaPlan ? 'Protocolo Cliente Gala' : 'Protocolo Estándar'}
                         </p>
                       </div>
                     </div>
