@@ -19,23 +19,40 @@ export default function VerifyOrderPage() {
       
       setLoading(true);
       try {
-        const shortId = id.toString().split('-')[1]?.toLowerCase();
+        // Extraer el código después del guion (ej: de BM-CC106 extrae CC106)
+        // O si pasan el ID completo, usarlo tal cual
+        const rawId = id.toString();
+        const searchId = rawId.includes('-') ? rawId.split('-')[1].toLowerCase() : rawId.toLowerCase();
         
-        if (!shortId) {
+        if (!searchId) {
           setError(true);
           return;
         }
 
+        // Búsqueda inteligente: buscamos pedidos cuyo ID EMPIECE con ese código
         const { data: pedido, error: err } = await supabase
           .from('pedidos')
           .select('*')
-          .ilike('id', `${shortId}%`)
+          .ilike('id', `${searchId}%`)
+          .limit(1)
           .single();
 
         if (pedido) {
           setOrder(pedido);
         } else {
-          setError(true);
+          // Si no está en pedidos, intentar buscar en solicitudes (respaldo)
+          const { data: solicitud } = await supabase
+            .from('solicitudes')
+            .select('*')
+            .ilike('id', `${searchId}%`)
+            .limit(1)
+            .single();
+
+          if (solicitud) {
+            setOrder(solicitud);
+          } else {
+            setError(true);
+          }
         }
       } catch (err) {
         console.error("Error verificando pedido:", err);
