@@ -48,181 +48,115 @@ export default function AdminOrdersPage() {
     if (orders.length === 0 && !showEmpty) return null;
     
     return (
-      <div className="space-y-6 mb-16">
-        <div className="flex items-center gap-4 px-2">
-           <h2 className="text-xl font-black uppercase tracking-tighter text-black">{title}</h2>
-           <div className="h-px flex-1 bg-zinc-100" />
-           <span className="text-[10px] font-black text-zinc-400 bg-white px-3 py-1 rounded-full border border-zinc-50">{orders.length}</span>
+      <div className="space-y-4 mb-12">
+        <div className="flex items-center gap-3 px-2">
+           <h2 className="text-sm font-black uppercase tracking-widest text-zinc-900">{title}</h2>
+           <div className="h-[1px] flex-1 bg-zinc-200/50" />
+           <span className="text-[10px] font-black text-zinc-400 bg-white px-2 py-0.5 rounded-md border border-zinc-100">{orders.length}</span>
         </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="flex flex-col gap-3">
           {orders.map((order) => (
-            <div key={order.id} className="bg-white rounded-[3rem] border border-gray-100 p-8 shadow-sm hover:shadow-2xl transition-all duration-500 group relative overflow-hidden">
-              {/* Indicator Pulse for new orders */}
-              {order.estado === 'pendiente' && !order.visto && (
-                <div className="absolute top-0 right-0 w-32 h-8 bg-red-500 text-white text-[8px] font-black uppercase flex items-center justify-center tracking-widest rounded-bl-3xl shadow-lg z-10 animate-pulse">
-                  Nuevo Pedido
-                </div>
-              )}
-
-              <div className="flex justify-between items-start mb-10">
-                <div className="flex items-center gap-5">
-                  <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 border border-slate-100 group-hover:bg-slate-900 group-hover:text-white transition-all duration-500">
-                    <User className="w-7 h-7" />
+            <div key={order.id} className="bg-white rounded-2xl border border-zinc-100 p-4 shadow-sm hover:shadow-md transition-all group">
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                
+                {/* 1. INFO CLIENTE (IZQUIERDA) */}
+                <div className="flex items-center gap-4 min-w-[200px]">
+                  <div className="w-10 h-10 bg-zinc-900 rounded-xl flex items-center justify-center text-white text-xs font-black shrink-0">
+                    {order.nombre_cliente.charAt(0)}
                   </div>
+                  <div className="min-w-0">
+                    <h3 className="text-xs font-black uppercase tracking-tight text-zinc-950 truncate">{order.nombre_cliente}</h3>
+                    <p className="text-[9px] font-bold text-zinc-400 uppercase mt-0.5">
+                      {new Date(order.created_at).toLocaleDateString('es-GT', { day: 'numeric', month: 'short' })}
+                    </p>
+                  </div>
+                </div>
+
+                {/* 2. DETALLE PRODUCTOS (CENTRO) */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-wrap gap-1.5">
+                    {order.items.slice(0, 3).map((item: any, idx: number) => (
+                      <span key={idx} className="text-[8px] font-black bg-zinc-100 px-2 py-1 rounded-lg text-zinc-600 uppercase truncate max-w-[120px]">
+                        {item.quantity}x {item.name.split(' ')[0]}
+                      </span>
+                    ))}
+                    {order.items.length > 3 && <span className="text-[8px] font-black text-zinc-300">+{order.items.length - 3}</span>}
+                  </div>
+                  <p className="text-[9px] font-bold text-zinc-400 mt-1.5 flex items-center gap-1">
+                    <MapPin className="w-2.5 h-2.5" /> {order.ubicacion_entrega?.slice(0, 40)}...
+                  </p>
+                </div>
+
+                {/* 3. FINANZAS (DERECHA) */}
+                <div className="flex items-center gap-4 px-4 bg-zinc-50/50 rounded-xl py-2 border border-zinc-100">
+                  <div className="text-right">
+                    <p className="text-[8px] font-black text-zinc-400 uppercase mb-0.5">Total</p>
+                    <p className="text-xs font-black text-zinc-950">Q{order.total}</p>
+                  </div>
+                  <div className="w-px h-6 bg-zinc-200" />
                   <div>
-                    <h3 className="text-xl font-black uppercase tracking-tight text-black leading-tight mb-2">{order.nombre_cliente}</h3>
-                    <div className="flex items-center gap-3">
-                      <p className="text-xs font-black text-indigo-600 bg-indigo-50 px-3 py-1 rounded-lg border border-indigo-100">
-                        {new Date(order.created_at).toLocaleDateString('es-GT', { day: 'numeric', month: 'long', year: 'numeric' })}
-                      </p>
-                      {!order.cliente_id && (
-                        <span className="text-[8px] font-black bg-zinc-100 text-zinc-500 px-2 py-1 rounded uppercase tracking-widest">Invitado</span>
-                      )}
-                    </div>
+                    <p className="text-[8px] font-black text-zinc-400 uppercase mb-0.5">Inversión</p>
+                    <input 
+                       type="number" 
+                       defaultValue={order.inversion}
+                       onBlur={async (e) => {
+                         const val = Number(e.target.value);
+                         if (val !== order.inversion) {
+                           await supabase.from('pedidos').update({ inversion: val }).eq('id', order.id);
+                           fetchAllOrders();
+                         }
+                       }}
+                       className="w-16 bg-white border border-zinc-200 rounded px-1.5 py-0.5 text-[10px] font-black text-indigo-600 outline-none focus:ring-1 focus:ring-indigo-300"
+                    />
                   </div>
                 </div>
-                <div className="flex flex-col items-end gap-2">
-                  {getStatusBadge(order.estado)}
-                  {order.codigo_seguimiento && (
-                    <p className="text-[14px] font-black text-black bg-zinc-950 text-white px-4 py-1.5 rounded-xl shadow-lg">#{order.codigo_seguimiento}</p>
-                  )}
-                </div>
-              </div>
 
-              <div className="bg-slate-50/50 rounded-[2.5rem] p-8 mb-10 border border-slate-100">
-                 <div className="flex items-start gap-4 mb-8">
-                    <div className="p-2 bg-white rounded-xl shadow-sm border border-slate-100">
-                      <MapPin className="w-5 h-5 text-indigo-600" />
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-1.5">{order.tipo_entrega === 'domicilio' ? 'Entrega a Domicilio' : '📍 Punto de Encuentro (Seguro)'}</p>
-                      <p className="text-sm font-bold text-slate-800 leading-relaxed">{order.ubicacion_entrega}</p>
-                    </div>
-                 </div>
-                 
-                 <div className="border-t border-slate-100 pt-8">
-                    <div className="flex items-center justify-between mb-4">
-                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Detalle de Compra</p>
-                      <span className="text-[9px] font-black bg-black text-white px-2 py-0.5 rounded-full">{order.items.length} Items</span>
-                    </div>
-                    <div className="space-y-3">
-                      {order.items.map((item: any, idx: number) => (
-                        <div key={idx} className="flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-100 group-hover:border-indigo-100 transition-colors">
-                          <span className="text-sm font-black text-slate-900 italic">
-                             <span className="text-indigo-600 text-lg mr-2">x{item.quantity}</span> {item.name} {item.size && <span className="text-[10px] not-italic ml-2 bg-slate-50 px-2 py-1 rounded text-slate-400">Talla: {item.size}</span>}
-                          </span>
-                          <span className="text-sm font-black text-slate-400">Q{item.price * item.quantity}</span>
-                        </div>
-                      ))}
-                    </div>
-                 </div>
-              </div>
-
-              <div className="flex flex-wrap items-center justify-between gap-8 mb-10 px-4">
-                  <div className="flex items-center gap-6">
-                    <div>
-                      <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-2">Total Pedido</p>
-                      <p className="text-2xl font-black text-zinc-950">Q{order.total}</p>
-                    </div>
-                    {(order as any).comprobante_url && (
-                      <button 
-                        onClick={() => window.open((order as any).comprobante_url, '_blank')}
-                        className="flex items-center gap-2 bg-emerald-500 text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest shadow-lg hover:bg-emerald-600 transition-all"
-                      >
-                        <Download className="w-4 h-4" /> Ver Recibo
+                {/* 4. ACCIONES (FINAL) */}
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5">
+                    {order.estado === 'pendiente' && (
+                      <button onClick={() => updateOrderStatus(order.id, 'recibido')} className="h-9 px-4 bg-zinc-950 text-white rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-emerald-600 transition-all flex items-center gap-2">
+                        <CheckCircle className="w-3.5 h-3.5" /> Confirmar
                       </button>
                     )}
-                  </div>
-                  <div className="bg-indigo-50/50 p-6 rounded-3xl border border-indigo-100/50 flex items-center gap-8">
-                    <div>
-                      <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-2 text-center">Inversión Costo</p>
-                      <div className="flex items-center gap-1">
-                         <span className="text-indigo-300 font-bold text-lg italic">Q</span>
-                         <input 
-                           type="number" 
-                           defaultValue={order.inversion}
-                           onBlur={async (e) => {
-                             const val = Number(e.target.value);
-                             if (val !== order.inversion) {
-                               await supabase.from('pedidos').update({ inversion: val }).eq('id', order.id);
-                               fetchAllOrders();
-                             }
-                           }}
-                           className="w-24 bg-white border border-indigo-100 rounded-xl px-3 py-2 text-md font-black text-indigo-900 outline-none focus:ring-2 focus:ring-indigo-200 transition-all text-center"
-                         />
-                      </div>
-                    </div>
-                    <div className="w-px h-10 bg-indigo-100" />
-                    <div className="text-center">
-                      <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-2">Ganancia Est.</p>
-                      <p className="text-2xl font-black text-indigo-600">Q{order.ganancia}</p>
-                    </div>
-                  </div>
-              </div>
+                    {order.estado === 'recibido' && (
+                      <button onClick={() => updateOrderStatus(order.id, 'preparacion')} className="h-9 px-4 bg-amber-500 text-white rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-amber-600 transition-all flex items-center gap-2">
+                        <Clock className="w-3.5 h-3.5" /> Empacar
+                      </button>
+                    )}
+                    {order.estado === 'preparacion' && (
+                      <button onClick={() => updateOrderStatus(order.id, 'en_transito')} className="h-9 px-4 bg-indigo-600 text-white rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-indigo-700 transition-all flex items-center gap-2">
+                        <Truck className="w-3.5 h-3.5" /> En Ruta
+                      </button>
+                    )}
+                    {order.estado === 'en_transito' && (
+                      <button onClick={() => updateOrderStatus(order.id, 'listo_entrega')} className="h-9 px-4 bg-emerald-600 text-white rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-emerald-700 transition-all flex items-center gap-2">
+                        <CheckCircle className="w-3.5 h-3.5" /> Entregado
+                      </button>
+                    )}
 
-              <div className="flex flex-col gap-3">
-                <div className="flex flex-col md:flex-row gap-3">
-                  {order.estado === 'pendiente' && (
                     <button 
-                      onClick={() => updateOrderStatus(order.id, 'recibido')}
-                      className="flex-1 bg-black text-white py-5 rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.2em] transition-all shadow-xl hover:bg-zinc-800 flex items-center justify-center gap-3 hover:scale-[1.01]"
+                      onClick={() => {
+                        const invoiceData = {
+                          id: order.id, cliente_nombre: order.nombre_cliente,
+                          cliente_telefono: order.cliente_telefono || "N/A",
+                          ubicacion_entrega: order.ubicacion_entrega,
+                          items: order.items, total: order.total,
+                          anticipo: order.anticipo || (order.total * 0.5)
+                        };
+                        generateInvoicePDF(invoiceData);
+                      }}
+                      className="w-9 h-9 bg-zinc-100 text-zinc-950 rounded-xl flex items-center justify-center hover:bg-zinc-200 transition-all"
+                      title="PDF Gala"
                     >
-                      <CheckCircle className="w-5 h-5 text-emerald-400" /> Confirmar Pedido
+                      <Download className="w-3.5 h-3.5" />
                     </button>
-                  )}
-                  {order.estado === 'recibido' && (
-                    <button 
-                      onClick={() => updateOrderStatus(order.id, 'preparacion')}
-                      className="flex-1 bg-amber-500 hover:bg-amber-600 text-white py-5 rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.2em] transition-all shadow-xl flex items-center justify-center gap-3"
-                    >
-                      <Clock className="w-5 h-5" /> Empaquetando Pedido
-                    </button>
-                  )}
-                  {order.estado === 'preparacion' && (
-                    <button 
-                      onClick={() => updateOrderStatus(order.id, 'en_transito')}
-                      className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-5 rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.2em] transition-all shadow-xl flex items-center justify-center gap-3"
-                    >
-                      <Truck className="w-5 h-5" /> Despachar (En Camino)
-                    </button>
-                  )}
-                  {order.estado === 'en_transito' && (
-                    <button 
-                      onClick={() => updateOrderStatus(order.id, 'listo_entrega')}
-                      className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-5 rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.2em] transition-all shadow-xl flex items-center justify-center gap-3"
-                    >
-                      <CheckCircle className="w-5 h-5" /> Marcar como Entregado
-                    </button>
-                  )}
-
-                  <button 
-                    onClick={() => {
-                      const invoiceData = {
-                        id: order.id,
-                        cliente_nombre: order.nombre_cliente,
-                        cliente_telefono: order.cliente_telefono || "N/A",
-                        ubicacion_entrega: order.ubicacion_entrega,
-                        items: order.items,
-                        total: order.total,
-                        anticipo: order.anticipo || (order.total * 0.5)
-                      };
-                      generateInvoicePDF(invoiceData);
-                    }}
-                    className="flex-none bg-zinc-100 hover:bg-zinc-200 text-zinc-900 px-6 py-5 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2"
-                  >
-                    <Download className="w-5 h-5" /> PDF
-                  </button>
+                  </div>
+                  
+                  {getStatusBadge(order.estado)}
                 </div>
-                
-                {['pendiente', 'recibido', 'preparacion'].includes(order.estado) && (
-                  <button 
-                    onClick={() => updateOrderStatus(order.id, 'cancelado')}
-                    className="w-full bg-slate-50 hover:bg-rose-50 text-slate-400 hover:text-rose-600 py-4 rounded-[1.2rem] text-[8px] font-black uppercase tracking-[0.2em] transition-all border border-transparent hover:border-rose-100 flex items-center justify-center gap-2"
-                  >
-                    <XCircle className="w-4 h-4" /> Cancelar Pedido Permanentemente
-                  </button>
-                )}
+
               </div>
             </div>
           ))}
