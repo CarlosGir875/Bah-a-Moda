@@ -171,10 +171,13 @@ export const generateInvoicePDF = async (order: any) => {
     doc.text("SALDO A PAGAR:", 135, finalY + 33);
     doc.text(`Q${saldo.toFixed(2)}`, 187, finalY + 33, { align: 'right' });
 
-    // --- REAL QR CODE GENERATION (Linking to Digital Twin) ---
-    const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://bahiamoda.com';
-    const qrData = `${baseUrl}/verify/${invoiceId}`;
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrData)}`;
+    // --- PRE-CALCULAR URL DIRECTA AL PDF (Caja Fuerte) ---
+    const bucketName = 'receipts';
+    const fileName = `${invoiceId}_${order.id}.pdf`;
+    const publicPdfUrl = `https://jfxgjlswbvbzaqtsnany.supabase.co/storage/v1/object/public/${bucketName}/${fileName}`;
+
+    // --- REAL QR CODE GENERATION (Linking DIRECTLY to the PDF file) ---
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(publicPdfUrl)}`;
     
     try {
       const response = await fetch(qrUrl);
@@ -193,7 +196,7 @@ export const generateInvoicePDF = async (order: any) => {
 
     doc.setFontSize(6);
     doc.setTextColor(100, 116, 139);
-    doc.text("CERTIFICADO DE AUTENTICIDAD DIGITAL (QR)", 15, 238);
+    doc.text("ESCANEÉ PARA VER ORIGINAL (PDF)", 15, 238);
 
     // PIE DE PÁGINA LIMPIO
     doc.setDrawColor(...champagneGold);
@@ -217,7 +220,16 @@ export const generateInvoicePDF = async (order: any) => {
     const disclaimer = "Este documento es una orden de compra oficial de Bahía Moda. Verifique su autenticidad mediante el código QR.";
     doc.text(disclaimer, 105, 285, { align: 'center' });
 
-    // Save/Download for the user
+    // --- SUBIR PDF A LA CAJA FUERTE ANTES DE DESCARGAR ---
+    const pdfBlob = doc.output('blob');
+    await supabase.storage
+      .from(bucketName)
+      .upload(fileName, pdfBlob, {
+        upsert: true,
+        contentType: 'application/pdf'
+      });
+
+    // Descargar para el cliente
     doc.save(`${invoiceId}_BahiaModa_Official.pdf`);
     
   } catch (error) {
