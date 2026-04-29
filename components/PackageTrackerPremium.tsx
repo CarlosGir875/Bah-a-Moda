@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Truck, Package, MapPin, CheckCircle2, Clock, Home, Building2, Warehouse, ArrowRight, Sun, Cloud, FileSearch, ShieldCheck, Zap, Waves } from "lucide-react";
+import { X, Truck, Package, MapPin, CheckCircle2, Clock, Home, Building2, Warehouse, ArrowRight, Sun, Cloud, ShieldCheck } from "lucide-react";
 import { useStore } from "@/lib/store";
 
 export function PackageTrackerPremium() {
@@ -11,13 +11,13 @@ export function PackageTrackerPremium() {
 
   if (!isTrackingOpen) return null;
 
-  // Mapa más largo para evitar amontonamiento (Efecto SimCity)
+  // Mapa equilibrado (v17.0)
   const steps = [
-    { id: 'pendiente', label: 'ESPERA', progress: 5, building: 'hub', x: 80, y: 350 },
-    { id: 'recibido', label: 'CONFIRMADO', progress: 28, building: 'hq', x: 300, y: 220 },
-    { id: 'preparacion', label: 'EMPACANDO', progress: 52, building: 'warehouse', x: 550, y: 350 },
-    { id: 'en_transito', label: 'EN RUTA', progress: 78, building: 'road', x: 800, y: 250 },
-    { id: 'listo_entrega', label: 'ENTREGADO', progress: 95, building: 'home', x: 920, y: 320 }
+    { id: 'pendiente', label: 'ESPERA', progress: 5, building: 'hub', x: 100, y: 250 },
+    { id: 'recibido', label: 'CONFIRMADO', progress: 28, building: 'hq', x: 280, y: 230 },
+    { id: 'preparacion', label: 'EMPACANDO', progress: 52, building: 'warehouse', x: 460, y: 250 },
+    { id: 'en_transito', label: 'EN RUTA', progress: 78, building: 'road', x: 640, y: 230 },
+    { id: 'listo_entrega', label: 'ENTREGADO', progress: 92, building: 'home', x: 740, y: 240 }
   ];
 
   let currentStepIndex = steps.findIndex(s => s.id === activeOrder?.estado);
@@ -33,81 +33,58 @@ export function PackageTrackerPremium() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="absolute inset-0 bg-black/90 backdrop-blur-2xl"
+          className="absolute inset-0 bg-black/80 backdrop-blur-md"
           onClick={() => setIsTrackingOpen(false)}
         />
         
         <motion.div
-          initial={{ scale: 0.9, opacity: 0, y: 100 }}
+          initial={{ scale: 0.95, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
-          exit={{ scale: 0.9, opacity: 0, y: 100 }}
-          className="relative w-full max-w-4xl bg-white rounded-[4rem] shadow-[0_60px_200px_rgba(0,0,0,0.8)] overflow-hidden border border-white/5"
+          exit={{ scale: 0.95, opacity: 0, y: 20 }}
+          className="relative w-full max-w-2xl bg-white rounded-[2.5rem] shadow-[0_40px_100px_rgba(0,0,0,0.5)] overflow-hidden border border-slate-100"
         >
-          {/* Header Superior Gala */}
-          <div className="p-12 pb-8 flex items-center justify-between bg-white relative z-30">
+          {/* Header Compacto y Elegante */}
+          <div className="p-8 pb-4 flex items-center justify-between bg-white relative z-20">
             <div className="flex flex-col">
-              <div className="flex items-center gap-4 mb-3">
-                 <div className="px-4 py-1.5 bg-black rounded-full shadow-lg">
-                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white">Gala Universe v16.0</span>
-                 </div>
-                 <div className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-              </div>
-              <h2 className="text-4xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">Logística de Élite</h2>
+              <span className="text-[9px] font-black uppercase tracking-[0.3em] text-indigo-600 mb-1">Gala Fleet Management</span>
+              <h2 className="text-2xl font-black text-slate-900 tracking-tighter uppercase italic">Seguimiento</h2>
             </div>
             <button 
               onClick={() => setIsTrackingOpen(false)}
-              className="p-5 bg-slate-50 hover:bg-slate-100 rounded-[2rem] text-slate-400 hover:text-black transition-all shadow-xl active:scale-90"
+              className="p-3 bg-slate-50 hover:bg-slate-100 rounded-2xl text-slate-400 hover:text-black transition-all active:scale-90"
             >
-              <X className="w-8 h-8" />
+              <X className="w-5 h-5" />
             </button>
           </div>
 
-          {/* 🗺️ EL MICRO-UNIVERSO GALA (v16.0) */}
-          <div className="relative h-[500px] w-full flex items-center justify-center overflow-hidden bg-[#e0f2f1]">
-             {/* 🏔️ AMBIENTE DE FONDO (Deep Perspective) */}
-             <div className="absolute inset-0 pointer-events-none opacity-40">
-                <svg viewBox="0 0 1000 500" className="w-full h-full">
-                   {/* Montañas Lejanas */}
-                   <path d="M 0 300 L 200 100 L 400 300 L 600 150 L 800 300 L 1000 200 L 1000 500 L 0 500 Z" fill="#004d40" />
-                   <Sun className="w-24 h-24 text-amber-400 absolute right-20 top-10" />
-                   {/* Nubes */}
-                   <motion.g animate={{ x: [0, 50, 0] }} transition={{ repeat: Infinity, duration: 20 }}>
-                      <Cloud className="w-20 h-20 text-white absolute left-40 top-20 opacity-60" />
-                   </motion.g>
+          {/* 🗺️ EL MUNDO EQUILIBRADO (v17.0) */}
+          <div className="relative h-[320px] w-full flex items-center justify-center overflow-hidden bg-[#f1f5f9]">
+             {/* Fondo de Montañas (Strictly Background) */}
+             <div className="absolute inset-0 pointer-events-none opacity-20">
+                <svg viewBox="0 0 800 400" className="w-full h-full">
+                   <path d="M 0 250 L 150 150 L 350 250 L 550 180 L 800 250 L 800 400 L 0 400 Z" fill="#475569" />
+                   <Sun className="w-12 h-12 text-amber-400 absolute right-10 top-10" />
                 </svg>
              </div>
 
+             {/* Suelo Sólido para la Carretera */}
+             <div className="absolute bottom-0 w-full h-[150px] bg-slate-200/50" />
+
              <div className="relative w-full h-full">
-                <svg viewBox="0 0 1000 500" className="w-full h-full overflow-visible drop-shadow-3xl">
+                <svg viewBox="0 0 800 400" className="w-full h-full overflow-visible">
                    
-                   {/* 🌊 RÍO GALA (Miniature Water) */}
-                   <motion.path 
-                     d="M -100 450 Q 250 380 500 480 T 1100 450"
-                     fill="none" stroke="#81d4fa" strokeWidth="100" strokeOpacity="0.4"
-                     animate={{ strokeDashoffset: [0, -300] }}
-                     transition={{ repeat: Infinity, duration: 15, ease: "linear" }}
-                     strokeDasharray="15 30"
-                   />
-
-                   {/* 🛣️ CARRETERA PRINCIPAL (Long & Smooth) */}
+                   {/* 🛣️ CARRETERA PLANA (Smooth & Horizontal) */}
                    <path 
-                     id="galaMainRoute16"
-                     d="M 80 350 Q 150 350, 300 220 T 550 350 T 800 250 T 920 320"
-                     fill="none" stroke="#1e293b" strokeWidth="14" strokeLinecap="round" strokeLinejoin="round" 
+                     id="galaFlatRoad"
+                     d="M 50 250 Q 150 250, 280 230 T 460 250 T 640 230 T 780 240"
+                     fill="none" stroke="#334155" strokeWidth="12" strokeLinecap="round" strokeLinejoin="round" 
                    />
                    <path 
-                     d="M 80 350 Q 150 350, 300 220 T 550 350 T 800 250 T 920 320"
-                     fill="none" stroke="#facc15" strokeWidth="1" strokeDasharray="6 12" strokeOpacity="0.4"
+                     d="M 50 250 Q 150 250, 280 230 T 460 250 T 640 230 T 780 240"
+                     fill="none" stroke="#fbbf24" strokeWidth="1" strokeDasharray="5 10" strokeOpacity="0.5"
                    />
 
-                   {/* 🌳 MINI DECORACIONES (Mundo Vivo) */}
-                   {[...Array(15)].map((_, i) => (
-                     <g key={i} transform={`translate(${Math.random() * 1000}, ${Math.random() * 500})`}>
-                        <circle r="2" fill="#2e7d32" opacity="0.3" />
-                     </g>
-                   ))}
-
-                   {/* 🏢 EDIFICIOS MINIATURA ANIMADOS */}
+                   {/* 🏢 EDIFICIOS (Sweet Spot Size) */}
                    {steps.map((point, idx) => {
                      const isReached = idx <= currentStepIndex;
                      const isCurrent = idx === currentStepIndex;
@@ -115,68 +92,60 @@ export function PackageTrackerPremium() {
                      return (
                        <g key={point.id} transform={`translate(${point.x}, ${point.y})`}>
                           <motion.g
-                            initial={{ scale: 0, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            transition={{ delay: idx * 0.1, type: "spring" }}
+                            initial={{ y: -20, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ delay: idx * 0.05 }}
                           >
-                             {/* Sombras */}
-                             <ellipse cx="0" cy="10" rx="30" ry="10" fill="black" opacity="0.05" />
+                             <ellipse cx="0" cy="10" rx="25" ry="8" fill="black" opacity="0.05" />
 
-                             {/* EDIFICIOS MINIATURA */}
                              {point.building === 'hub' && (
-                               <g transform="translate(-20, -50) scale(0.8)">
-                                  <rect x="0" y="10" width="40" height="40" fill={isReached ? '#004d40' : '#cfd8dc'} rx="2" />
-                                  <path d="M0 10 L20 0 L40 10 Z" fill={isReached ? '#002420' : '#90a4ae'} />
-                                  {/* Interior Animado: Ventanas Trabajando */}
-                                  <g transform="translate(5, 15)">
-                                     <motion.rect width="10" height="10" fill="white" animate={isCurrent ? { opacity: [0.1, 0.8, 0.1] } : { opacity: 0.2 }} transition={{ repeat: Infinity, duration: 1 }} />
-                                     <motion.rect x="20" width="10" height="10" fill="white" animate={isCurrent ? { opacity: [0.8, 0.1, 0.8] } : { opacity: 0.2 }} transition={{ repeat: Infinity, duration: 1 }} />
-                                  </g>
+                               <g transform="translate(-15, -40)">
+                                  <rect x="0" y="10" width="30" height="30" fill={isReached ? '#334155' : '#cbd5e1'} rx="2" />
+                                  <path d="M0 10 L15 0 L30 10 Z" fill={isReached ? '#1e293b' : '#94a3b8'} />
+                                  {isCurrent && (
+                                    <motion.rect width="6" height="6" x="12" y="15" fill="white" animate={{ opacity: [0.2, 1, 0.2] }} transition={{ repeat: Infinity, duration: 1 }} />
+                                  )}
                                </g>
                              )}
                              {point.building === 'hq' && (
-                               <g transform="translate(-15, -80) scale(0.8)">
-                                  <rect x="0" y="0" width="30" height="80" fill={isReached ? '#1a237e' : '#cfd8dc'} rx="2" />
-                                  <rect x="5" y="5" width="20" height="70" fill="#e1f5fe" opacity="0.5" />
-                                  {/* Interior Animado: Pulso de Aprobación */}
+                               <g transform="translate(-12, -60)">
+                                  <rect x="0" y="0" width="24" height="60" fill={isReached ? '#1e3a8a' : '#cbd5e1'} rx="2" />
+                                  <rect x="4" y="4" width="16" height="52" fill="#bfdbfe" opacity="0.3" />
                                   {isCurrent && (
-                                    <motion.circle r="40" cx="15" cy="40" fill="#4fc3f7" initial={{ scale: 0, opacity: 0.5 }} animate={{ scale: 2, opacity: 0 }} transition={{ repeat: Infinity, duration: 1.5 }} />
+                                    <motion.circle r="20" cx="12" cy="30" fill="#60a5fa" initial={{ scale: 0, opacity: 0.5 }} animate={{ scale: 2, opacity: 0 }} transition={{ repeat: Infinity, duration: 2 }} />
                                   )}
-                                  <ShieldCheck className="w-5 h-5 text-white absolute" x="5" y="15" />
                                </g>
                              )}
                              {point.building === 'warehouse' && (
-                               <g transform="translate(-25, -45) scale(0.8)">
-                                  <rect x="0" y="10" width="50" height="40" fill={isReached ? '#4e342e' : '#cfd8dc'} rx="2" />
-                                  <rect x="10" y="25" width="15" height="25" fill="#1e293b" />
-                                  {/* Interior Animado: Carga de Paquetes */}
+                               <g transform="translate(-20, -35)">
+                                  <rect x="0" y="5" width="40" height="30" fill={isReached ? '#92400e' : '#cbd5e1'} rx="2" />
+                                  <rect x="8" y="15" width="10" height="20" fill="#1e293b" />
                                   {isCurrent && (
                                     <g>
-                                       {[0,1,2].map((p, i) => (
-                                         <motion.rect key={i} width="6" height="6" fill="#fbbf24" initial={{ x: 10, y: 35, opacity: 0 }} animate={{ x: 50, opacity: [0, 1, 0] }} transition={{ repeat: Infinity, duration: 1.2, delay: i * 0.4 }} />
+                                       {[0,1].map((p, i) => (
+                                         <motion.rect key={i} width="4" height="4" fill="#fbbf24" initial={{ x: 8, y: 20, opacity: 0 }} animate={{ x: 35, opacity: [0, 1, 0] }} transition={{ repeat: Infinity, duration: 1, delay: i * 0.5 }} />
                                        ))}
                                     </g>
                                   )}
                                </g>
                              )}
                              {point.building === 'road' && (
-                               <g transform="translate(-12, -35) scale(0.8)">
-                                  <circle r="15" fill={isReached ? '#4527a0' : '#cfd8dc'} />
-                                  <Truck className="w-5 h-5 text-white absolute" x="-9" y="-9" />
+                               <g transform="translate(-10, -25)">
+                                  <circle r="12" fill={isReached ? '#4f46e5' : '#cbd5e1'} />
+                                  <Truck className="w-4 h-4 text-white absolute -translate-x-2 -translate-y-2" />
                                </g>
                              )}
                              {point.building === 'home' && (
-                               <g transform="translate(-20, -50) scale(0.8)">
-                                  <path d="M 0 20 L 25 0 L 50 20 L 50 55 L 0 55 Z" fill={isCurrent ? '#1b5e20' : '#cfd8dc'} />
-                                  <rect x="18" y="35" width="14" height="20" fill="#ffeb3b" />
-                                  <Home className="w-6 h-6 text-white absolute" x="12" y="18" />
+                               <g transform="translate(-15, -40)">
+                                  <path d="M 0 15 L 15 0 L 30 15 L 30 40 L 0 40 Z" fill={isCurrent ? '#166534' : '#cbd5e1'} />
+                                  <Home className="w-5 h-5 text-white absolute" x="5" y="15" />
                                </g>
                              )}
 
-                             {/* Etiqueta Miniature */}
-                             <g transform="translate(0, 25)">
-                                <rect x="-35" y="0" width="70" height="18" rx="9" fill={isCurrent ? '#0f172a' : 'white'} className="shadow-2xl" />
-                                <text fontSize="7" fontWeight="900" textAnchor="middle" y="12" fill={isCurrent ? 'white' : '#94a3b8'} className="uppercase tracking-[0.3em]">
+                             {/* Label Fina */}
+                             <g transform="translate(0, 20)">
+                                <rect x="-30" y="0" width="60" height="14" rx="7" fill={isCurrent ? 'black' : 'white'} className="shadow-lg" />
+                                <text fontSize="6" fontWeight="900" textAnchor="middle" y="9" fill={isCurrent ? 'white' : '#94a3b8'} className="uppercase tracking-[0.2em]">
                                    {point.label}
                                 </text>
                              </g>
@@ -185,7 +154,7 @@ export function PackageTrackerPremium() {
                      );
                    })}
 
-                   {/* 🚛 EL GALA MASTER MINI (Pocket Edition) */}
+                   {/* 🚛 EL GALA MASTER v17 (Smooth & Level) */}
                    {currentEstado !== 'pendiente' && currentEstado !== 'recibido' && (
                      <motion.g 
                        initial={{ opacity: 0 }}
@@ -194,41 +163,22 @@ export function PackageTrackerPremium() {
                          offsetDistance: `${progressPercent}%` 
                        }}
                        style={{ 
-                         offsetPath: "path('M 80 350 Q 150 350, 300 220 T 550 350 T 800 250 T 920 320')",
+                         offsetPath: "path('M 50 250 Q 150 250, 280 230 T 460 250 T 640 230 T 780 240')",
                          offsetRotate: "auto 0deg" 
                        }}
-                       transition={{ duration: currentEstado === 'en_transito' ? 4 : 0, ease: "easeInOut" }}
+                       transition={{ duration: currentEstado === 'en_transito' ? 3 : 0, ease: "easeInOut" }}
                      >
-                        <g transform="translate(-35, -30) scale(0.55)">
-                           {/* Camión Largo y Detallado */}
-                           <rect x="0" y="5" width="80" height="35" rx="2" fill="#1e293b" />
-                           <rect x="5" y="10" width="70" height="25" fill="#334155" />
-                           <text x="10" y="27" fontSize="9" fontWeight="900" fill="white" opacity="0.9" className="italic tracking-tighter">GALA MASTER</text>
+                        <g transform="translate(-25, -25) scale(0.6)">
+                           <rect x="0" y="5" width="60" height="30" rx="2" fill="#1e293b" />
+                           <rect x="62" y="10" width="20" height="25" fill="#1d4ed8" rx="2" />
+                           <text x="5" y="22" fontSize="7" fontWeight="900" fill="white" opacity="0.8" className="italic">GALA</text>
                            
-                           {/* Cabina */}
-                           <g transform="translate(82, 0)">
-                              <path d="M 0 10 L 20 10 L 30 25 L 30 40 L 0 40 Z" fill="#1d4ed8" />
-                              <rect x="5" y="15" width="15" height="12" fill="#e0f2fe" opacity="0.7" rx="1" />
-                           </g>
-
-                           {/* 🎡 MINI RUEDAS ANIMADAS */}
+                           {/* Ruedas Finitas */}
                            <g fill="#111">
-                              {[12, 22, 55, 65, 95, 105].map((cx, i) => (
-                                <motion.g key={i} transform={`translate(${cx}, 45)`}>
-                                   <motion.circle r="6" animate={currentEstado === 'en_transito' ? { rotate: 360 } : {}} transition={{ repeat: Infinity, duration: 0.4, ease: "linear" }} stroke="white" strokeWidth="1.5" strokeDasharray="3 3" />
-                                   <circle r="2" fill="white" />
-                                </motion.g>
+                              {[8, 18, 42, 52, 72].map((cx, i) => (
+                                <motion.circle key={i} cx={cx} cy="38" r="5" animate={currentEstado === 'en_transito' ? { rotate: 360 } : {}} transition={{ repeat: Infinity, duration: 0.5, ease: "linear" }} stroke="white" strokeWidth="1" />
                               ))}
                            </g>
-
-                           {/* Smoke (Solo en RUTA) */}
-                           {currentEstado === 'en_transito' && (
-                             <motion.g opacity="0.6">
-                                {[0, 1, 2].map((i) => (
-                                  <motion.circle key={i} cx="-5" cy="15" r="4" fill="#94a3b8" animate={{ opacity: [0, 1, 0], x: [-5, -60], y: [15, -20], scale: [1, 4] }} transition={{ repeat: Infinity, duration: 1.2, delay: i * 0.4 }} />
-                                ))}
-                             </motion.g>
-                           )}
                         </g>
                      </motion.g>
                    )}
@@ -236,41 +186,34 @@ export function PackageTrackerPremium() {
              </div>
           </div>
 
-          {/* Tarjeta de Información Detallada */}
-          <div className="p-12 pt-10 space-y-10 bg-white relative z-30">
-             <div className="flex flex-col sm:flex-row gap-10 items-center justify-between p-10 bg-slate-50 rounded-[4rem] border border-slate-100 shadow-inner group">
-                <div className="flex items-center gap-8">
-                   <div className="p-8 bg-white rounded-[2.5rem] shadow-2xl text-indigo-600 ring-12 ring-slate-50">
-                      <Truck className="w-10 h-10" />
+          {/* Tarjeta de Información Compacta (v17.0) */}
+          <div className="p-8 pt-4 bg-white relative z-30">
+             <div className="flex items-center justify-between p-5 bg-slate-50 rounded-[2rem] border border-slate-100 mb-6 shadow-inner">
+                <div className="flex items-center gap-4">
+                   <div className="p-4 bg-white rounded-2xl shadow-lg text-indigo-600">
+                      <Truck className="w-6 h-6" />
                    </div>
                    <div>
-                      <p className="text-[12px] font-black text-slate-400 uppercase tracking-widest mb-2">Unidad de Élite Gala</p>
-                      <p className="text-xl font-black text-slate-900 uppercase italic leading-none">Master Truck #001</p>
-                      <div className="flex items-center gap-3 mt-3">
-                         <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
-                         <p className="text-[10px] font-bold text-indigo-500 uppercase tracking-widest">
-                           {currentEstado === 'preparacion' ? 'Carga de Mercancía en Progreso' : 
-                            currentEstado === 'en_transito' ? 'Transporte en Carretera Principal' : 'Supervisión Administrativa'}
-                         </p>
-                      </div>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-tight">Gala Master Truck</p>
+                      <p className="text-sm font-black text-slate-900 uppercase italic">Unidad #001</p>
                    </div>
                 </div>
-                <div className="flex flex-col items-center sm:items-end">
-                   <p className="text-[12px] font-black text-slate-400 uppercase tracking-widest mb-2">Punto de Entrega Gala</p>
-                   <p className="text-lg font-black text-slate-700 truncate max-w-[350px] border-b-4 border-emerald-100 italic">{activeOrder?.ubicacion_entrega || "Cargando..."}</p>
+                <div className="text-right">
+                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-tight">Destino Final</p>
+                   <p className="text-xs font-bold text-slate-700 italic border-b-2 border-indigo-100">{activeOrder?.ubicacion_entrega || "Cargando..."}</p>
                 </div>
              </div>
 
-             <div className="flex justify-between items-center py-8 border-t border-slate-100">
+             <div className="flex justify-between items-center mb-8 px-2">
                 <div className="flex flex-col">
-                   <p className="text-[12px] font-black text-indigo-500 uppercase tracking-[0.5em] mb-3">Inversión del Pedido</p>
-                   <p className="text-5xl font-black text-slate-900 tracking-tighter italic">Q{activeOrder?.total || 0}</p>
+                   <p className="text-[10px] font-black text-indigo-500 uppercase tracking-[0.4em] mb-1">Monto Invertido</p>
+                   <p className="text-2xl font-black text-slate-900 italic">Q{activeOrder?.total || 0}</p>
                 </div>
                 <div className="text-right flex flex-col items-end">
-                   <p className="text-[12px] font-black text-emerald-500 uppercase tracking-[0.5em] mb-3">Fase de Logística</p>
-                   <div className="flex items-center gap-5 bg-emerald-50 px-8 py-4 rounded-full border-2 border-emerald-100 shadow-xl">
-                      <div className="w-4 h-4 rounded-full bg-emerald-500 animate-ping" />
-                      <p className="text-3xl font-black text-emerald-950 uppercase italic tracking-tighter">
+                   <p className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.4em] mb-1">Estado de Entrega</p>
+                   <div className="flex items-center gap-3 bg-emerald-50 px-4 py-2 rounded-full border border-emerald-100">
+                      <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                      <p className="text-lg font-black text-emerald-950 uppercase italic tracking-tighter">
                          {steps[currentStepIndex]?.label}
                       </p>
                    </div>
@@ -279,10 +222,9 @@ export function PackageTrackerPremium() {
 
              <button 
                 onClick={() => setIsTrackingOpen(false)}
-                className="group w-full py-8 bg-zinc-950 text-white rounded-[3rem] text-[15px] font-black uppercase tracking-[0.5em] shadow-[0_25px_60px_rgba(0,0,0,0.4)] hover:shadow-indigo-500/50 transition-all active:scale-95 flex items-center justify-center gap-6 relative overflow-hidden"
+                className="group w-full py-5 bg-black text-white rounded-[1.8rem] text-[11px] font-black uppercase tracking-[0.3em] shadow-xl hover:shadow-indigo-500/20 transition-all active:scale-95 flex items-center justify-center gap-4 relative overflow-hidden"
              >
-                <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                Regresar a la Boutique <ArrowRight className="w-7 h-7 group-hover:translate-x-4 transition-transform" />
+                Regresar a la Tienda <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
              </button>
           </div>
         </motion.div>
