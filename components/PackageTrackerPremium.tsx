@@ -62,7 +62,7 @@ export function PackageTrackerPremium() {
              <div className="absolute inset-0 bg-gradient-to-b from-indigo-50/50 to-white" />
              
              {/* The Road / Path */}
-             <div className="relative w-full px-24">
+             <div className="relative w-full px-6 sm:px-12 md:px-24">
                 <div className="h-1.5 w-full bg-slate-100 rounded-full relative overflow-hidden">
                    <motion.div 
                      initial={{ width: 0 }}
@@ -71,32 +71,32 @@ export function PackageTrackerPremium() {
                      className="absolute h-full bg-gradient-to-r from-emerald-400 to-indigo-600 rounded-full"
                    />
                 </div>
-                                 {/* SMART STATUS INDICATORS (Control Center Logic - Only Active is Green) */}
-                 <div className="absolute top-8 left-12 right-12 flex justify-between z-20">
+                
+                {/* SMART STATUS INDICATORS (Optimized for all screens) */}
+                <div className="absolute top-8 left-4 right-4 sm:left-10 sm:right-10 md:left-20 md:right-20 flex justify-between z-20">
                     {steps.map((step, idx) => {
                       const isCurrent = idx === currentStepIndex;
-                      // En esta versión 9.0, solo el paso actual tiene la luz verde brillante
                       return (
-                        <div key={idx} className="flex flex-col items-center">
-                           <div className={`w-3 h-3 rounded-full border-2 transition-all duration-700 ${
+                        <div key={idx} className="flex flex-col items-center flex-1">
+                           <div className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full border-2 transition-all duration-700 ${
                              isCurrent 
                                ? 'bg-emerald-500 border-white shadow-[0_0_15px_#10b981] scale-125' 
                                : 'bg-slate-300 border-transparent opacity-40'
                            }`} />
                            <motion.span 
                              animate={{ 
-                               opacity: isCurrent ? 1 : 0.3, 
-                               scale: isCurrent ? 1.2 : 0.9,
-                               y: isCurrent ? 5 : 0 
+                               opacity: isCurrent ? 1 : 0.4, 
+                               scale: isCurrent ? 1.1 : 0.85,
+                               y: isCurrent ? 4 : 0 
                              }}
-                             className={`mt-2 text-[9px] font-black uppercase tracking-[0.2em] whitespace-nowrap ${isCurrent ? 'text-emerald-600' : 'text-slate-400'}`}
+                             className={`mt-2 text-[7px] sm:text-[8px] md:text-[9px] font-black uppercase tracking-tighter sm:tracking-[0.2em] whitespace-nowrap text-center ${isCurrent ? 'text-emerald-600' : 'text-slate-400'}`}
                            >
                               {step.label}
                            </motion.span>
                         </div>
                       );
                     })}
-                 </div>
+                </div>
 
                  {/* THE UNIFIED STAGE 8.0 (One SVG, One Coordinate System) */}
                  <div className="absolute inset-0 flex items-center justify-center p-4">
