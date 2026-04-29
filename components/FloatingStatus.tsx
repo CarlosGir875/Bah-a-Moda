@@ -136,19 +136,22 @@ export function FloatingStatus() {
                       {activeOrder.estado === 'recibido' && <CheckCircle2 className="w-8 h-8" />}
                       {activeOrder.estado === 'preparacion' && <Package className="w-8 h-8 animate-pulse" />}
                       {activeOrder.estado === 'en_transito' && <Truck className="w-8 h-8 animate-bounce" />}
+                      {activeOrder.estado === 'listo_entrega' && <CheckCircle2 className="w-8 h-8" />}
                       {activeOrder.estado === 'pendiente' && <Clock className="w-8 h-8 animate-pulse" />}
                     </div>
                     <p className="text-xs font-black uppercase tracking-widest mb-1">
                       {activeOrder.estado === 'pendiente' ? 'Solicitud en Revisión' :
-                       activeOrder.estado === 'recibido' ? '¡Pedido Aceptado!' : 
-                       activeOrder.estado === 'preparacion' ? 'Empaquetando Pedido' : 
-                       activeOrder.estado === 'en_transito' ? 'Pedido en Camino' : 'Procesando'}
+                       activeOrder.estado === 'recibido' ? '¡Pedido Confirmado!' : 
+                       activeOrder.estado === 'preparacion' ? 'Empacando Pedido' : 
+                       activeOrder.estado === 'en_transito' ? 'Pedido en Ruta' : 
+                       activeOrder.estado === 'listo_entrega' ? 'Pedido Entregado' : 'Procesando'}
                     </p>
                     <p className="text-[11px] font-medium text-gray-500 leading-relaxed">
                       {activeOrder.estado === 'pendiente' ? 'Estamos validando tu comprobante de reserva.' :
                        activeOrder.estado === 'recibido' ? 'Tu reserva ha sido aprobada con éxito.' : 
                        activeOrder.estado === 'preparacion' ? 'Estamos preparando tu paquete con elegancia.' : 
-                       activeOrder.estado === 'en_transito' ? 'Tu pedido va rumbo a su destino final.' : 'Estamos trabajando en tu pedido.'}
+                       activeOrder.estado === 'en_transito' ? 'Tu pedido va rumbo a su destino final.' : 
+                       activeOrder.estado === 'listo_entrega' ? '¡Gracias por comprar en Bahía Moda!' : 'Estamos trabajando en tu pedido.'}
                     </p>
                   </div>
                   <button 

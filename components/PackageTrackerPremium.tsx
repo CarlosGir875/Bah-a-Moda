@@ -13,13 +13,14 @@ export function PackageTrackerPremium() {
   if (!isTrackingOpen) return null;
 
   const steps = [
-    { id: 'recibido', label: 'Confirmado', progress: 10 },
-    { id: 'en_transito', label: 'En Ruta', progress: 50 },
+    { id: 'pendiente', label: 'Pendiente', progress: 10 },
+    { id: 'recibido', label: 'Confirmado', progress: 30 },
+    { id: 'preparacion', label: 'Empacando', progress: 55 },
+    { id: 'en_transito', label: 'En Ruta', progress: 80 },
     { id: 'listo_entrega', label: 'Entregado', progress: 100 }
   ];
 
   let currentStepIndex = steps.findIndex(s => s.id === activeOrder?.estado);
-  if (currentStepIndex === -1 && (activeOrder?.estado === 'preparacion' || activeOrder?.estado === 'pendiente')) currentStepIndex = 0; // Se fuerza a Confirmado siempre
   if (currentStepIndex === -1) currentStepIndex = 0;
 
   const progressPercent = steps[currentStepIndex]?.progress || 10;
@@ -240,8 +241,7 @@ export function PackageTrackerPremium() {
                    <div className="text-right">
                       <p className="text-[9px] font-black text-emerald-500 uppercase mb-1">Estado</p>
                       <p className="text-sm font-black text-slate-900 uppercase italic underline underline-offset-4 decoration-emerald-400">
-                         {activeOrder?.estado === 'en_transito' ? 'En Camino' :
-                          activeOrder?.estado === 'listo_entrega' ? 'Entregado' : 'Confirmado'}
+                         {steps[currentStepIndex]?.label || 'Procesando'}
                       </p>
                    </div>
                 </div>

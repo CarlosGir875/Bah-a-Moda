@@ -79,10 +79,10 @@ export function ProfileModal() {
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'pendiente': return 'En Espera';
-      case 'recibido': return 'Aceptado';
-      case 'preparacion': return 'Empaquetando';
-      case 'en_transito': return 'En Camino';
+      case 'pendiente': return 'Pendiente';
+      case 'recibido': return 'Confirmado';
+      case 'preparacion': return 'Empacando';
+      case 'en_transito': return 'En Ruta';
       case 'listo_entrega': return 'Entregado';
       case 'cancelado': return 'Cancelado';
       default: return status;
@@ -91,10 +91,10 @@ export function ProfileModal() {
   
   const renderMiniMasterTruck = (order: any) => {
     const steps = [
-      { id: 'pendiente', label: 'Espera' },
-      { id: 'recibido', label: 'Aceptado' },
-      { id: 'preparacion', label: 'Empaquetado' },
-      { id: 'en_transito', label: 'En Camino' },
+      { id: 'pendiente', label: 'Pendiente' },
+      { id: 'recibido', label: 'Confirmado' },
+      { id: 'preparacion', label: 'Empacando' },
+      { id: 'en_transito', label: 'En Ruta' },
       { id: 'listo_entrega', label: 'Entregado' }
     ];
     
