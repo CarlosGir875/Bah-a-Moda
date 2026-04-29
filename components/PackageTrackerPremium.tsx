@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Truck, Package, MapPin, CheckCircle2, Clock } from "lucide-react";
+import { X, Truck, Package, MapPin, CheckCircle2, Clock, Home, Building2, Warehouse, Trees } from "lucide-react";
 import { useStore } from "@/lib/store";
 
 export function PackageTrackerPremium() {
@@ -13,17 +13,17 @@ export function PackageTrackerPremium() {
   if (!isTrackingOpen) return null;
 
   const steps = [
-    { id: 'pendiente', label: 'Pendiente', progress: 10 },
-    { id: 'recibido', label: 'Confirmado', progress: 30 },
-    { id: 'preparacion', label: 'Empacando', progress: 55 },
-    { id: 'en_transito', label: 'En Ruta', progress: 80 },
-    { id: 'listo_entrega', label: 'Entregado', progress: 100 }
+    { id: 'pendiente', label: 'ESPERA', progress: 5 },
+    { id: 'recibido', label: 'CONFIRMADO', progress: 25 },
+    { id: 'preparacion', label: 'EMPACANDO', progress: 50 },
+    { id: 'en_transito', label: 'EN RUTA', progress: 75 },
+    { id: 'listo_entrega', label: 'ENTREGADO', progress: 100 }
   ];
 
   let currentStepIndex = steps.findIndex(s => s.id === activeOrder?.estado);
   if (currentStepIndex === -1) currentStepIndex = 0;
 
-  const progressPercent = steps[currentStepIndex]?.progress || 10;
+  const progressPercent = steps[currentStepIndex]?.progress || 5;
 
   return (
     <AnimatePresence>
@@ -40,13 +40,13 @@ export function PackageTrackerPremium() {
           initial={{ scale: 0.9, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.9, opacity: 0, y: 20 }}
-          className="relative w-full max-w-lg bg-white rounded-[3rem] shadow-[0_30px_100px_rgba(0,0,0,0.5)] overflow-hidden"
+          className="relative w-full max-w-2xl bg-white rounded-[3rem] shadow-[0_30px_100px_rgba(0,0,0,0.5)] overflow-hidden"
         >
           {/* Header */}
-          <div className="p-8 pb-0 flex items-center justify-between">
+          <div className="p-8 pb-4 flex items-center justify-between border-b border-gray-50">
             <div className="flex flex-col">
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-500">Live Tracking</span>
-              <h2 className="text-xl font-black text-slate-900">Seguimiento de Paquete</h2>
+              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-600">Gala Logistics World</span>
+              <h2 className="text-2xl font-black text-slate-900 tracking-tighter">Estado de Mi Pedido</h2>
             </div>
             <button 
               onClick={() => setIsTrackingOpen(false)}
@@ -56,139 +56,198 @@ export function PackageTrackerPremium() {
             </button>
           </div>
 
-          {/* THE LOGISTICS MAP EXPERIENCE 10.0 */}
-          <div className="relative h-85 w-full flex items-center justify-center overflow-hidden bg-slate-50">
-             {/* Isometric Grid Background */}
-             <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'linear-gradient(30deg, #444 12%, transparent 12.5%, transparent 87%, #444 87.5%, #444), linear-gradient(150deg, #444 12%, transparent 12.5%, transparent 87%, #444 87.5%, #444), linear-gradient(60deg, #999 25%, transparent 25.5%, transparent 75%, #999 75%, #999)', backgroundSize: '40px 70px' }} />
-
-             <div className="relative w-full h-full p-4 sm:p-8">
-                <svg viewBox="0 0 400 300" className="w-full h-full drop-shadow-2xl overflow-visible">
-                   {/* THE LOGISTICS PATH (Isometric Line) */}
+          {/* THE ISOMETRIC EMPIRE 11.0 */}
+          <div className="relative h-96 w-full flex items-center justify-center overflow-hidden bg-[#f0f4f8]">
+             {/* Dynamic Watermark Background */}
+             <div className="absolute inset-0 opacity-[0.05] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]" />
+             
+             <div className="relative w-full h-full p-2 sm:p-6">
+                <svg viewBox="0 0 500 400" className="w-full h-full drop-shadow-2xl overflow-visible">
+                   {/* 🌊 THE RIVER (Puerto de Bahía) */}
                    <motion.path 
-                     id="deliveryPath"
-                     d="M 50 220 L 120 180 L 200 220 L 280 180 L 350 220"
-                     fill="none" 
-                     stroke="#e2e8f0" 
-                     strokeWidth="6" 
-                     strokeLinecap="round" 
-                     strokeLinejoin="round"
-                   />
-                   <motion.path 
-                     d="M 50 220 L 120 180 L 200 220 L 280 180 L 350 220"
-                     fill="none" 
-                     stroke="url(#pathGradient)" 
-                     strokeWidth="6" 
-                     strokeLinecap="round" 
-                     strokeLinejoin="round"
-                     initial={{ pathLength: 0 }}
-                     animate={{ pathLength: progressPercent / 100 }}
-                     transition={{ duration: 1.5, ease: "easeInOut" }}
+                     d="M -50 300 Q 150 250 250 350 T 550 300"
+                     fill="none" stroke="#93c5fd" strokeWidth="40" strokeOpacity="0.4"
+                     animate={{ strokeDashoffset: [0, -100] }}
+                     transition={{ repeat: Infinity, duration: 10, ease: "linear" }}
+                     strokeDasharray="20 10"
                    />
                    
-                   <defs>
-                     <linearGradient id="pathGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                       <stop offset="0%" stopColor="#fbbf24" />
-                       <stop offset="50%" stopColor="#10b981" />
-                       <stop offset="100%" stopColor="#4f46e5" />
-                     </linearGradient>
-                   </defs>
+                   {/* 🛣️ THE CARRETERA (The Path) */}
+                   <path 
+                     id="mainRoad"
+                     d="M 60 300 L 150 200 L 250 280 L 350 180 L 440 260"
+                     fill="none" stroke="#334155" strokeWidth="12" strokeLinecap="round" strokeLinejoin="round" opacity="0.8"
+                   />
+                   {/* Road Markings */}
+                   <path 
+                     d="M 60 300 L 150 200 L 250 280 L 350 180 L 440 260"
+                     fill="none" stroke="white" strokeWidth="1" strokeDasharray="10 15" opacity="0.3"
+                   />
 
-                   {/* MILESTONES (The 5 Hitos) */}
+                   {/* 🌳 LANDSCAPING (Trees & Scenery) */}
                    {[
-                     { id: 'pendiente', x: 50, y: 220, label: 'Espera' },
-                     { id: 'recibido', x: 120, y: 180, label: 'Aceptado' },
-                     { id: 'preparacion', x: 200, y: 220, label: 'Empacando' },
-                     { id: 'en_transito', x: 280, y: 180, label: 'En Ruta' },
-                     { id: 'listo_entrega', x: 350, y: 220, label: 'Gala!' }
-                   ].map((hito, idx) => {
+                     {x: 80, y: 150}, {x: 200, y: 120}, {x: 400, y: 100}, 
+                     {x: 100, y: 350}, {x: 300, y: 330}, {x: 450, y: 350}
+                   ].map((t, i) => (
+                     <g key={i} transform={`translate(${t.x}, ${t.y})`}>
+                        <circle r="8" fill="#15803d" opacity="0.3" />
+                        <path d="M 0 -12 L 6 0 L -6 0 Z" fill="#166534" />
+                     </g>
+                   ))}
+
+                   {/* 🏗️ BUILDINGS (The 5 Milestones) */}
+                   {[
+                     { id: 'pendiente', x: 60, y: 300, label: 'ESPERA', building: 'sucursal' },
+                     { id: 'recibido', x: 150, y: 200, label: 'CONFIRMADO', building: 'sede' },
+                     { id: 'preparacion', x: 250, y: 280, label: 'EMPACANDO', building: 'almacen' },
+                     { id: 'en_transito', x: 350, y: 180, label: 'EN RUTA', building: 'ruta' },
+                     { id: 'listo_entrega', x: 440, y: 260, label: 'ENTREGADO', building: 'casa' }
+                   ].map((milestone, idx) => {
                      const isReached = idx <= currentStepIndex;
                      const isCurrent = idx === currentStepIndex;
+                     
                      return (
-                       <g key={hito.id} transform={`translate(${hito.x}, ${hito.y})`}>
-                         {/* Pin Shadow */}
-                         <circle cy="5" r="10" fill="black" opacity="0.05" />
-                         {/* Pin Body */}
-                         <motion.g
-                           initial={{ y: -20, opacity: 0 }}
-                           animate={{ y: 0, opacity: 1 }}
-                           transition={{ delay: idx * 0.2 }}
-                         >
-                           <path d="M-10 -25 A10 10 0 1 1 10 -25 L0 0 Z" fill={isCurrent ? '#4f46e5' : isReached ? '#10b981' : '#cbd5e1'} />
-                           <circle cx="0" cy="-25" r="7" fill="white" />
-                           <g transform="translate(-5, -30) scale(0.3)" className={isCurrent ? 'text-indigo-600' : isReached ? 'text-emerald-600' : 'text-slate-400'}>
-                             {hito.id === 'pendiente' && <Clock />}
-                             {hito.id === 'recibido' && <CheckCircle2 />}
-                             {hito.id === 'preparacion' && <Package />}
-                             {hito.id === 'en_transito' && <Truck />}
-                             {hito.id === 'listo_entrega' && <MapPin />}
-                           </g>
-                         </motion.g>
-                         {/* Label */}
-                         <text y="15" fontSize="6" fontWeight="900" textAnchor="middle" className="uppercase tracking-widest" fill={isCurrent ? '#1e293b' : '#94a3b8'}>
-                           {hito.label}
-                         </text>
+                       <g key={milestone.id} transform={`translate(${milestone.x}, ${milestone.y})`}>
+                          {/* Shadow */}
+                          <ellipse cx="0" cy="5" rx="20" ry="10" fill="black" opacity="0.05" />
+                          
+                          {/* Isometric Buildings */}
+                          <motion.g
+                            initial={{ y: -50, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ delay: idx * 0.15, type: "spring", stiffness: 100 }}
+                          >
+                             {/* Building Graphics based on type */}
+                             {milestone.building === 'sucursal' && (
+                               <g transform="translate(-20, -50)">
+                                 <rect x="0" y="10" width="40" height="40" fill={isReached ? '#475569' : '#cbd5e1'} rx="2" />
+                                 <rect x="5" y="0" width="30" height="15" fill={isReached ? '#1e293b' : '#94a3b8'} rx="1" />
+                                 <Clock className="w-5 h-5 text-white absolute" x="10" y="15" />
+                               </g>
+                             )}
+                             {milestone.building === 'sede' && (
+                               <g transform="translate(-15, -60)">
+                                 <rect x="0" y="0" width="30" height="60" fill={isReached ? '#1e40af' : '#cbd5e1'} rx="2" />
+                                 <rect x="5" y="5" width="20" height="50" fill="white" opacity="0.2" />
+                                 <Building2 className="w-5 h-5 text-white absolute" x="5" y="10" />
+                               </g>
+                             )}
+                             {milestone.building === 'almacen' && (
+                               <g transform="translate(-25, -45)">
+                                 <rect x="0" y="10" width="50" height="35" fill={isReached ? '#b45309' : '#cbd5e1'} rx="2" />
+                                 <path d="M 0 10 L 25 0 L 50 10 Z" fill={isReached ? '#78350f' : '#94a3b8'} />
+                                 <Warehouse className="w-6 h-6 text-white absolute" x="12" y="18" />
+                               </g>
+                             )}
+                             {milestone.building === 'ruta' && (
+                               <g transform="translate(-15, -40)">
+                                 <circle r="15" fill={isCurrent ? '#4f46e5' : '#cbd5e1'} />
+                                 <Truck className="w-5 h-5 text-white absolute" x="-10" y="-10" />
+                               </g>
+                             )}
+                             {milestone.building === 'casa' && (
+                               <g transform="translate(-20, -45)">
+                                 <path d="M 0 15 L 20 0 L 40 15 L 40 45 L 0 45 Z" fill={isCurrent ? '#059669' : '#cbd5e1'} />
+                                 <rect x="15" y="25" width="10" height="20" fill="white" opacity="0.3" />
+                                 <Home className="w-6 h-6 text-white absolute" x="7" y="15" />
+                               </g>
+                             )}
+
+                             {/* Label */}
+                             <g transform="translate(0, 15)">
+                               <rect x="-35" y="0" width="70" height="14" rx="7" fill={isCurrent ? 'black' : 'white'} className="shadow-sm" />
+                               <text fontSize="7" fontWeight="900" textAnchor="middle" y="9" fill={isCurrent ? 'white' : '#94a3b8'} className="uppercase tracking-widest">
+                                 {milestone.label}
+                               </text>
+                             </g>
+                          </motion.g>
                        </g>
                      );
                    })}
 
-                   {/* THE REAL GALA TRUCK (Isometric Animation) */}
-                   <motion.g 
-                     initial={{ opacity: 0 }}
-                     animate={{ 
-                       opacity: 1,
-                       offsetDistance: `${progressPercent}%` 
-                     }}
-                     style={{ 
-                       offsetPath: "path('M 50 220 L 120 180 L 200 220 L 280 180 L 350 220')",
-                       offsetRotate: "auto"
-                     }}
-                     transition={{ duration: 1.5, ease: "easeInOut" }}
-                   >
-                      <g transform="translate(-15, -25) scale(0.4)">
-                         {/* Truck Chassis */}
-                         <path d="M0 20 L40 0 L80 20 L40 40 Z" fill="#f59e0b" /> {/* Top Cargo */}
-                         <path d="M0 20 L0 50 L40 70 L40 40 Z" fill="#d97706" /> {/* Left Side */}
-                         <path d="M40 40 L40 70 L80 50 L80 20 Z" fill="#b45309" /> {/* Right Side */}
-                         
-                         {/* Cabin */}
-                         <path d="M65 12 L95 27 L95 47 L65 32 Z" fill="#1e3a8a" /> {/* Blue Cabin Side */}
-                         <path d="M65 12 L80 5 L110 20 L95 27 Z" fill="#1e40af" /> {/* Cabin Top */}
-                         
-                         {/* GALA Text on truck */}
-                         <text x="10" y="45" fontSize="14" fontWeight="900" fill="white" transform="skewY(-20)" opacity="0.9">GALA</text>
-                         
-                         {/* Wheels */}
-                         <circle cx="20" cy="65" r="8" fill="#111" />
-                         <circle cx="60" cy="45" r="8" fill="#111" />
-                      </g>
-                   </motion.g>
+                   {/* 🚛 THE MASTER TRUCK GALA (18 Wheeler) */}
+                   {activeOrder?.estado !== 'pendiente' && (
+                     <motion.g 
+                       initial={{ opacity: 0 }}
+                       animate={{ 
+                         opacity: 1,
+                         offsetDistance: `${progressPercent}%` 
+                       }}
+                       style={{ 
+                         offsetPath: "path('M 60 300 L 150 200 L 250 280 L 350 180 L 440 260')",
+                         offsetRotate: "auto"
+                       }}
+                       transition={{ duration: 2, ease: "easeInOut" }}
+                     >
+                        <g transform="translate(-30, -35) scale(0.6)">
+                           {/* Long Trailer */}
+                           <rect x="0" y="10" width="70" height="35" rx="2" fill="#1e293b" />
+                           <rect x="5" y="15" width="60" height="25" fill="#334155" />
+                           <text x="10" y="32" fontSize="10" fontWeight="900" fill="white" opacity="0.8" className="italic tracking-tighter">GALA MASTER</text>
+                           
+                           {/* Cabin (Truck Head) */}
+                           <g transform="translate(72, 5)">
+                              <rect x="0" y="5" width="25" height="35" rx="3" fill="#1d4ed8" />
+                              <rect x="15" y="10" width="10" height="20" fill="#93c5fd" opacity="0.6" /> {/* Windshield */}
+                              <rect x="0" y="40" width="25" height="5" fill="#0f172a" /> {/* Bumper */}
+                           </g>
+
+                           {/* 18 Wheels (Grouped for detail) */}
+                           <g fill="#111">
+                              <circle cx="10" cy="48" r="6" />
+                              <circle cx="22" cy="48" r="6" />
+                              <circle cx="50" cy="48" r="6" />
+                              <circle cx="62" cy="48" r="6" />
+                              <circle cx="85" cy="45" r="7" />
+                           </g>
+
+                           {/* Smoke Effect */}
+                           <motion.g opacity="0.3">
+                              {[0, 1, 2].map((i) => (
+                                <motion.circle 
+                                  key={i}
+                                  cx="-5" cy="15" r="3" fill="#94a3b8"
+                                  animate={{ opacity: [0, 1, 0], x: [-5, -30], y: [15, 0], scale: [1, 3] }}
+                                  transition={{ repeat: Infinity, duration: 0.8, delay: i * 0.2 }}
+                                />
+                              ))}
+                           </motion.g>
+                        </g>
+                     </motion.g>
+                   )}
                 </svg>
              </div>
           </div>
 
           {/* Details Card */}
-          <div className="p-8 pt-0 space-y-6">
-             <div className="bg-slate-50 p-6 rounded-[2rem] border border-slate-100 flex items-center justify-between">
-                <div className="flex flex-col">
-                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Repartidor Estimado</p>
-                   <p className="text-sm font-bold text-slate-900">Bahía Logistics S.A.</p>
+          <div className="p-8 pt-6 space-y-6 bg-white">
+             <div className="flex flex-col sm:flex-row gap-4 items-center justify-between p-6 bg-slate-50 rounded-3xl border border-slate-100">
+                <div className="flex items-center gap-4">
+                   <div className="p-4 bg-white rounded-2xl shadow-sm text-indigo-600">
+                      <Truck className="w-6 h-6" />
+                   </div>
+                   <div>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Unidad Gala Asignada</p>
+                      <p className="text-sm font-black text-slate-900 uppercase">Master Truck #001 - Bahía Express</p>
+                   </div>
                 </div>
-                <div className="p-3 bg-white rounded-2xl shadow-sm text-indigo-600">
-                   <Truck className="w-5 h-5" />
+                <div className="flex flex-col items-center sm:items-end">
+                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Destino</p>
+                   <p className="text-xs font-bold text-slate-700 truncate max-w-[200px]">{activeOrder?.ubicacion_entrega || "Puerto San José"}</p>
                 </div>
              </div>
 
-             <div className="space-y-4">
-                <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-center text-slate-300">Resumen de Entrega</h4>
-                <div className="flex justify-between items-end">
-                   <div className="text-left">
-                      <p className="text-[9px] font-black text-indigo-500 uppercase mb-1">Factura</p>
-                      <p className="text-lg font-black text-slate-900">Q{activeOrder?.total || 0}</p>
-                   </div>
-                   <div className="text-right">
-                      <p className="text-[9px] font-black text-emerald-500 uppercase mb-1">Estado</p>
-                      <p className="text-sm font-black text-slate-900 uppercase italic underline underline-offset-4 decoration-emerald-400">
-                         {steps[currentStepIndex]?.label || 'Procesando'}
+             <div className="flex justify-between items-center py-4 border-t border-slate-100">
+                <div>
+                   <p className="text-[10px] font-black text-indigo-500 uppercase tracking-[0.2em] mb-1">Total Pedido</p>
+                   <p className="text-2xl font-black text-slate-900 tracking-tighter">Q{activeOrder?.total || 0}</p>
+                </div>
+                <div className="text-right">
+                   <p className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.2em] mb-1">Estado Real</p>
+                   <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                      <p className="text-lg font-black text-slate-900 uppercase italic">
+                         {steps[currentStepIndex]?.label}
                       </p>
                    </div>
                 </div>
@@ -196,13 +255,21 @@ export function PackageTrackerPremium() {
 
              <button 
                 onClick={() => setIsTrackingOpen(false)}
-                className="w-full py-5 bg-black text-white rounded-[1.8rem] text-[11px] font-black uppercase tracking-[0.2em] shadow-xl hover:shadow-indigo-200 transition-all active:scale-95"
+                className="w-full py-5 bg-black text-white rounded-[2rem] text-[11px] font-black uppercase tracking-[0.3em] shadow-2xl hover:shadow-indigo-200 transition-all active:scale-95 flex items-center justify-center gap-3"
              >
-                Cerrar Ventana
+                Continuar Navegando <ArrowRight className="w-4 h-4" />
              </button>
           </div>
         </motion.div>
       </div>
     </AnimatePresence>
+  );
+}
+
+function ArrowRight({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+    </svg>
   );
 }

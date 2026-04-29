@@ -140,11 +140,11 @@ export function FloatingStatus() {
                       {activeOrder.estado === 'pendiente' && <Clock className="w-8 h-8 animate-pulse" />}
                     </div>
                     <p className="text-xs font-black uppercase tracking-widest mb-1">
-                      {activeOrder.estado === 'pendiente' ? 'Solicitud en Revisión' :
-                       activeOrder.estado === 'recibido' ? '¡Pedido Confirmado!' : 
-                       activeOrder.estado === 'preparacion' ? 'Empacando Pedido' : 
-                       activeOrder.estado === 'en_transito' ? 'Pedido en Ruta' : 
-                       activeOrder.estado === 'listo_entrega' ? 'Pedido Entregado' : 'Procesando'}
+                      {activeOrder.estado === 'pendiente' ? 'ESPERA' :
+                       activeOrder.estado === 'recibido' ? 'CONFIRMADO' : 
+                       activeOrder.estado === 'preparacion' ? 'EMPACANDO' : 
+                       activeOrder.estado === 'en_transito' ? 'EN RUTA' : 
+                       activeOrder.estado === 'listo_entrega' ? 'ENTREGADO' : 'PROCESANDO'}
                     </p>
                     <p className="text-[11px] font-medium text-gray-500 leading-relaxed">
                       {activeOrder.estado === 'pendiente' ? 'Estamos validando tu comprobante de reserva.' :
