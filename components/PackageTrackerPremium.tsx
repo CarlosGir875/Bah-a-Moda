@@ -165,7 +165,6 @@ export function PackageTrackerPremium() {
                 </svg>
              </div>
           </div>
-           </div>
 
           {/* Details Card */}
           <div className="p-8 pt-0 space-y-6">
