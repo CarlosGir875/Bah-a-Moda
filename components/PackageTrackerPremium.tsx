@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Truck, Package, MapPin, CheckCircle2, Clock, Home, Building2, Warehouse, ArrowRight, Sun, Cloud, FileSearch, ShieldCheck } from "lucide-react";
+import { X, Truck, Package, MapPin, CheckCircle2, Clock, Home, Building2, Warehouse, ArrowRight, Sun, Cloud, FileSearch, ShieldCheck, Zap, Waves } from "lucide-react";
 import { useStore } from "@/lib/store";
 
 export function PackageTrackerPremium() {
@@ -11,12 +11,13 @@ export function PackageTrackerPremium() {
 
   if (!isTrackingOpen) return null;
 
+  // Mapa más largo para evitar amontonamiento (Efecto SimCity)
   const steps = [
-    { id: 'pendiente', label: 'ESPERA', progress: 5, building: 'hub', x: 60, y: 320 },
-    { id: 'recibido', label: 'CONFIRMADO', progress: 28, building: 'hq', x: 250, y: 200 },
-    { id: 'preparacion', label: 'EMPACANDO', progress: 52, building: 'warehouse', x: 450, y: 320 },
-    { id: 'en_transito', label: 'EN RUTA', progress: 78, building: 'road', x: 500, y: 250 },
-    { id: 'listo_entrega', label: 'ENTREGADO', progress: 100, building: 'home', x: 580, y: 280 }
+    { id: 'pendiente', label: 'ESPERA', progress: 5, building: 'hub', x: 80, y: 350 },
+    { id: 'recibido', label: 'CONFIRMADO', progress: 28, building: 'hq', x: 300, y: 220 },
+    { id: 'preparacion', label: 'EMPACANDO', progress: 52, building: 'warehouse', x: 550, y: 350 },
+    { id: 'en_transito', label: 'EN RUTA', progress: 78, building: 'road', x: 800, y: 250 },
+    { id: 'listo_entrega', label: 'ENTREGADO', progress: 95, building: 'home', x: 920, y: 320 }
   ];
 
   let currentStepIndex = steps.findIndex(s => s.id === activeOrder?.estado);
@@ -32,71 +33,81 @@ export function PackageTrackerPremium() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="absolute inset-0 bg-black/80 backdrop-blur-xl"
+          className="absolute inset-0 bg-black/90 backdrop-blur-2xl"
           onClick={() => setIsTrackingOpen(false)}
         />
         
         <motion.div
-          initial={{ scale: 0.9, opacity: 0, y: 50 }}
+          initial={{ scale: 0.9, opacity: 0, y: 100 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
-          exit={{ scale: 0.9, opacity: 0, y: 50 }}
-          className="relative w-full max-w-2xl bg-white rounded-[3.5rem] shadow-[0_50px_150px_rgba(0,0,0,0.7)] overflow-hidden border border-white/10"
+          exit={{ scale: 0.9, opacity: 0, y: 100 }}
+          className="relative w-full max-w-4xl bg-white rounded-[4rem] shadow-[0_60px_200px_rgba(0,0,0,0.8)] overflow-hidden border border-white/5"
         >
-          {/* Header Ultra Premium */}
-          <div className="p-10 pb-6 flex items-center justify-between bg-white relative z-20">
+          {/* Header Superior Gala */}
+          <div className="p-12 pb-8 flex items-center justify-between bg-white relative z-30">
             <div className="flex flex-col">
-              <div className="flex items-center gap-3 mb-2">
-                 <div className="px-3 py-1 bg-emerald-500 rounded-full">
-                    <span className="text-[9px] font-black uppercase tracking-[0.3em] text-white">Gala Logistics Live</span>
+              <div className="flex items-center gap-4 mb-3">
+                 <div className="px-4 py-1.5 bg-black rounded-full shadow-lg">
+                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white">Gala Universe v16.0</span>
                  </div>
-                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Storytelling v15.1</span>
+                 <div className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
               </div>
-              <h2 className="text-3xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">Bitácora de Pedido</h2>
+              <h2 className="text-4xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">Logística de Élite</h2>
             </div>
             <button 
               onClick={() => setIsTrackingOpen(false)}
-              className="p-4 bg-slate-50 hover:bg-slate-100 rounded-3xl text-slate-400 hover:text-black transition-all"
+              className="p-5 bg-slate-50 hover:bg-slate-100 rounded-[2rem] text-slate-400 hover:text-black transition-all shadow-xl active:scale-90"
             >
-              <X className="w-6 h-6" />
+              <X className="w-8 h-8" />
             </button>
           </div>
 
-          {/* 🗺️ EL MUNDO GALA STORYTELLING (v15.1) */}
-          <div className="relative h-[480px] w-full flex items-center justify-center overflow-hidden bg-[#e0f7fa]">
-             {/* BACKGROUND SCENERY */}
-             <div className="absolute inset-0 pointer-events-none">
-                <svg viewBox="0 0 600 500" className="w-full h-full opacity-30">
-                   <path d="M 0 250 Q 150 150 300 250 T 600 250 L 600 500 L 0 500 Z" fill="#4db6ac" />
-                   <g transform="translate(520, 60)" className="text-amber-400">
-                      <Sun className="w-16 h-16" />
-                   </g>
+          {/* 🗺️ EL MICRO-UNIVERSO GALA (v16.0) */}
+          <div className="relative h-[500px] w-full flex items-center justify-center overflow-hidden bg-[#e0f2f1]">
+             {/* 🏔️ AMBIENTE DE FONDO (Deep Perspective) */}
+             <div className="absolute inset-0 pointer-events-none opacity-40">
+                <svg viewBox="0 0 1000 500" className="w-full h-full">
+                   {/* Montañas Lejanas */}
+                   <path d="M 0 300 L 200 100 L 400 300 L 600 150 L 800 300 L 1000 200 L 1000 500 L 0 500 Z" fill="#004d40" />
+                   <Sun className="w-24 h-24 text-amber-400 absolute right-20 top-10" />
+                   {/* Nubes */}
+                   <motion.g animate={{ x: [0, 50, 0] }} transition={{ repeat: Infinity, duration: 20 }}>
+                      <Cloud className="w-20 h-20 text-white absolute left-40 top-20 opacity-60" />
+                   </motion.g>
                 </svg>
              </div>
 
              <div className="relative w-full h-full">
-                <svg viewBox="0 0 600 500" className="w-full h-full overflow-visible drop-shadow-2xl">
+                <svg viewBox="0 0 1000 500" className="w-full h-full overflow-visible drop-shadow-3xl">
                    
-                   {/* 🌊 RIVER */}
+                   {/* 🌊 RÍO GALA (Miniature Water) */}
                    <motion.path 
-                     d="M -100 420 Q 150 350 300 450 T 700 420"
-                     fill="none" stroke="#4fc3f7" strokeWidth="80" strokeOpacity="0.4"
-                     animate={{ strokeDashoffset: [0, -200] }}
-                     transition={{ repeat: Infinity, duration: 12, ease: "linear" }}
-                     strokeDasharray="20 40"
+                     d="M -100 450 Q 250 380 500 480 T 1100 450"
+                     fill="none" stroke="#81d4fa" strokeWidth="100" strokeOpacity="0.4"
+                     animate={{ strokeDashoffset: [0, -300] }}
+                     transition={{ repeat: Infinity, duration: 15, ease: "linear" }}
+                     strokeDasharray="15 30"
                    />
 
-                   {/* 🛣️ THE ROAD */}
+                   {/* 🛣️ CARRETERA PRINCIPAL (Long & Smooth) */}
                    <path 
-                     id="galaStoryPath"
-                     d="M 60 320 C 120 320, 180 200, 250 200 C 320 200, 380 320, 450 320 C 520 320, 580 250, 600 250"
-                     fill="none" stroke="#263238" strokeWidth="20" strokeLinecap="round" strokeLinejoin="round" 
+                     id="galaMainRoute16"
+                     d="M 80 350 Q 150 350, 300 220 T 550 350 T 800 250 T 920 320"
+                     fill="none" stroke="#1e293b" strokeWidth="14" strokeLinecap="round" strokeLinejoin="round" 
                    />
                    <path 
-                     d="M 60 320 C 120 320, 180 200, 250 200 C 320 200, 380 320, 450 320 C 520 320, 580 250, 600 250"
-                     fill="none" stroke="#ffd600" strokeWidth="1.5" strokeDasharray="10 20" strokeOpacity="0.5"
+                     d="M 80 350 Q 150 350, 300 220 T 550 350 T 800 250 T 920 320"
+                     fill="none" stroke="#facc15" strokeWidth="1" strokeDasharray="6 12" strokeOpacity="0.4"
                    />
 
-                   {/* 🏢 BUILDINGS AND PHASE VISUALS */}
+                   {/* 🌳 MINI DECORACIONES (Mundo Vivo) */}
+                   {[...Array(15)].map((_, i) => (
+                     <g key={i} transform={`translate(${Math.random() * 1000}, ${Math.random() * 500})`}>
+                        <circle r="2" fill="#2e7d32" opacity="0.3" />
+                     </g>
+                   ))}
+
+                   {/* 🏢 EDIFICIOS MINIATURA ANIMADOS */}
                    {steps.map((point, idx) => {
                      const isReached = idx <= currentStepIndex;
                      const isCurrent = idx === currentStepIndex;
@@ -104,70 +115,68 @@ export function PackageTrackerPremium() {
                      return (
                        <g key={point.id} transform={`translate(${point.x}, ${point.y})`}>
                           <motion.g
-                            initial={{ y: -50, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
+                            initial={{ scale: 0, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ delay: idx * 0.1, type: "spring" }}
                           >
-                             <ellipse cx="0" cy="15" rx="40" ry="15" fill="black" opacity="0.05" />
+                             {/* Sombras */}
+                             <ellipse cx="0" cy="10" rx="30" ry="10" fill="black" opacity="0.05" />
 
+                             {/* EDIFICIOS MINIATURA */}
                              {point.building === 'hub' && (
-                               <g transform="translate(-30, -80)">
-                                  <rect x="0" y="20" width="60" height="60" fill={isReached ? '#004d40' : '#b0bec5'} rx="4" />
-                                  <path d="M0 20 L30 0 L60 20 Z" fill={isReached ? '#002420' : '#78909c'} />
-                                  {isCurrent && (
-                                    <motion.g animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 4, ease: "linear" }} transform="translate(30, 50)">
-                                      <Clock className="w-8 h-8 text-white absolute -translate-x-4 -translate-y-4" />
-                                    </motion.g>
-                                  )}
+                               <g transform="translate(-20, -50) scale(0.8)">
+                                  <rect x="0" y="10" width="40" height="40" fill={isReached ? '#004d40' : '#cfd8dc'} rx="2" />
+                                  <path d="M0 10 L20 0 L40 10 Z" fill={isReached ? '#002420' : '#90a4ae'} />
+                                  {/* Interior Animado: Ventanas Trabajando */}
+                                  <g transform="translate(5, 15)">
+                                     <motion.rect width="10" height="10" fill="white" animate={isCurrent ? { opacity: [0.1, 0.8, 0.1] } : { opacity: 0.2 }} transition={{ repeat: Infinity, duration: 1 }} />
+                                     <motion.rect x="20" width="10" height="10" fill="white" animate={isCurrent ? { opacity: [0.8, 0.1, 0.8] } : { opacity: 0.2 }} transition={{ repeat: Infinity, duration: 1 }} />
+                                  </g>
                                </g>
                              )}
                              {point.building === 'hq' && (
-                               <g transform="translate(-25, -120)">
-                                  <rect x="0" y="0" width="50" height="120" fill={isReached ? '#1a237e' : '#b0bec5'} rx="4" />
-                                  <rect x="5" y="5" width="40" height="110" fill="#bbdefb" opacity="0.4" />
+                               <g transform="translate(-15, -80) scale(0.8)">
+                                  <rect x="0" y="0" width="30" height="80" fill={isReached ? '#1a237e' : '#cfd8dc'} rx="2" />
+                                  <rect x="5" y="5" width="20" height="70" fill="#e1f5fe" opacity="0.5" />
+                                  {/* Interior Animado: Pulso de Aprobación */}
                                   {isCurrent && (
-                                    <motion.g initial={{ scale: 0 }} animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 2 }} transform="translate(25, 30)">
-                                       <ShieldCheck className="w-10 h-10 text-emerald-400 absolute -translate-x-5 -translate-y-5" />
-                                    </motion.g>
+                                    <motion.circle r="40" cx="15" cy="40" fill="#4fc3f7" initial={{ scale: 0, opacity: 0.5 }} animate={{ scale: 2, opacity: 0 }} transition={{ repeat: Infinity, duration: 1.5 }} />
                                   )}
+                                  <ShieldCheck className="w-5 h-5 text-white absolute" x="5" y="15" />
                                </g>
                              )}
                              {point.building === 'warehouse' && (
-                               <g transform="translate(-40, -70)">
-                                  <rect x="0" y="10" width="80" height="60" fill={isReached ? '#5d4037' : '#b0bec5'} rx="4" />
-                                  <rect x="10" y="30" width="20" height="40" fill="#1e293b" /> {/* Muelle */}
+                               <g transform="translate(-25, -45) scale(0.8)">
+                                  <rect x="0" y="10" width="50" height="40" fill={isReached ? '#4e342e' : '#cfd8dc'} rx="2" />
+                                  <rect x="10" y="25" width="15" height="25" fill="#1e293b" />
+                                  {/* Interior Animado: Carga de Paquetes */}
                                   {isCurrent && (
-                                    <motion.g>
-                                       {[0, 1, 2].map((p, i) => (
-                                         <motion.g
-                                           key={i}
-                                           initial={{ x: 10, y: 40, opacity: 0 }}
-                                           animate={{ x: 50, y: 40, opacity: [0, 1, 0] }}
-                                           transition={{ repeat: Infinity, duration: 1.5, delay: i * 0.5 }}
-                                         >
-                                            <Package className="w-4 h-4 text-amber-500" />
-                                         </motion.g>
+                                    <g>
+                                       {[0,1,2].map((p, i) => (
+                                         <motion.rect key={i} width="6" height="6" fill="#fbbf24" initial={{ x: 10, y: 35, opacity: 0 }} animate={{ x: 50, opacity: [0, 1, 0] }} transition={{ repeat: Infinity, duration: 1.2, delay: i * 0.4 }} />
                                        ))}
-                                    </motion.g>
+                                    </g>
                                   )}
                                </g>
                              )}
                              {point.building === 'road' && (
-                               <g transform="translate(-20, -50)">
-                                  <circle r="25" fill={isReached ? '#311b92' : '#b0bec5'} />
-                                  <Truck className="w-8 h-8 text-white absolute -translate-x-4 -translate-y-4" />
+                               <g transform="translate(-12, -35) scale(0.8)">
+                                  <circle r="15" fill={isReached ? '#4527a0' : '#cfd8dc'} />
+                                  <Truck className="w-5 h-5 text-white absolute" x="-9" y="-9" />
                                </g>
                              )}
                              {point.building === 'home' && (
-                               <g transform="translate(-35, -80)">
-                                  <path d="M 0 35 L 40 0 L 80 35 L 80 80 L 0 80 Z" fill={isCurrent ? '#1b5e20' : '#b0bec5'} />
-                                  <Home className="w-10 h-10 text-white absolute" x="22" y="30" />
+                               <g transform="translate(-20, -50) scale(0.8)">
+                                  <path d="M 0 20 L 25 0 L 50 20 L 50 55 L 0 55 Z" fill={isCurrent ? '#1b5e20' : '#cfd8dc'} />
+                                  <rect x="18" y="35" width="14" height="20" fill="#ffeb3b" />
+                                  <Home className="w-6 h-6 text-white absolute" x="12" y="18" />
                                </g>
                              )}
 
-                             {/* Label */}
-                             <g transform="translate(0, 45)">
-                                <rect x="-50" y="0" width="100" height="26" rx="13" fill={isCurrent ? '#0f172a' : 'white'} className="shadow-2xl" />
-                                <text fontSize="10" fontWeight="900" textAnchor="middle" y="17" fill={isCurrent ? 'white' : '#94a3b8'} className="uppercase tracking-[0.3em]">
+                             {/* Etiqueta Miniature */}
+                             <g transform="translate(0, 25)">
+                                <rect x="-35" y="0" width="70" height="18" rx="9" fill={isCurrent ? '#0f172a' : 'white'} className="shadow-2xl" />
+                                <text fontSize="7" fontWeight="900" textAnchor="middle" y="12" fill={isCurrent ? 'white' : '#94a3b8'} className="uppercase tracking-[0.3em]">
                                    {point.label}
                                 </text>
                              </g>
@@ -176,7 +185,7 @@ export function PackageTrackerPremium() {
                      );
                    })}
 
-                   {/* 🚛 EL GALA MASTER (Lógica Narrativa) */}
+                   {/* 🚛 EL GALA MASTER MINI (Pocket Edition) */}
                    {currentEstado !== 'pendiente' && currentEstado !== 'recibido' && (
                      <motion.g 
                        initial={{ opacity: 0 }}
@@ -185,48 +194,38 @@ export function PackageTrackerPremium() {
                          offsetDistance: `${progressPercent}%` 
                        }}
                        style={{ 
-                         offsetPath: "path('M 60 320 C 120 320, 180 200, 250 200 C 320 200, 380 320, 450 320 C 520 320, 580 250, 600 250')",
+                         offsetPath: "path('M 80 350 Q 150 350, 300 220 T 550 350 T 800 250 T 920 320')",
                          offsetRotate: "auto 0deg" 
                        }}
-                       transition={{ duration: currentEstado === 'en_transito' ? 3 : 0, ease: "easeInOut" }}
+                       transition={{ duration: currentEstado === 'en_transito' ? 4 : 0, ease: "easeInOut" }}
                      >
-                        <g transform="translate(-60, -45) scale(0.9)">
-                           {/* Truck Body */}
-                           <rect x="0" y="10" width="105" height="48" rx="4" fill="#263238" />
-                           <rect x="5" y="15" width="95" height="38" fill="#37474f" />
-                           <text x="15" y="35" fontSize="11" fontWeight="900" fill="white" opacity="0.8" className="italic">GALA MASTER</text>
+                        <g transform="translate(-35, -30) scale(0.55)">
+                           {/* Camión Largo y Detallado */}
+                           <rect x="0" y="5" width="80" height="35" rx="2" fill="#1e293b" />
+                           <rect x="5" y="10" width="70" height="25" fill="#334155" />
+                           <text x="10" y="27" fontSize="9" fontWeight="900" fill="white" opacity="0.9" className="italic tracking-tighter">GALA MASTER</text>
                            
                            {/* Cabina */}
-                           <g transform="translate(107, 5)">
-                              <path d="M 0 10 L 25 10 L 38 28 L 38 48 L 0 48 Z" fill="#1d4ed8" />
-                              <rect x="5" y="15" width="22" height="18" fill="#e0f2fe" opacity="0.7" rx="2" />
+                           <g transform="translate(82, 0)">
+                              <path d="M 0 10 L 20 10 L 30 25 L 30 40 L 0 40 Z" fill="#1d4ed8" />
+                              <rect x="5" y="15" width="15" height="12" fill="#e0f2fe" opacity="0.7" rx="1" />
                            </g>
 
-                           {/* 🎡 WHEELS */}
+                           {/* 🎡 MINI RUEDAS ANIMADAS */}
                            <g fill="#111">
-                              {[18, 32, 75, 89, 120, 135].map((cx, i) => (
-                                <motion.g key={i} transform={`translate(${cx}, 58)`}>
-                                   <motion.circle 
-                                     r="9" 
-                                     animate={currentEstado === 'en_transito' ? { rotate: 360 } : {}}
-                                     transition={{ repeat: Infinity, duration: 0.5, ease: "linear" }}
-                                     stroke="white" strokeWidth="2" strokeDasharray="4 4"
-                                   />
-                                   <circle r="4" fill="white" />
+                              {[12, 22, 55, 65, 95, 105].map((cx, i) => (
+                                <motion.g key={i} transform={`translate(${cx}, 45)`}>
+                                   <motion.circle r="6" animate={currentEstado === 'en_transito' ? { rotate: 360 } : {}} transition={{ repeat: Infinity, duration: 0.4, ease: "linear" }} stroke="white" strokeWidth="1.5" strokeDasharray="3 3" />
+                                   <circle r="2" fill="white" />
                                 </motion.g>
                               ))}
                            </g>
 
-                           {/* Smoke */}
+                           {/* Smoke (Solo en RUTA) */}
                            {currentEstado === 'en_transito' && (
-                             <motion.g opacity="0.5">
+                             <motion.g opacity="0.6">
                                 {[0, 1, 2].map((i) => (
-                                  <motion.circle 
-                                    key={i}
-                                    cx="-8" cy="15" r="5" fill="#94a3b8"
-                                    animate={{ opacity: [0, 1, 0], x: [-10, -100], y: [15, -30], scale: [1, 6] }}
-                                    transition={{ repeat: Infinity, duration: 1.5, delay: i * 0.5 }}
-                                  />
+                                  <motion.circle key={i} cx="-5" cy="15" r="4" fill="#94a3b8" animate={{ opacity: [0, 1, 0], x: [-5, -60], y: [15, -20], scale: [1, 4] }} transition={{ repeat: Infinity, duration: 1.2, delay: i * 0.4 }} />
                                 ))}
                              </motion.g>
                            )}
@@ -237,38 +236,41 @@ export function PackageTrackerPremium() {
              </div>
           </div>
 
-          {/* Info Card */}
-          <div className="p-10 pt-8 space-y-8 bg-white relative z-20">
-             <div className="flex flex-col sm:flex-row gap-8 items-center justify-between p-8 bg-slate-50 rounded-[3rem] border border-slate-100 shadow-inner group">
-                <div className="flex items-center gap-6">
-                   <div className="p-6 bg-white rounded-3xl shadow-lg text-indigo-600 ring-8 ring-slate-50">
-                      <Truck className="w-8 h-8" />
+          {/* Tarjeta de Información Detallada */}
+          <div className="p-12 pt-10 space-y-10 bg-white relative z-30">
+             <div className="flex flex-col sm:flex-row gap-10 items-center justify-between p-10 bg-slate-50 rounded-[4rem] border border-slate-100 shadow-inner group">
+                <div className="flex items-center gap-8">
+                   <div className="p-8 bg-white rounded-[2.5rem] shadow-2xl text-indigo-600 ring-12 ring-slate-50">
+                      <Truck className="w-10 h-10" />
                    </div>
                    <div>
-                      <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1">Unidad Gala</p>
-                      <p className="text-md font-black text-slate-900 uppercase italic leading-none">Master Truck #001</p>
-                      <p className="text-[9px] font-bold text-indigo-500 mt-2 uppercase tracking-widest">
-                        {currentEstado === 'preparacion' ? 'Fase: Carga de Mercancía' : 
-                         currentEstado === 'en_transito' ? 'Fase: Despliegue en Ruta' : 'Fase: Gestión Administrativa'}
-                      </p>
+                      <p className="text-[12px] font-black text-slate-400 uppercase tracking-widest mb-2">Unidad de Élite Gala</p>
+                      <p className="text-xl font-black text-slate-900 uppercase italic leading-none">Master Truck #001</p>
+                      <div className="flex items-center gap-3 mt-3">
+                         <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
+                         <p className="text-[10px] font-bold text-indigo-500 uppercase tracking-widest">
+                           {currentEstado === 'preparacion' ? 'Carga de Mercancía en Progreso' : 
+                            currentEstado === 'en_transito' ? 'Transporte en Carretera Principal' : 'Supervisión Administrativa'}
+                         </p>
+                      </div>
                    </div>
                 </div>
                 <div className="flex flex-col items-center sm:items-end">
-                   <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1">Destino</p>
-                   <p className="text-sm font-black text-slate-700 truncate max-w-[300px] border-b-2 border-emerald-200">{activeOrder?.ubicacion_entrega || "Cargando..."}</p>
+                   <p className="text-[12px] font-black text-slate-400 uppercase tracking-widest mb-2">Punto de Entrega Gala</p>
+                   <p className="text-lg font-black text-slate-700 truncate max-w-[350px] border-b-4 border-emerald-100 italic">{activeOrder?.ubicacion_entrega || "Cargando..."}</p>
                 </div>
              </div>
 
-             <div className="flex justify-between items-center py-6 border-t border-slate-100">
+             <div className="flex justify-between items-center py-8 border-t border-slate-100">
                 <div className="flex flex-col">
-                   <p className="text-[11px] font-black text-indigo-500 uppercase tracking-[0.4em] mb-2">Inversión</p>
-                   <p className="text-4xl font-black text-slate-900 tracking-tighter italic">Q{activeOrder?.total || 0}</p>
+                   <p className="text-[12px] font-black text-indigo-500 uppercase tracking-[0.5em] mb-3">Inversión del Pedido</p>
+                   <p className="text-5xl font-black text-slate-900 tracking-tighter italic">Q{activeOrder?.total || 0}</p>
                 </div>
                 <div className="text-right flex flex-col items-end">
-                   <p className="text-[11px] font-black text-emerald-500 uppercase tracking-[0.4em] mb-2">Estado Gala</p>
-                   <div className="flex items-center gap-4 bg-emerald-50 px-6 py-3 rounded-full border border-emerald-100">
-                      <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
-                      <p className="text-2xl font-black text-emerald-900 uppercase italic tracking-tighter">
+                   <p className="text-[12px] font-black text-emerald-500 uppercase tracking-[0.5em] mb-3">Fase de Logística</p>
+                   <div className="flex items-center gap-5 bg-emerald-50 px-8 py-4 rounded-full border-2 border-emerald-100 shadow-xl">
+                      <div className="w-4 h-4 rounded-full bg-emerald-500 animate-ping" />
+                      <p className="text-3xl font-black text-emerald-950 uppercase italic tracking-tighter">
                          {steps[currentStepIndex]?.label}
                       </p>
                    </div>
@@ -277,10 +279,10 @@ export function PackageTrackerPremium() {
 
              <button 
                 onClick={() => setIsTrackingOpen(false)}
-                className="group w-full py-7 bg-zinc-950 text-white rounded-[2.5rem] text-[13px] font-black uppercase tracking-[0.4em] shadow-2xl hover:shadow-indigo-500/40 transition-all active:scale-95 flex items-center justify-center gap-5 relative overflow-hidden"
+                className="group w-full py-8 bg-zinc-950 text-white rounded-[3rem] text-[15px] font-black uppercase tracking-[0.5em] shadow-[0_25px_60px_rgba(0,0,0,0.4)] hover:shadow-indigo-500/50 transition-all active:scale-95 flex items-center justify-center gap-6 relative overflow-hidden"
              >
                 <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                Regresar a la Boutique <ArrowRight className="w-6 h-6 group-hover:translate-x-3 transition-transform" />
+                Regresar a la Boutique <ArrowRight className="w-7 h-7 group-hover:translate-x-4 transition-transform" />
              </button>
           </div>
         </motion.div>
