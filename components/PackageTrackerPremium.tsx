@@ -56,167 +56,115 @@ export function PackageTrackerPremium() {
             </button>
           </div>
 
-          {/* THE ISLAND EXPERIENCE */}
-          <div className="relative h-80 flex items-center justify-center overflow-hidden">
-             {/* Background Atmosphere */}
-             <div className="absolute inset-0 bg-gradient-to-b from-indigo-50/50 to-white" />
-             
-             {/* The Road / Path */}
-             <div className="relative w-full px-6 sm:px-12 md:px-24">
-                <div className="h-1.5 w-full bg-slate-100 rounded-full relative overflow-hidden">
-                   <motion.div 
-                     initial={{ width: 0 }}
-                     animate={{ width: `${progressPercent}%` }}
-                     transition={{ duration: 1.5, ease: "easeOut" }}
-                     className="absolute h-full bg-gradient-to-r from-emerald-400 to-indigo-600 rounded-full"
+          {/* THE LOGISTICS MAP EXPERIENCE 10.0 */}
+          <div className="relative h-85 w-full flex items-center justify-center overflow-hidden bg-slate-50">
+             {/* Isometric Grid Background */}
+             <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'linear-gradient(30deg, #444 12%, transparent 12.5%, transparent 87%, #444 87.5%, #444), linear-gradient(150deg, #444 12%, transparent 12.5%, transparent 87%, #444 87.5%, #444), linear-gradient(60deg, #999 25%, transparent 25.5%, transparent 75%, #999 75%, #999)', backgroundSize: '40px 70px' }} />
+
+             <div className="relative w-full h-full p-4 sm:p-8">
+                <svg viewBox="0 0 400 300" className="w-full h-full drop-shadow-2xl overflow-visible">
+                   {/* THE LOGISTICS PATH (Isometric Line) */}
+                   <motion.path 
+                     id="deliveryPath"
+                     d="M 50 220 L 120 180 L 200 220 L 280 180 L 350 220"
+                     fill="none" 
+                     stroke="#e2e8f0" 
+                     strokeWidth="6" 
+                     strokeLinecap="round" 
+                     strokeLinejoin="round"
                    />
-                </div>
-                
-                {/* SMART STATUS INDICATORS (Optimized for all screens) */}
-                <div className="absolute top-8 left-4 right-4 sm:left-10 sm:right-10 md:left-20 md:right-20 flex justify-between z-20">
-                    {steps.map((step, idx) => {
-                      const isCurrent = idx === currentStepIndex;
-                      return (
-                        <div key={idx} className="flex flex-col items-center flex-1">
-                           <div className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full border-2 transition-all duration-700 ${
-                             isCurrent 
-                               ? 'bg-emerald-500 border-white shadow-[0_0_15px_#10b981] scale-125' 
-                               : 'bg-slate-300 border-transparent opacity-40'
-                           }`} />
-                           <motion.span 
-                             animate={{ 
-                               opacity: isCurrent ? 1 : 0.4, 
-                               scale: isCurrent ? 1.1 : 0.85,
-                               y: isCurrent ? 4 : 0 
-                             }}
-                             className={`mt-2 text-[7px] sm:text-[8px] md:text-[9px] font-black uppercase tracking-tighter sm:tracking-[0.2em] whitespace-nowrap text-center ${isCurrent ? 'text-emerald-600' : 'text-slate-400'}`}
-                           >
-                              {step.label}
-                           </motion.span>
-                        </div>
-                      );
-                    })}
-                </div>
+                   <motion.path 
+                     d="M 50 220 L 120 180 L 200 220 L 280 180 L 350 220"
+                     fill="none" 
+                     stroke="url(#pathGradient)" 
+                     strokeWidth="6" 
+                     strokeLinecap="round" 
+                     strokeLinejoin="round"
+                     initial={{ pathLength: 0 }}
+                     animate={{ pathLength: progressPercent / 100 }}
+                     transition={{ duration: 1.5, ease: "easeInOut" }}
+                   />
+                   
+                   <defs>
+                     <linearGradient id="pathGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                       <stop offset="0%" stopColor="#fbbf24" />
+                       <stop offset="50%" stopColor="#10b981" />
+                       <stop offset="100%" stopColor="#4f46e5" />
+                     </linearGradient>
+                   </defs>
 
-                 {/* THE UNIFIED STAGE 8.0 (One SVG, One Coordinate System) */}
-                 <div className="absolute inset-0 flex items-center justify-center p-4">
-                    <svg viewBox="0 0 400 240" className="w-full h-full drop-shadow-2xl overflow-visible">
-                       {/* Background Ground */}
-                       <rect width="400" height="240" fill="#f8fafc" rx="20" />
-                       
-                       {/* DISTANT MOUNTAINS */}
-                       <g opacity="0.1">
-                          <path d="M0 160 L100 60 L200 160 Z" fill="#64748b" />
-                          <path d="M150 160 L280 80 L400 160 Z" fill="#94a3b8" />
+                   {/* MILESTONES (The 5 Hitos) */}
+                   {[
+                     { id: 'pendiente', x: 50, y: 220, label: 'Espera' },
+                     { id: 'recibido', x: 120, y: 180, label: 'Aceptado' },
+                     { id: 'preparacion', x: 200, y: 220, label: 'Empacando' },
+                     { id: 'en_transito', x: 280, y: 180, label: 'En Ruta' },
+                     { id: 'listo_entrega', x: 350, y: 220, label: 'Gala!' }
+                   ].map((hito, idx) => {
+                     const isReached = idx <= currentStepIndex;
+                     const isCurrent = idx === currentStepIndex;
+                     return (
+                       <g key={hito.id} transform={`translate(${hito.x}, ${hito.y})`}>
+                         {/* Pin Shadow */}
+                         <circle cy="5" r="10" fill="black" opacity="0.05" />
+                         {/* Pin Body */}
+                         <motion.g
+                           initial={{ y: -20, opacity: 0 }}
+                           animate={{ y: 0, opacity: 1 }}
+                           transition={{ delay: idx * 0.2 }}
+                         >
+                           <path d="M-10 -25 A10 10 0 1 1 10 -25 L0 0 Z" fill={isCurrent ? '#4f46e5' : isReached ? '#10b981' : '#cbd5e1'} />
+                           <circle cx="0" cy="-25" r="7" fill="white" />
+                           <g transform="translate(-5, -30) scale(0.3)" className={isCurrent ? 'text-indigo-600' : isReached ? 'text-emerald-600' : 'text-slate-400'}>
+                             {hito.id === 'pendiente' && <Clock />}
+                             {hito.id === 'recibido' && <CheckCircle2 />}
+                             {hito.id === 'preparacion' && <Package />}
+                             {hito.id === 'en_transito' && <Truck />}
+                             {hito.id === 'listo_entrega' && <MapPin />}
+                           </g>
+                         </motion.g>
+                         {/* Label */}
+                         <text y="15" fontSize="6" fontWeight="900" textAnchor="middle" className="uppercase tracking-widest" fill={isCurrent ? '#1e293b' : '#94a3b8'}>
+                           {hito.label}
+                         </text>
                        </g>
+                     );
+                   })}
 
-                       {/* THE ROAD (BLACK) - ABSOLUTE BASELINE */}
-                       <rect y="160" width="400" height="50" fill="#1e293b" />
-                       <line x1="0" y1="160" x2="400" y2="160" stroke="#0f172a" strokeWidth="2" />
-                       
-                       {/* High-Speed Yellow Lanes */}
-                       <motion.g 
-                          animate={{ x: [0, -60] }}
-                          transition={{ repeat: Infinity, duration: 0.4, ease: "linear" }}
-                       >
-                          {[...Array(12)].map((_, i) => (
-                             <rect key={i} x={i * 60} y="180" width="30" height="3" rx="1.5" fill="#facc15" />
-                          ))}
-                       </motion.g>
-
-                       {/* THE FOREST (Rooted on the road surface) */}
-                       <g opacity="0.2">
-                          {[20, 120, 250, 340].map((x, i) => (
-                             <g key={i} transform={`translate(${x}, 90)`}>
-                                <path d="M20 0 L40 70 L0 70 Z" fill="#064e3b" />
-                                <rect x="18" y="70" width="4" height="10" fill="#451a03" />
-                             </g>
-                          ))}
-                       </g>
-
-                       {/* THE PIXEL PERFECT TRUCK 9.0 (Agency Illustration) */}
-                       <motion.g 
-                          animate={{ x: (progressPercent * 2.5) }} /* Max width 250 in 400 viewBox */
-                          initial={{ x: 0 }}
-                          transition={{ duration: 1.5, ease: "easeInOut" }}
-                       >
-                          <g transform="translate(-40, 75)">
-                             {/* THE CARGO CONTAINER (Grey with Texture) */}
-                             <rect x="5" y="10" width="105" height="70" rx="4" fill="#E8E8E8" />
-                             {/* Vertical Texture Lines from Ref */}
-                             <g opacity="0.1">
-                                {[...Array(20)].map((_, i) => (
-                                   <line key={i} x1={10 + i*5} y1="15" x2={10 + i*5} y2="75" stroke="black" strokeWidth="0.5" />
-                                ))}
-                             </g>
-                             
-                             {/* BIG LOCATION PIN (Grounded inside container) */}
-                             <g opacity="0.3" transform="translate(57, 45) scale(0.8)">
-                                <path d="M0 -30 C-15 -30 -30 -15 -30 0 C-30 25 0 50 0 50 C0 50 30 25 30 0 C30 -15 15 -30 0 -30 Z" fill="#9CA3AF" />
-                                <circle r="10" fill="white" />
-                             </g>
-                             
-                             {/* REAR LIGHTS (Red/Yellow from Image) */}
-                             <rect x="5" y="15" width="4" height="15" fill="#EF4444" rx="1" />
-                             <rect x="5" y="32" width="4" height="10" fill="#FBBF24" rx="1" />
-                             
-                             {/* THE CABIN (BLUE - PROFESSIONAL CURVES) */}
-                             <path d="M110 80 L160 80 L160 70 L160 30 C160 30 115 30 110 30 Z" fill="#1D60B6" />
-                             
-                             {/* Windshield */}
-                             <path d="M115 35 L145 35 L145 55 L115 55 Z" fill="#93C5FD" opacity="0.5" />
-                             
-                             {/* THE DRIVER (Red Cap & Shirt - Exact Ref) */}
-                             <g transform="translate(132, 48)">
-                                {/* Arm on wheel */}
-                                <path d="M-5 10 Q5 10 12 5" stroke="#FDE047" strokeWidth="3" fill="none" />
-                                {/* Head & Cap */}
-                                <circle r="6" fill="#FDE047" />
-                                <path d="M-6 -4 Q0 -10 8 -4 L8 2 L-6 2 Z" fill="#EF4444" /> {/* Red Cap */}
-                                <rect x="5" y="-3" width="6" height="3" fill="#EF4444" rx="1" /> {/* Cap Visor */}
-                                {/* Body */}
-                                <rect x="-6" y="5" width="12" height="15" rx="3" fill="#EF4444" />
-                             </g>
-                             
-                             {/* FRONT HEADLIGHT (White) */}
-                             <rect x="155" y="55" width="5" height="12" fill="white" rx="1" />
-
-                             {/* THE BLACK BUMPER */}
-                             <rect x="3" y="75" width="158" height="6" fill="#1A1A1A" rx="2" />
-
-                             {/* WHEELS (Touching the Road exactly at 160) */}
-                             <g>
-                                {/* Back Wheel */}
-                                <circle cx="35" cy="85" r="18" fill="#1A1A1A" />
-                                <circle cx="35" cy="85" r="10" fill="#D1D5DB" />
-                                <circle cx="35" cy="85" r="4" fill="#1A1A1A" />
-                                {/* Front Wheel */}
-                                <circle cx="125" cy="85" r="18" fill="#1A1A1A" />
-                                <circle cx="125" cy="85" r="10" fill="#D1D5DB" />
-                                <circle cx="125" cy="85" r="4" fill="#1A1A1A" />
-                             </g>
-
-                             {/* ANIMATED SMOKE (Exhaust) */}
-                             <motion.g opacity="0.3">
-                                {[0, 1, 2].map((i) => (
-                                  <motion.circle 
-                                    key={i}
-                                    cx="-5" cy="78" r="4" fill="#94a3b8"
-                                    animate={{ 
-                                      opacity: [0, 1, 0], 
-                                      x: [-5, -60], 
-                                      y: [78, 60],
-                                      scale: [1, 2.5] 
-                                    }}
-                                    transition={{ repeat: Infinity, duration: 1, delay: i * 0.3 }}
-                                  />
-                                ))}
-                             </motion.g>
-                          </g>
-                       </motion.g>
-                    </svg>
-                 </div>
-              </div>
+                   {/* THE REAL GALA TRUCK (Isometric Animation) */}
+                   <motion.g 
+                     initial={{ opacity: 0 }}
+                     animate={{ 
+                       opacity: 1,
+                       offsetDistance: `${progressPercent}%` 
+                     }}
+                     style={{ 
+                       offsetPath: "path('M 50 220 L 120 180 L 200 220 L 280 180 L 350 220')",
+                       offsetRotate: "auto"
+                     }}
+                     transition={{ duration: 1.5, ease: "easeInOut" }}
+                   >
+                      <g transform="translate(-15, -25) scale(0.4)">
+                         {/* Truck Chassis */}
+                         <path d="M0 20 L40 0 L80 20 L40 40 Z" fill="#f59e0b" /> {/* Top Cargo */}
+                         <path d="M0 20 L0 50 L40 70 L40 40 Z" fill="#d97706" /> {/* Left Side */}
+                         <path d="M40 40 L40 70 L80 50 L80 20 Z" fill="#b45309" /> {/* Right Side */}
+                         
+                         {/* Cabin */}
+                         <path d="M65 12 L95 27 L95 47 L65 32 Z" fill="#1e3a8a" /> {/* Blue Cabin Side */}
+                         <path d="M65 12 L80 5 L110 20 L95 27 Z" fill="#1e40af" /> {/* Cabin Top */}
+                         
+                         {/* GALA Text on truck */}
+                         <text x="10" y="45" fontSize="14" fontWeight="900" fill="white" transform="skewY(-20)" opacity="0.9">GALA</text>
+                         
+                         {/* Wheels */}
+                         <circle cx="20" cy="65" r="8" fill="#111" />
+                         <circle cx="60" cy="45" r="8" fill="#111" />
+                      </g>
+                   </motion.g>
+                </svg>
+             </div>
+          </div>
            </div>
 
           {/* Details Card */}
