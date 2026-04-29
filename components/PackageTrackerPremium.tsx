@@ -12,11 +12,11 @@ export function PackageTrackerPremium() {
   if (!isTrackingOpen) return null;
 
   const steps = [
-    { id: 'pendiente', label: 'ESPERA', progress: 5, building: 'hub' },
-    { id: 'recibido', label: 'CONFIRMADO', progress: 28, building: 'hq' },
-    { id: 'preparacion', label: 'EMPACANDO', progress: 52, building: 'warehouse' },
-    { id: 'en_transito', label: 'EN RUTA', progress: 78, building: 'road' },
-    { id: 'listo_entrega', label: 'ENTREGADO', progress: 100, building: 'home' }
+    { id: 'pendiente', label: 'ESPERA', progress: 5, building: 'hub', x: 60, y: 320 },
+    { id: 'recibido', label: 'CONFIRMADO', progress: 28, building: 'hq', x: 250, y: 200 },
+    { id: 'preparacion', label: 'EMPACANDO', progress: 52, building: 'warehouse', x: 450, y: 320 },
+    { id: 'en_transito', label: 'EN RUTA', progress: 78, building: 'road', x: 500, y: 250 },
+    { id: 'listo_entrega', label: 'ENTREGADO', progress: 100, building: 'home', x: 580, y: 280 }
   ];
 
   let currentStepIndex = steps.findIndex(s => s.id === activeOrder?.estado);
@@ -49,7 +49,7 @@ export function PackageTrackerPremium() {
                  <div className="px-3 py-1 bg-emerald-500 rounded-full">
                     <span className="text-[9px] font-black uppercase tracking-[0.3em] text-white">Gala Logistics Live</span>
                  </div>
-                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Storytelling v15.0</span>
+                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Storytelling v15.1</span>
               </div>
               <h2 className="text-3xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">Bitácora de Pedido</h2>
             </div>
@@ -61,7 +61,7 @@ export function PackageTrackerPremium() {
             </button>
           </div>
 
-          {/* 🗺️ EL MUNDO GALA STORYTELLING (v15.0) */}
+          {/* 🗺️ EL MUNDO GALA STORYTELLING (v15.1) */}
           <div className="relative h-[480px] w-full flex items-center justify-center overflow-hidden bg-[#e0f7fa]">
              {/* BACKGROUND SCENERY */}
              <div className="absolute inset-0 pointer-events-none">
@@ -81,7 +81,7 @@ export function PackageTrackerPremium() {
                      d="M -100 420 Q 150 350 300 450 T 700 420"
                      fill="none" stroke="#4fc3f7" strokeWidth="80" strokeOpacity="0.4"
                      animate={{ strokeDashoffset: [0, -200] }}
-                     transition={{ repeat: Infinity, duration: 15, ease: "linear" }}
+                     transition={{ repeat: Infinity, duration: 12, ease: "linear" }}
                      strokeDasharray="20 40"
                    />
 
@@ -137,7 +137,6 @@ export function PackageTrackerPremium() {
                                   <rect x="10" y="30" width="20" height="40" fill="#1e293b" /> {/* Muelle */}
                                   {isCurrent && (
                                     <motion.g>
-                                       {/* Animated Packages Loading into the truck later */}
                                        {[0, 1, 2].map((p, i) => (
                                          <motion.g
                                            key={i}
@@ -203,7 +202,7 @@ export function PackageTrackerPremium() {
                               <rect x="5" y="15" width="22" height="18" fill="#e0f2fe" opacity="0.7" rx="2" />
                            </g>
 
-                           {/* 🎡 WHEELS (Solo giran en RUTA) */}
+                           {/* 🎡 WHEELS */}
                            <g fill="#111">
                               {[18, 32, 75, 89, 120, 135].map((cx, i) => (
                                 <motion.g key={i} transform={`translate(${cx}, 58)`}>
@@ -218,7 +217,7 @@ export function PackageTrackerPremium() {
                               ))}
                            </g>
 
-                           {/* Smoke (Solo en RUTA) */}
+                           {/* Smoke */}
                            {currentEstado === 'en_transito' && (
                              <motion.g opacity="0.5">
                                 {[0, 1, 2].map((i) => (
